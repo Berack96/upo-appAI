@@ -1,0 +1,17 @@
+# Qui ho messo alcune librerie utili utilizzate durante il corso.
+# Se si nota che alcune non sono necessarie, si potrebbero rimuovere
+# in modo da evitare conflitti o problemi futuri.
+# Per ogni roba ho fatto un commento per evitare di dimenticarmi cosa fa chi.
+
+# per fare richieste HTTP
+requests
+# per l'elaborazione del linguaggio naturale in locale (https://huggingface.co/learn/llm-course/chapter1/3?fw=pt)
+transformers
+# per fare una UI web semplice con input e output
+gradio
+# per interagire con l'API di OpenAI e di altri (basta cambiare il baseurl)
+openai
+# per fare in modo di ottenere dati validati e strutturati
+pydantic
+# per gestire variabili d'ambiente (generalmente API keys o opzioni)
+dotenv
