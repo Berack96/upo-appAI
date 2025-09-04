@@ -8,38 +8,26 @@ Questa è la repository per l'esame di Applicazioni Intelligenti che consiste in
 L'obiettivo di questo progetto è creare un sistema basato su **LLM Agents** e deve dimostrare la capacità di ragionare, adattarsi a eventi esterni e comunicare in modo intelligente.
 
 # Installazione
-Per l'installazione si può utilizzare un approccio tramite **pip** (manuale) oppure utilizzare un ambiente **Docker** già pronto (automatico)
+Per l'installazione si può utilizzare un approccio tramite **uv** (manuale) oppure utilizzare un ambiente **Docker** già pronto (automatico)
 
-### PIP
-**1. Ambiente**: Per prima cosa si deve creare un nuovo environment Python:
+### UV
+**1. Installazione uv**: Per prima cosa installa uv se non è già presente sul sistema:
 ```sh
-python -m venv .venv
+# Windows (PowerShell)
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# macOS/Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-**2. Attivare l'ambiente**: dobbiamo usare uno dei seguenti comandi, in base al fatto che siamo su Windows o Unix.
-
-*Nota*: nel caso Windows non faccia partire lo script per policy interne di sicurezza, bisogna far eseguire questo comando prima di attivare l'ambiente virtuale creato:\
-``` Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser ```
-
+**2. Ambiente e dipendenze**: uv installerà python e creerà automaticamente l'ambiente virtuale con le dipendenze corrette:
 ```sh
-# Unix
-source .venv/bin/activate
-
-# Windows
-.venv/Scripts/activate
-
-# Windows (PS)
-.venv/Scripts/Activate.ps1
+uv sync --frozen --no-cache
 ```
 
-**3. Dipendenze**: Infine installiamo le dipendenze nell'ambiente appena creato:
+**3. Run**: Successivamente si può far partire il progetto tramite il comando:
 ```sh
-python -m pip install -r requirements.txt
-```
-
-**4. Run**: Successivamente si può far partire il progetto tramite il comando:
-```sh
-python src/app.py
+uv run python src/app.py
 ```
 
 ### Docker
