@@ -19,15 +19,11 @@ dependencies = [
     # ✅ per fare una UI web semplice con input e output
     "gradio",
 
-    # ❌ per l'elaborazione del linguaggio naturale in locale (https://huggingface.co/learn/llm-course/chapter1/3?fw=pt)
-    #"transformers",
-    # ❌ per fare chiamate a modelli indipendentemente dal modello specifico (astrae meglio rispetto a openai)
-    #"langchain",
     # ✅ per costruire agenti (ovvero modelli che possono fare più cose tramite tool) https://github.com/agno-agi/agno
     # altamente consigliata dato che ha anche tools integrati per fare scraping, calcoli e molto altro
     # oltre a questa è necessario installare anche le librerie specifiche per i modelli che si vogliono usare
     "agno",
+    # ✅ Modelli supportati e installati (aggiungere qui sotto quelli che si vogliono usare)
     "google-genai",
-    # ☑️ per usare modelli in locale
     "ollama",
 ]

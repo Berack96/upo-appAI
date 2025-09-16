@@ -1,8 +1,5 @@
 # Vogliamo usare una versione di linux leggera con già uv installato
 # Infatti scegliamo l'immagine ufficiale di uv che ha già tutto configurato
-# Nel caso in cui si volesse usare un'altra immagine di base che ha magari CUDA
-# bisognerebbe installare uv manualmente come descritto nel README
-
 FROM ghcr.io/astral-sh/uv:python3.12-alpine
 
 # Dopo aver definito la workdir mi trovo già in essa
@@ -22,4 +19,4 @@ COPY LICENSE .
 COPY src ./src
 
 # Comando di default all'avvio dell'applicazione
-CMD ["python", "src/example.py"]
+CMD ["python", "src/app.py"]

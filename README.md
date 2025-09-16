@@ -12,7 +12,7 @@ Per l'installazione si può utilizzare un approccio tramite **uv** (manuale) opp
 
 Prima di avviare l'applicazione è però necessario configurare correttamente le API keys e installare Ollama per l'utilizzo dei modelli locali, altrimenti il progetto, anche se installato correttamente, non riuscirà a partire.
 
-## API Keys
+### API Keys
 Le API Keys puoi ottenerle tramite i seguenti servizi:
 - **Google AI**: [Google AI Studio](https://makersuite.google.com/app/apikey) (gratuito con limiti)
 - **Anthropic**: [Anthropic Console](https://console.anthropic.com/)
@@ -21,14 +21,11 @@ Le API Keys puoi ottenerle tramite i seguenti servizi:
 
 Nota che alcune API sono gratuite con limiti di utilizzo, altre sono a pagamento. Google offre attualmente l'accesso gratuito con limiti ragionevoli.
 
-## Ollama (Modelli Locali)
+### Ollama (Modelli Locali)
 Per utilizzare modelli AI localmente, è necessario installare Ollama:
 
 **1. Installazione Ollama**:
-- **Linux**: 
-  ```sh
-  curl -fsSL https://ollama.com/install.sh | sh
-  ```
+- **Linux**: `curl -fsSL https://ollama.com/install.sh | sh`
 - **macOS/Windows**: Scarica l'installer da [https://ollama.com/download/windows](https://ollama.com/download/windows)
 
 **2. GPU Support (Raccomandato)**:
@@ -37,10 +34,7 @@ Per utilizzare la GPU con Ollama, assicurati di avere NVIDIA CUDA Toolkit instal
 - **Documentazione WSL**: [CUDA WSL User Guide](https://docs.nvidia.com/cuda/wsl-user-guide/index.html)
 
 **3. Installazione Modelli**:
-Esempio per installare un modello locale:
-```sh
-ollama pull gemma3:4b
-```
+Esempio per installare un modello locale: `ollama pull gpt-oss`
 
 ### Variabili d'Ambiente
 
