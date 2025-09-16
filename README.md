@@ -10,7 +10,9 @@ L'obiettivo di questo progetto è creare un sistema basato su **LLM Agents** e d
 # Installazione
 Per l'installazione si può utilizzare un approccio tramite **uv** (manuale) oppure utilizzare un ambiente **Docker** già pronto (automatico).
 
-Prima di avviare l'applicazione è però necessario configurare correttamente le API keys, altrimenti il progetto, anche se installato correttamente, non riuscirà a partire.
+Prima di avviare l'applicazione è però necessario configurare correttamente le API keys e installare Ollama per l'utilizzo dei modelli locali, altrimenti il progetto, anche se installato correttamente, non riuscirà a partire.
+
+## API Keys
 Le API Keys puoi ottenerle tramite i seguenti servizi:
 - **Google AI**: [Google AI Studio](https://makersuite.google.com/app/apikey) (gratuito con limiti)
 - **Anthropic**: [Anthropic Console](https://console.anthropic.com/)
@@ -19,6 +21,27 @@ Le API Keys puoi ottenerle tramite i seguenti servizi:
 
 Nota che alcune API sono gratuite con limiti di utilizzo, altre sono a pagamento. Google offre attualmente l'accesso gratuito con limiti ragionevoli.
 
+## Ollama (Modelli Locali)
+Per utilizzare modelli AI localmente, è necessario installare Ollama:
+
+**1. Installazione Ollama**:
+- **Linux**: 
+  ```sh
+  curl -fsSL https://ollama.com/install.sh | sh
+  ```
+- **macOS/Windows**: Scarica l'installer da [https://ollama.com/download/windows](https://ollama.com/download/windows)
+
+**2. GPU Support (Raccomandato)**:
+Per utilizzare la GPU con Ollama, assicurati di avere NVIDIA CUDA Toolkit installato:
+- **Download**: [NVIDIA CUDA Downloads](https://developer.nvidia.com/cuda-downloads?target_os=Windows&target_arch=x86_64&target_version=11&target_type=exe_local)
+- **Documentazione WSL**: [CUDA WSL User Guide](https://docs.nvidia.com/cuda/wsl-user-guide/index.html)
+
+**3. Installazione Modelli**:
+Esempio per installare un modello locale:
+```sh
+ollama pull gemma3:4b
+```
+
 ### Variabili d'Ambiente
 
 **1. Copia il file di esempio**:
@@ -26,12 +49,14 @@ Nota che alcune API sono gratuite con limiti di utilizzo, altre sono a pagamento
 cp .env.example .env
 ```
 
-**2. Modifica il file .env** creato con le tue API keys, inserendole nella variabile opportuna dopo l'uguale e ***senza*** spazi:
+**2. Modifica il file .env** creato con le tue API keys e il path dei modelli Ollama, inserendoli nelle variabili opportune dopo l'uguale e ***senza*** spazi:
 ```dotenv
 GOOGLE_API_KEY=
 ANTHROPIC_API_KEY=
 DEEPSEEK_API_KEY=
 OPENAI_API_KEY=
+# Path dove Ollama salva i modelli (es. /home/username/.ollama su Linux)
+OLLAMA_MODELS_PATH=
 ```
 
 ### Opzione 1 UV

@@ -8,8 +8,30 @@ services:
       - .:/app
     env_file:
       - .env
+    # Aggiunte chiave:
     environment:
+      # Questa variabile dice alla tua app dove trovare il servizio Ollama
+      - OLLAMA_HOST=http://ollama:11434 
+      # Le tue API keys esistenti
       - GOOGLE_API_KEY=${GOOGLE_API_KEY}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+    # Assicura che ollama parta prima della tua app
+    depends_on:
+      - ollama
+
+  # Nuovo servizio per Ollama
+  ollama:
+    image: ollama/ollama
+    container_name: ollama
+    # Aggiungi il runtime NVIDIA per GPU support
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    ports:
+      - "11434:11434"
+    volumes:
+      # Mappa la cartella dei modelli del tuo PC a quella interna del container
+      # ${OLLAMA_MODELS_PATH} sarà letto dal file .env
+      - ${OLLAMA_MODELS_PATH}:/root/.ollama

@@ -2,7 +2,7 @@
 # Infatti scegliamo l'immagine ufficiale di uv che ha già tutto configurato
 # Nel caso in cui si volesse usare un'altra immagine di base che ha magari CUDA
 # bisognerebbe installare uv manualmente come descritto nel README
-#FROM pytorch/pytorch:2.6.0-cuda12.6-cudnn9-devel   # Lo lascio qui nel caso
+
 FROM ghcr.io/astral-sh/uv:python3.12-alpine
 
 # Dopo aver definito la workdir mi trovo già in essa
@@ -22,4 +22,4 @@ COPY LICENSE .
 COPY src ./src
 
 # Comando di default all'avvio dell'applicazione
-CMD ["python", "src/app.py"]
+CMD ["python", "src/example.py"]
