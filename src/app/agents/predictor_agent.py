@@ -5,7 +5,7 @@ from typing import Any
 import anthropic
 import requests
 from dotenv import load_dotenv
-from google.genai import Client
+from google import genai
 from openai import OpenAI
 
 load_dotenv()
@@ -40,7 +40,7 @@ class PredictorAgent:
         # Google Gemini
         google_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
         if google_key:
-            client = Client(api_key=google_key)
+            client = genai.Client(api_key=google_key)
             self.providers["google"] = {"type": "google", "client": client, "model": "gemini-1.5-flash"}
 
         # DeepSeek
@@ -128,11 +128,19 @@ class PredictorAgent:
             model=model,
             contents=prompt,
             config={
-                "temperature": 0.7,
-                "max_output_tokens": 300
+                "temperature": 0.7,           # Controlla la creatività (0.0-1.0)
+                "max_output_tokens": 300,     # Numero massimo di token nella risposta
+                "top_p": 0.9,                 # Nucleus sampling (opzionale)
+                "top_k": 40,                  # Top-k sampling (opzionale)
+                "candidate_count": 1,         # Numero di risposte candidate (di solito 1)
+                "stop_sequences": []          # Sequenze che fermano la generazione (opzionale)
             }
         )
-        return response.text.strip()
+        # Gestisce il caso in cui response.text sia None
+        result = getattr(response, 'text', None)
+        if result is None:
+            return "⚠️ Google API ha restituito una risposta vuota"
+        return result.strip()
 
     @staticmethod
     def _predict_deepseek(prompt, api_key, model):
