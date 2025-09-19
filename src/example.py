@@ -17,4 +17,4 @@ try:
     result = reasoning_agent.run("Scrivi una poesia su un gatto. Sii breve.")
     print(result.content)
 except Exception as e:
-    pass
+    print(f"Si è verificato un errore: {e}")
