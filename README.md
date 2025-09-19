@@ -25,7 +25,10 @@ Nota che alcune API sono gratuite con limiti di utilizzo, altre sono a pagamento
 Per utilizzare modelli AI localmente, è necessario installare Ollama:
 
 **1. Installazione Ollama**:
-- **Linux**: `curl -fsSL https://ollama.com/install.sh | sh`
+- **Linux**: 
+```sh 
+curl -fsSL https://ollama.com/install.sh | sh
+```
 - **macOS/Windows**: Scarica l'installer da [https://ollama.com/download/windows](https://ollama.com/download/windows)
 
 **2. GPU Support (Raccomandato)**:
@@ -34,7 +37,10 @@ Per utilizzare la GPU con Ollama, assicurati di avere NVIDIA CUDA Toolkit instal
 - **Documentazione WSL**: [CUDA WSL User Guide](https://docs.nvidia.com/cuda/wsl-user-guide/index.html)
 
 **3. Installazione Modelli**:
-Esempio per installare un modello locale: `ollama pull gpt-oss`
+Si possono avere più modelli installati contemporaneamente. Per questo progetto si consiglia di utilizzare il modello open source `gpt-oss` poiché prestante e compatibile con tante funzionalità. Per il download:
+```sh 
+ollama pull gpt-oss:latest
+```
 
 ### Variabili d'Ambiente
 
@@ -85,4 +91,58 @@ docker compose up --build -d
 Il file `.env` verrà automaticamente caricato nel container grazie alla configurazione in `docker-compose.yaml`.
 
 # Applicazione
-L'applicazione è attualmente in fase di sviluppo. Maggiori dettagli saranno aggiunti durante l'implementazione.
+**L'applicazione è attualmente in fase di sviluppo.** 
+## Aggiornamento del 19 Giugno 2024
+Usando la libreria ``gradio`` è stata creata un'interfaccia web semplice per interagire con gli agenti. Gli agenti si trovano
+nella cartella `src/app/agents` e sono:
+- **Market Agent**: Recupera i dati di mercato (prezzi, volumi, ecc.). ***MOCK***
+- **News Agent**: Recupera le notizie finanziarie più recenti utilizzando. ***MOCK***
+- **Social Agent**: Analizza i sentimenti sui social media utilizzando. ***MOCK***
+- **Predictor Agent**: Utilizza i dati raccolti dagli altri agenti per fare previsioni.
+
+L'applicazione principale si trova in `src/app.py` e può essere eseguita con il comando:
+```sh
+uv run python src/app.py
+```
+
+### Albero delle cartelle:
+```txt
+upo-appAI/
+├── Dockerfile
+├── LICENSE
+├── README.md
+├── docker-compose.yaml
+├── docs/
+├── pyproject.toml
+├── requirements.txt
+├── src/
+│   ├── __pycache__/
+│   ├── app/
+│   │   ├── __init__.py
+│   │   ├── __pycache__/
+│   │   ├── agents/
+│   │   │   ├── __init__.py
+│   │   │   ├── __pycache__/
+│   │   │   ├── market_agent.py
+│   │   │   ├── news_agent.py
+│   │   │   ├── predictor_agent.py
+│   │   │   └── social_agent.py
+│   │   └── tool.py
+│   ├── app.py
+│   ├── example.py
+│   └── ollama_demo.py
+└── uv.lock
+```
+
+### Problemi noti
+1. Google ci sono differenze fra i modelli 1.x e i modelli 2.x. Si suggerisce la costruzione di due metodi differenti. 
+   2. `gemini-1.5-flash` funziona perfettamente
+   3. `gemini-2.5-flash` non funziona passando parametri come *temperature* e *max_tokens*, bisogna trovare la nuova sintassi.
+2. Ollama viene correttamente triggerato dalla selezione da interfaccia web ma la generazione della risposta non viene parsificata correttamente. 
+
+### ToDo
+1. Per lo scraping online bisogna iscriversi e recuperare le chiavi API
+   2. **Market Agent**: [CoinGecko](https://www.coingecko.com/it)
+   3. **News Agent**: [CryptoPanic](https://cryptopanic.com/)
+   4. **Social Agent**: [post più hot da r/CryptoCurrency (Reddit)](https://www.reddit.com/)
+5. Capire come `gpt-oss` parsifica la risposta e per questioni "estetiche" si può pensare di visualizzare lo stream dei token. Vedere il sorgente `src/ollama_demo.py` per risolvere il problema.
