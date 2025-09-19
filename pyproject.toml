@@ -27,7 +27,9 @@ dependencies = [
     # altamente consigliata dato che ha anche tools integrati per fare scraping, calcoli e molto altro
     # oltre a questa è necessario installare anche le librerie specifiche per i modelli che si vogliono usare
     "agno",
+    # ✅ Modelli supportati e installati (aggiungere qui sotto quelli che si vogliono usare)
     "google-genai",
+    "ollama",
     "openai",
     "anthropic",
     "google",
