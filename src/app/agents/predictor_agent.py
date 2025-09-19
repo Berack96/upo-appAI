@@ -2,11 +2,11 @@ import json
 import os
 from typing import Any
 
-import requests
-import openai
 import anthropic
-from google.genai import Client
+import requests
 from dotenv import load_dotenv
+from google.genai import Client
+from openai import OpenAI
 
 load_dotenv()
 
@@ -20,8 +20,12 @@ class PredictorAgent:
         # OpenAI
         openai_key = os.getenv("OPENAI_API_KEY")
         if openai_key:
-            openai.api_key = openai_key
-            self.providers["openai"] = {"type": "openai", "client": openai, "model": "gpt-4o-mini"}
+            client = OpenAI(api_key=openai_key)
+            self.providers["openai"] = {
+                "type": "openai",
+                "client": client,
+                "model": "gpt-4o-mini"
+            }
 
         # Anthropic
         anthropic_key = os.getenv("ANTHROPIC_API_KEY")
@@ -97,7 +101,7 @@ class PredictorAgent:
 
     @staticmethod
     def _predict_openai(prompt, client, model):
-        resp = client.ChatCompletion.create(
+        resp = client.chat.completions.create(
             model=model,
             messages=[
                 {"role": "system", "content": "Sei un consulente finanziario crypto."},
@@ -106,7 +110,7 @@ class PredictorAgent:
             max_tokens=300,
             temperature=0.7
         )
-        return resp["choices"][0]["message"]["content"].strip()
+        return resp.choices[0].message.content.strip()
 
     @staticmethod
     def _predict_anthropic(prompt, client, model):
