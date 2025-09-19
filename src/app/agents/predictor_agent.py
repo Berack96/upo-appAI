@@ -14,7 +14,7 @@ class PredictorAgent:
     def __init__(self):
         # Ollama via HTTP locale
         self.providers = {
-            "ollama": {"type": "ollama", "host": os.getenv("OLLAMA_HOST", "http://localhost:11434"), "model": "llama3"}
+            "ollama": {"type": "ollama", "host": os.getenv("OLLAMA_HOST", "http://localhost:11434"), "model": "gpt-oss:latest"}
         }
 
         # OpenAI

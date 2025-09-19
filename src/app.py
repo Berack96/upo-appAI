@@ -14,7 +14,7 @@ with gr.Blocks() as demo:
 
     with gr.Row():
         provider = gr.Dropdown(
-            choices=["mock", "openai", "anthropic", "google", "deepseek"],
+            choices=["mock", "openai", "anthropic", "google", "deepseek", "ollama"],
             value="mock",
             label="Modello da usare"
         )
