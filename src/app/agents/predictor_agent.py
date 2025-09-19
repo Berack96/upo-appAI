@@ -26,19 +26,25 @@ class PredictorAgent:
         # Anthropic
         anthropic_key = os.getenv("ANTHROPIC_API_KEY")
         if anthropic_key:
-            client = anthropic.Client(api_key=anthropic_key)
-            self.providers["anthropic"] = {"type": "anthropic", "client": client, "model": "claude-3"}
+            client = anthropic.Anthropic(api_key=anthropic_key)
+            self.providers["anthropic"] = {
+                "type": "anthropic",
+                "client": client,
+                "model": "claude-3-haiku-20240307"
+            }
 
         # Google Gemini
-        google_key = os.getenv("GEMINI_API_KEY")
+        google_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
         if google_key:
-            client = Client(credentials={"api_key": google_key})
+            client = Client(api_key=google_key)
             self.providers["google"] = {"type": "google", "client": client, "model": "gemini-1.5-flash"}
 
         # DeepSeek
         deepseek_key = os.getenv("DEEPSEEK_API_KEY")
         if deepseek_key:
             self.providers["deepseek"] = {"type": "deepseek", "api_key": deepseek_key, "model": "deepseek-chat"}
+
+        print("✅ Providers attivi:", list(self.providers.keys()))
 
     def predict(self, data, sentiment, style="conservative", provider="mock"):
         provider = provider.lower()
@@ -114,11 +120,13 @@ class PredictorAgent:
 
     @staticmethod
     def _predict_google(prompt, client, model):
-        response = client.generate_text(
+        response = client.models.generate_content(
             model=model,
-            prompt=prompt,
-            max_output_tokens=300,
-            temperature=0.7
+            contents=prompt,
+            config={
+                "temperature": 0.7,
+                "max_output_tokens": 300
+            }
         )
         return response.text.strip()
 
