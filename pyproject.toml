@@ -10,7 +10,7 @@ requires-python = "==3.12.*"
 # Per ogni roba ho fatto un commento per evitare di dimenticarmi cosa fa chi.
 # Inoltre ho messo una emoji per indicare se è raccomandato o meno.
 dependencies = [
-    # ✅ per gestire variabili d'ambiente (generalmente API keys o opzioni)
+    # ✅ per gestire variabili d'ambiente (generalmente API keys od opzioni)
     "dotenv",
 
     # 🟡 per fare scraping di pagine web
