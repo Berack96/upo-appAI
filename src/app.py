@@ -1,4 +1,10 @@
 import gradio as gr
+import sys
+import os
+
+# Aggiungi src al Python path per gli import
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 from app.tool import ToolAgent
 
 tool_agent = ToolAgent()

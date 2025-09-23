@@ -95,10 +95,17 @@ Il file `.env` verrà automaticamente caricato nel container grazie alla configu
 ## Aggiornamento del 19 Giugno 2024
 Usando la libreria ``gradio`` è stata creata un'interfaccia web semplice per interagire con gli agenti. Gli agenti si trovano
 nella cartella `src/app/agents` e sono:
-- **Market Agent**: Recupera i dati di mercato (prezzi, volumi, ecc.). ***MOCK***
+- **Market Agent**: Agente unificato che supporta multiple fonti di dati (Coinbase + CryptoCompare) con auto-configurazione
 - **News Agent**: Recupera le notizie finanziarie più recenti utilizzando. ***MOCK***
 - **Social Agent**: Analizza i sentimenti sui social media utilizzando. ***MOCK***
 - **Predictor Agent**: Utilizza i dati raccolti dagli altri agenti per fare previsioni.
+
+### Market Agent Features:
+- **Auto-configurazione**: Configura automaticamente i provider disponibili basandosi sulle env vars
+- **Multiple provider**: Supporta sia Coinbase (trading) che CryptoCompare (market data)
+- **Fallback intelligente**: Se un provider fallisce, prova automaticamente altri
+- **Interfaccia unificata**: Un'unica API per accedere a tutti i provider
+- **Provider-specific methods**: Accesso diretto alle funzionalità specifiche di ogni provider
 
 L'applicazione principale si trova in `src/app.py` e può essere eseguita con il comando:
 ```sh
@@ -112,6 +119,7 @@ upo-appAI/
 ├── LICENSE
 ├── README.md
 ├── docker-compose.yaml
+├── pytest.ini                             # Configurazione pytest
 ├── docs/
 ├── pyproject.toml
 ├── requirements.txt
@@ -123,14 +131,23 @@ upo-appAI/
 │   │   ├── agents/
 │   │   │   ├── __init__.py
 │   │   │   ├── __pycache__/
-│   │   │   ├── market_agent.py
+│   │   │   ├── market_agent.py              # Unified market agent (Coinbase + CryptoCompare)
 │   │   │   ├── news_agent.py
 │   │   │   ├── predictor_agent.py
 │   │   │   └── social_agent.py
+│   │   ├── signers/
+│   │   │   ├── __init__.py
+│   │   │   ├── coinbase_signer.py           # Coinbase authentication
+│   │   │   └── cryptocompare_signer.py      # CryptoCompare authentication
 │   │   └── tool.py
 │   ├── app.py
 │   ├── example.py
 │   └── ollama_demo.py
+├── tests/
+│   ├── conftest.py                         # Configurazione pytest globale
+│   └── agents/
+│       └── test_market_agents.py           # Test suite pytest per market agent
+├── market_agent_demo.py                   # Demo script
 └── uv.lock
 ```
 
@@ -141,8 +158,44 @@ upo-appAI/
 2. Ollama viene correttamente triggerato dalla selezione da interfaccia web ma la generazione della risposta non viene parsificata correttamente. 
 
 ### ToDo
-1. Per lo scraping online bisogna iscriversi e recuperare le chiavi API
-   2. **Market Agent**: [CoinGecko](https://www.coingecko.com/it)
-   3. **News Agent**: [CryptoPanic](https://cryptopanic.com/)
-   4. **Social Agent**: [post più hot da r/CryptoCurrency (Reddit)](https://www.reddit.com/)
-5. Capire come `gpt-oss` parsifica la risposta e per questioni "estetiche" si può pensare di visualizzare lo stream dei token. Vedere il sorgente `src/ollama_demo.py` per risolvere il problema.
+1. ~~Per lo scraping online bisogna iscriversi e recuperare le chiavi API~~
+   2. **Market Agent**: ✅ [CryptoCompare](https://www.cryptocompare.com/cryptopian/api-keys) (implementato)
+   3. **Market Agent**: ✅ [Coinbase](https://www.coinbase.com/cloud/discover/api-keys) (implementato)
+   4. **News Agent**: [CryptoPanic](https://cryptopanic.com/)
+   5. **Social Agent**: [post più hot da r/CryptoCurrency (Reddit)](https://www.reddit.com/)
+6. Capire come `gpt-oss` parsifica la risposta e per questioni "estetiche" si può pensare di visualizzare lo stream dei token. Vedere il sorgente `src/ollama_demo.py` per risolvere il problema.
+
+### Test Market Agent
+Per testare il market agent implementato, puoi usare diversi metodi:
+
+**Test con pytest** (raccomandato):
+```sh
+# Esegui tutti i test
+uv run pytest tests/agents/test_market_agents.py -v
+
+# Esegui solo test veloci (esclude test API lenti)
+uv run pytest tests/agents/test_market_agents.py -v -m "not slow"
+
+# Esegui solo test che richiedono API
+uv run pytest tests/agents/test_market_agents.py -v -m "api"
+
+# Esegui test con output dettagliato
+uv run pytest tests/agents/test_market_agents.py -v -s
+```
+
+**Test standalone** (compatibilità):
+```sh
+uv run python tests/agents/test_market_agents.py
+```
+
+**Demo interattivo**:
+```sh
+uv run python market_agent_demo.py
+```
+
+**Test rapido**:
+```sh
+uv run python -c "from src.app.agents.market_agent import MarketAgent; agent = MarketAgent(); print('Providers:', agent.get_available_providers()); print(agent.analyze('test'))"
+```
+
+Il MarketAgent si auto-configura basandosi sulle variabili disponibili nel tuo .env.
