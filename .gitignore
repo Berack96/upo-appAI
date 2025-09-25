@@ -175,3 +175,6 @@ cython_debug/
 
 # chroma db
 ./chroma_db/
+
+# VS Code
+.vscode/
