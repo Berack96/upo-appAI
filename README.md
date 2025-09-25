@@ -14,7 +14,7 @@ L'obiettivo è quello di creare un sistema di consulenza finanziaria basato su L
   - [Installazione in locale con UV](#installazione-in-locale-con-uv)
   - [Installazione con Docker](#installazione-con-docker)
 - [Applicazione](#applicazione)
-   - [Ultimo Aggiornamento](#ultimo aggiornamento)
+   - [Ultimo Aggiornamento](#ultimo-aggiornamento)
    - [Tests](#tests)
 
 # **Installazione**
