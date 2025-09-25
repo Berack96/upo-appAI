@@ -1,34 +1,34 @@
-# **Progetto di Esame: Da definire**
+# **Agente di Analisi e Consulenza Crypto**
 Questa è la repository per l'esame di Applicazioni Intelligenti che consiste in:
 - Progetto per 2/3 del voto.
 - Orale per 1/3 dei punti composto da:
   - Presentazione (come se lo facessimo ad un cliente) di gruppo
   - Orale singolo con domande del corso (teoria e strumenti visti)
 
-L'obiettivo di questo progetto è creare un sistema basato su **LLM Agents** e deve dimostrare la capacità di ragionare, adattarsi a eventi esterni e comunicare in modo intelligente.
+L'obiettivo è quello di creare un sistema di consulenza finanziaria basato su LLM Agents che analizza il mercato delle criptovalute per fornire consigli di investimento personalizzati. Inoltre il sistema deve dimostrare la capacità di ragionare, gestire la persistenza dei dati, utilizzare fonti esterne e presentare un'analisi comprensibile e razionale, offrendo sia una consulenza ad ampio spettro che su una singola criptovaluta.
 
-# Installazione
-Per l'installazione si può utilizzare un approccio tramite **uv** (manuale) oppure utilizzare un ambiente **Docker** già pronto (automatico).
+# **Indice**
+- [Installazione](#installazione)
+  - [Ollama (Modelli Locali)](#ollama-modelli-locali)
+  - [Variabili d'Ambiente](#variabili-dambiente)
+  - [Installazione in locale con UV](#installazione-in-locale-con-uv)
+  - [Installazione con Docker](#installazione-con-docker)
+- [Applicazione](#applicazione)
+   - [Ultimo Aggiornamento](#ultimo aggiornamento)
+   - [Tests](#tests)
 
-Prima di avviare l'applicazione è però necessario configurare correttamente le API keys e installare Ollama per l'utilizzo dei modelli locali, altrimenti il progetto, anche se installato correttamente, non riuscirà a partire.
+# **Installazione**
+Per l'installazione di questo progetto si consiglia di utilizzare **Docker**. Con questo approccio si evita di dover installare manualmente tutte le dipendenze e si può eseguire il progetto in un ambiente isolato.
 
-### API Keys
-Le API Keys puoi ottenerle tramite i seguenti servizi:
-- **Google AI**: [Google AI Studio](https://makersuite.google.com/app/apikey) (gratuito con limiti)
-- **Anthropic**: [Anthropic Console](https://console.anthropic.com/)
-- **DeepSeek**: [DeepSeek Platform](https://platform.deepseek.com/)
-- **OpenAI**: [OpenAI Platform](https://platform.openai.com/api-keys)
+Per lo sviluppo locale si può utilizzare **uv** che si occupa di creare un ambiente virtuale e installare tutte le dipendenze.
 
-Nota che alcune API sono gratuite con limiti di utilizzo, altre sono a pagamento. Google offre attualmente l'accesso gratuito con limiti ragionevoli.
+In ogni caso, ***prima*** di avviare l'applicazione è però necessario configurare correttamente le **API keys** e installare Ollama per l'utilizzo dei modelli locali, altrimenti il progetto, anche se installato correttamente, non riuscirà a partire.
 
 ### Ollama (Modelli Locali)
 Per utilizzare modelli AI localmente, è necessario installare Ollama:
 
 **1. Installazione Ollama**:
-- **Linux**: 
-```sh 
-curl -fsSL https://ollama.com/install.sh | sh
-```
+- **Linux**: `curl -fsSL https://ollama.com/install.sh | sh`
 - **macOS/Windows**: Scarica l'installer da [https://ollama.com/download/windows](https://ollama.com/download/windows)
 
 **2. GPU Support (Raccomandato)**:
@@ -37,10 +37,7 @@ Per utilizzare la GPU con Ollama, assicurati di avere NVIDIA CUDA Toolkit instal
 - **Documentazione WSL**: [CUDA WSL User Guide](https://docs.nvidia.com/cuda/wsl-user-guide/index.html)
 
 **3. Installazione Modelli**:
-Si possono avere più modelli installati contemporaneamente. Per questo progetto si consiglia di utilizzare il modello open source `gpt-oss` poiché prestante e compatibile con tante funzionalità. Per il download:
-```sh 
-ollama pull gpt-oss:latest
-```
+Si possono avere più modelli installati contemporaneamente. Per questo progetto si consiglia di utilizzare il modello open source `gpt-oss` poiché prestante e compatibile con tante funzionalità. Per il download: `ollama pull gpt-oss:latest`
 
 ### Variabili d'Ambiente
 
@@ -49,17 +46,15 @@ ollama pull gpt-oss:latest
 cp .env.example .env
 ```
 
-**2. Modifica il file .env** creato con le tue API keys e il path dei modelli Ollama, inserendoli nelle variabili opportune dopo l'uguale e ***senza*** spazi:
-```dotenv
-GOOGLE_API_KEY=
-ANTHROPIC_API_KEY=
-DEEPSEEK_API_KEY=
-OPENAI_API_KEY=
-# Path dove Ollama salva i modelli (es. /home/username/.ollama su Linux)
-OLLAMA_MODELS_PATH=
-```
+**2. Modifica il file .env** creato con le tue API keys e il path dei modelli Ollama, inserendoli nelle variabili opportune dopo l'uguale e ***senza*** spazi.
 
-### Opzione 1 UV
+Le API Keys puoi ottenerle tramite i seguenti servizi (alcune sono gratuite, altre a pagamento):
+- **Google AI**: [Google AI Studio](https://makersuite.google.com/app/apikey) (gratuito con limiti)
+- **Anthropic**: [Anthropic Console](https://console.anthropic.com/)
+- **DeepSeek**: [DeepSeek Platform](https://platform.deepseek.com/)
+- **OpenAI**: [OpenAI Platform](https://platform.openai.com/api-keys)
+
+## **Installazione in locale con UV**
 **1. Installazione uv**: Per prima cosa installa uv se non è già presente sul sistema:
 ```sh
 # Windows (PowerShell)
@@ -79,7 +74,7 @@ uv sync --frozen --no-cache
 uv run python src/app.py
 ```
 
-### Opzione 2 Docker
+## **Installazione con Docker**
 Alternativamente, se si ha installato [Docker](https://www.docker.com), si può utilizzare il [Dockerfile](Dockerfile) e il [docker-compose.yaml](docker-compose.yaml) per creare il container con tutti i file necessari e già in esecuzione:
 
 **IMPORTANTE**: Assicurati di aver configurato il file `.env` come descritto sopra prima di avviare Docker.
@@ -90,9 +85,11 @@ docker compose up --build -d
 
 Il file `.env` verrà automaticamente caricato nel container grazie alla configurazione in `docker-compose.yaml`.
 
-# Applicazione
+# **Applicazione**
+
 **L'applicazione è attualmente in fase di sviluppo.** 
-## Aggiornamento del 19 Giugno 2024
+
+## Ultimo Aggiornamento
 Usando la libreria ``gradio`` è stata creata un'interfaccia web semplice per interagire con gli agenti. Gli agenti si trovano
 nella cartella `src/app/agents` e sono:
 - **Market Agent**: Agente unificato che supporta multiple fonti di dati (Coinbase + CryptoCompare) con auto-configurazione
@@ -106,50 +103,6 @@ nella cartella `src/app/agents` e sono:
 - **Fallback intelligente**: Se un provider fallisce, prova automaticamente altri
 - **Interfaccia unificata**: Un'unica API per accedere a tutti i provider
 - **Provider-specific methods**: Accesso diretto alle funzionalità specifiche di ogni provider
-
-L'applicazione principale si trova in `src/app.py` e può essere eseguita con il comando:
-```sh
-uv run python src/app.py
-```
-
-### Albero delle cartelle:
-```txt
-upo-appAI/
-├── Dockerfile
-├── LICENSE
-├── README.md
-├── docker-compose.yaml
-├── pytest.ini                             # Configurazione pytest
-├── docs/
-├── pyproject.toml
-├── requirements.txt
-├── src/
-│   ├── __pycache__/
-│   ├── app/
-│   │   ├── __init__.py
-│   │   ├── __pycache__/
-│   │   ├── agents/
-│   │   │   ├── __init__.py
-│   │   │   ├── __pycache__/
-│   │   │   ├── market_agent.py              # Unified market agent (Coinbase + CryptoCompare)
-│   │   │   ├── news_agent.py
-│   │   │   ├── predictor_agent.py
-│   │   │   └── social_agent.py
-│   │   ├── signers/
-│   │   │   ├── __init__.py
-│   │   │   ├── coinbase_signer.py           # Coinbase authentication
-│   │   │   └── cryptocompare_signer.py      # CryptoCompare authentication
-│   │   └── tool.py
-│   ├── app.py
-│   ├── example.py
-│   └── ollama_demo.py
-├── tests/
-│   ├── conftest.py                         # Configurazione pytest globale
-│   └── agents/
-│       └── test_market_agents.py           # Test suite pytest per market agent
-├── market_agent_demo.py                   # Demo script
-└── uv.lock
-```
 
 ### Problemi noti
 1. Google ci sono differenze fra i modelli 1.x e i modelli 2.x. Si suggerisce la costruzione di due metodi differenti. 
@@ -165,7 +118,7 @@ upo-appAI/
    5. **Social Agent**: [post più hot da r/CryptoCurrency (Reddit)](https://www.reddit.com/)
 6. Capire come `gpt-oss` parsifica la risposta e per questioni "estetiche" si può pensare di visualizzare lo stream dei token. Vedere il sorgente `src/ollama_demo.py` per risolvere il problema.
 
-### Test Market Agent
+## Tests
 Per testare il market agent implementato, puoi usare diversi metodi:
 
 **Test con pytest** (raccomandato):
@@ -183,19 +136,7 @@ uv run pytest tests/agents/test_market_agents.py -v -m "api"
 uv run pytest tests/agents/test_market_agents.py -v -s
 ```
 
-**Test standalone** (compatibilità):
-```sh
-uv run python tests/agents/test_market_agents.py
-```
-
-**Demo interattivo**:
-```sh
-uv run python market_agent_demo.py
-```
-
 **Test rapido**:
 ```sh
 uv run python -c "from src.app.agents.market_agent import MarketAgent; agent = MarketAgent(); print('Providers:', agent.get_available_providers()); print(agent.analyze('test'))"
 ```
-
-Il MarketAgent si auto-configura basandosi sulle variabili disponibili nel tuo .env.
