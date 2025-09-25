@@ -1,29 +1,8 @@
-import os
 import gradio as gr
 
 from dotenv import load_dotenv
 from app.tool import ToolAgent
-
-def available_keys():
-    """
-    Controlla quali provider di modelli LLM hanno le loro API keys disponibili
-    come variabili d'ambiente e ritorna una lista di provider disponibili.
-    Se nessuna API key è disponibile, ritorna solo 'mock' come opzione.
-    """
-    availables = []
-    if os.getenv("GOOGLE_API_KEY"):
-        availables.append("google")
-    if os.getenv("OPENAI_API_KEY"):
-        availables.append("openai")
-    if os.getenv("ANTHROPIC_API_KEY"):
-        availables.append("anthropic")
-    if os.getenv("DEEPSEEK_API_KEY"):
-        availables.append("deepseek")
-    if os.getenv("OLLAMA_MODELS_PATH"):
-        availables.append("ollama")
-
-    return ['mock', *availables]
-
+from app.models import Models
 
 ########################################
 # MAIN APP & GRADIO INTERFACE
@@ -37,16 +16,16 @@ if __name__ == "__main__":
     load_dotenv()
     ######################################
 
+    list_models = Models.available()
     tool_agent = ToolAgent()
 
     with gr.Blocks() as demo:
         gr.Markdown("# 🤖 Agente di Analisi e Consulenza Crypto")
 
         with gr.Row():
-            list_choices = available_keys()
             provider = gr.Dropdown(
-                choices=list_choices,
-                value=list_choices[0],
+                choices=list_models,
+                value=list_models[0],
                 label="Modello da usare"
             )
             style = gr.Dropdown(

@@ -4,11 +4,8 @@ from typing import Any
 
 import anthropic
 import requests
-from dotenv import load_dotenv
 from google import genai
 from openai import OpenAI
-
-load_dotenv()
 
 class PredictorAgent:
     def __init__(self):
