@@ -3,7 +3,7 @@ import requests
 import logging
 import os
 from dotenv import load_dotenv
-from app.signers.market_signers.coinbase_rest_signer import CoinbaseCDPSigner
+from app.signers.market_signers.coinbase_signer import CoinbaseCDPSigner
 from app.signers.market_signers.cryptocompare_signer import CryptoCompareSigner
 
 load_dotenv()

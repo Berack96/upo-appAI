@@ -37,5 +37,13 @@ dependencies = [
     "coinbase-advanced-py",
     "cryptocompare",
     "cdp-sdk",
-    "python-binance"
+    "python-binance",
+    "langchain>=0.3.27",
+    "langchain-community>=0.3.21",
+    "langchain-chroma>=0.2.2",
+    "langchain-ollama>=0.3.7",
+    "chromadb",
+    "fastapi",
+    "uvicorn",
+    "pydantic"
 ]
