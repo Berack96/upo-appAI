@@ -115,4 +115,7 @@ Usando la libreria ``gradio`` è stata creata un'interfaccia web semplice per in
 
 ## Tests
 
-***Per ora ho cambiato tutto e quindi i test non funzionano***
+Per eseguire i test, assicurati di aver configurato correttamente le variabili d'ambiente nel file `.env` come descritto sopra. Poi esegui il comando:
+```sh
+uv run pytest -v
+```

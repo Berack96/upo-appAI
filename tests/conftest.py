@@ -39,7 +39,7 @@ def pytest_collection_modifyitems(config, items):
     for item in items:
         if "api" in item.name.lower() or "coinbase" in item.name.lower() or "cryptocompare" in item.name.lower():
             item.add_marker(pytest.mark.api)
-        
+
         # Aggiungi marker 'slow' ai test che potrebbero essere lenti
         if "overview" in item.name.lower() or "analysis" in item.name.lower():
             item.add_marker(pytest.mark.slow)
