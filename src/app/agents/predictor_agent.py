@@ -55,6 +55,7 @@ class PredictorAgent:
         if provider == "mock" or provider not in self.providers:
             return self._predict_mock(style)
 
+        # da migliorare
         prompt = f"""
             Sei un consulente finanziario crypto.
             Dati di mercato: {data}
