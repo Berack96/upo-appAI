@@ -7,7 +7,16 @@ from app.models import Models
 
 
 class ToolAgent:
+    """
+    Classe principale che coordina gli agenti per rispondere alle richieste dell'utente.
+    available_models: lista dei modelli disponibili (Models.availables()).
+    all_styles: lista degli stili di previsione disponibili (PredictorStyle).
+    """
+
     def __init__(self, available_models: list[Models], all_styles: list[PredictorStyle]):
+        """
+        Inizializza l'agente con i modelli e gli stili disponibili.
+        """
         self.available_models = available_models
         self.all_styles = all_styles
 
@@ -15,6 +24,10 @@ class ToolAgent:
         self.choose_provider(0) # Default to the first model
 
     def choose_provider(self, index: int):
+        """
+        Sceglie il modello LLM da utilizzare in base all'indice fornito.
+        index: indice del modello nella lista available_models.
+        """
         # TODO Utilizzare AGNO per gestire i modelli... è molto più semplice e permette di cambiare modello facilmente
         # TODO https://docs.agno.com/introduction
         # Inoltre permette di creare dei team e workflow di agenti più facilmente
@@ -26,6 +39,8 @@ class ToolAgent:
     def interact(self, query: str, style_index: int):
         """
         Funzione principale che coordina gli agenti per rispondere alla richiesta dell'utente.
+        query: richiesta dell'utente (es. "Qual è la previsione per Bitcoin?")
+        style_index: indice dello stile di previsione nella lista all_styles.
         """
 
         # Step 1: raccolta analisi

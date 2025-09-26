@@ -2,6 +2,10 @@ from coinbase.rest.types.product_types import Candle, GetProductResponse
 
 
 class BaseWrapper:
+    """
+    Interfaccia per i wrapper delle API di mercato.
+    Implementa i metodi di base che ogni wrapper deve avere.
+    """
     def get_product(self, asset_id: str) -> 'ProductInfo':
         raise NotImplementedError
     def get_products(self, asset_ids: list[str]) -> list['ProductInfo']:
@@ -12,6 +16,10 @@ class BaseWrapper:
         raise NotImplementedError
 
 class ProductInfo:
+    """
+    Informazioni sul prodotto, come ottenute dalle API di mercato.
+    Implementa i metodi di conversione dai dati grezzi delle API.
+    """
     id: str
     symbol: str
     price: float
@@ -39,6 +47,10 @@ class ProductInfo:
         return product
 
 class Price:
+    """
+    Rappresenta i dati di prezzo per un asset, come ottenuti dalle API di mercato.
+    Implementa i metodi di conversione dai dati grezzi delle API.
+    """
     high: float
     low: float
     open: float

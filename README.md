@@ -87,56 +87,32 @@ Il file `.env` verrà automaticamente caricato nel container grazie alla configu
 
 # **Applicazione**
 
-**L'applicazione è attualmente in fase di sviluppo.** 
+***L'applicazione è attualmente in fase di sviluppo.***
 
-## Ultimo Aggiornamento
-Usando la libreria ``gradio`` è stata creata un'interfaccia web semplice per interagire con gli agenti. Gli agenti si trovano
-nella cartella `src/app/agents` e sono:
-- **Market Agent**: Agente unificato che supporta multiple fonti di dati (Coinbase + CryptoCompare) con auto-configurazione
+Usando la libreria ``gradio`` è stata creata un'interfaccia web semplice per interagire con l'agente principale. Gli agenti secondari si trovano nella cartella `src/app/agents` e sono:
+- **Market Agent**: ~~Agente unificato che supporta multiple fonti di dati (Coinbase + CryptoCompare) con auto-configurazione~~  (non proprio un agente per ora)
 - **News Agent**: Recupera le notizie finanziarie più recenti utilizzando. ***MOCK***
 - **Social Agent**: Analizza i sentimenti sui social media utilizzando. ***MOCK***
 - **Predictor Agent**: Utilizza i dati raccolti dagli altri agenti per fare previsioni.
 
+## Ultimo Aggiornamento
 ### Market Agent Features:
 - **Auto-configurazione**: Configura automaticamente i provider disponibili basandosi sulle env vars
 - **Multiple provider**: Supporta sia Coinbase (trading) che CryptoCompare (market data)
-- **Fallback intelligente**: Se un provider fallisce, prova automaticamente altri
 - **Interfaccia unificata**: Un'unica API per accedere a tutti i provider
-- **Provider-specific methods**: Accesso diretto alle funzionalità specifiche di ogni provider
 
-### Problemi noti
-1. Google ci sono differenze fra i modelli 1.x e i modelli 2.x. Si suggerisce la costruzione di due metodi differenti. 
-   2. `gemini-1.5-flash` funziona perfettamente
-   3. `gemini-2.5-flash` non funziona passando parametri come *temperature* e *max_tokens*, bisogna trovare la nuova sintassi.
-2. Ollama viene correttamente triggerato dalla selezione da interfaccia web ma la generazione della risposta non viene parsificata correttamente. 
+### Problemi con i modelli LLM:
+1. **Ollama gpt-oss**: il modello `gpt-oss` funziona ma non riesce a seguire le istruzioni.
+2. **Ollama-gwen**: il modello `gwen` funziona più veloce di `gpt-oss` ma comunque non segue le istruzioni.
 
 ### ToDo
-1. ~~Per lo scraping online bisogna iscriversi e recuperare le chiavi API~~
-   2. **Market Agent**: ✅ [CryptoCompare](https://www.cryptocompare.com/cryptopian/api-keys) (implementato)
-   3. **Market Agent**: ✅ [Coinbase](https://www.coinbase.com/cloud/discover/api-keys) (implementato)
-   4. **News Agent**: [CryptoPanic](https://cryptopanic.com/)
-   5. **Social Agent**: [post più hot da r/CryptoCurrency (Reddit)](https://www.reddit.com/)
-6. Capire come `gpt-oss` parsifica la risposta e per questioni "estetiche" si può pensare di visualizzare lo stream dei token. Vedere il sorgente `src/ollama_demo.py` per risolvere il problema.
+1. [X] Per lo scraping online bisogna iscriversi e recuperare le chiavi API
+2. [X] **Market Agent**: [CryptoCompare](https://www.cryptocompare.com/cryptopian/api-keys)
+3. [X] **Market Agent**: [Coinbase](https://www.coinbase.com/cloud/discover/api-keys)
+4. [] **News Agent**: [CryptoPanic](https://cryptopanic.com/)
+5. [] **Social Agent**: [post più hot da r/CryptoCurrency (Reddit)](https://www.reddit.com/)
+6. [] Capire come `gpt-oss` parsifica la risposta e per questioni "estetiche" si può pensare di visualizzare lo stream dei token. Vedere il sorgente `src/ollama_demo.py` per risolvere il problema.
 
 ## Tests
-Per testare il market agent implementato, puoi usare diversi metodi:
 
-**Test con pytest** (raccomandato):
-```sh
-# Esegui tutti i test
-uv run pytest tests/agents/test_market_agents.py -v
-
-# Esegui solo test veloci (esclude test API lenti)
-uv run pytest tests/agents/test_market_agents.py -v -m "not slow"
-
-# Esegui solo test che richiedono API
-uv run pytest tests/agents/test_market_agents.py -v -m "api"
-
-# Esegui test con output dettagliato
-uv run pytest tests/agents/test_market_agents.py -v -s
-```
-
-**Test rapido**:
-```sh
-uv run python -c "from src.app.agents.market_agent import MarketAgent; agent = MarketAgent(); print('Providers:', agent.get_available_providers()); print(agent.analyze('test'))"
-```
+***Per ora ho cambiato tutto e quindi i test non funzionano***

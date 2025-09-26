@@ -1,6 +1,9 @@
 # Versione pubblica senza autenticazione
 from binance.client import Client
 
+# TODO fare l'aggancio con API in modo da poterlo usare come wrapper di mercato
+# TODO implementare i metodi di BaseWrapper
+
 class PublicBinanceAgent:
     def __init__(self):
         # Client pubblico (senza credenziali)
