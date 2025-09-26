@@ -41,6 +41,9 @@ class ToolAgent:
         style_index: indice dello stile di previsione nella lista all_styles.
         """
 
+        # TODO Step 0: ricerca e analisi della richiesta (es. estrazione di criptovalute specifiche)
+        # Prendere la query dell'utente e fare un'analisi preliminare con una agente o con un team di agenti (social e news)
+
         # Step 1: raccolta analisi
         cryptos = ["BTC", "ETH", "XRP", "LTC", "BCH"]  # TODO rendere dinamico in futuro
         market_data = self.market.get_products(cryptos)
