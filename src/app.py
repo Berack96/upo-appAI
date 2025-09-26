@@ -2,8 +2,6 @@ import gradio as gr
 
 from dotenv import load_dotenv
 from app.tool import ToolAgent
-from app.models import Models
-from app.agents.predictor import PredictorStyle
 
 ########################################
 # MAIN APP & GRADIO INTERFACE
@@ -17,28 +15,21 @@ if __name__ == "__main__":
     load_dotenv()
     ######################################
 
-    models = Models.availables()
-    styles = list(PredictorStyle)
-    models_names = [model.name for model in models]
-    styles_names = [style.value for style in styles]
-    print("✅ Modelli disponibili:", models_names)
-    print("✅ Stili disponibili:", styles_names)
-
-    tool_agent = ToolAgent(models, styles)
+    tool_agent = ToolAgent()
 
     with gr.Blocks() as demo:
         gr.Markdown("# 🤖 Agente di Analisi e Consulenza Crypto")
 
         with gr.Row():
             provider = gr.Dropdown(
-                choices=models_names,
+                choices=tool_agent.list_providers(),
                 type="index",
                 label="Modello da usare"
             )
             provider.change(fn=tool_agent.choose_provider, inputs=provider, outputs=None)
 
             style = gr.Dropdown(
-                choices=styles_names,
+                choices=tool_agent.list_styles(),
                 type="index",
                 label="Stile di investimento"
             )

@@ -13,6 +13,16 @@ def get_first_available_market_api(currency:str = "USD") -> BaseWrapper:
     :param currency: Valuta di riferimento (default "USD")
     :return: Lista di istanze di wrapper
     """
+    return get_list_available_market_apis(currency=currency)[0]
+
+def get_list_available_market_apis(currency:str = "USD") -> list[BaseWrapper]:
+    """
+    Restituisce la lista di wrapper disponibili in base alle configurazioni del file .env e alle chiavi API presenti.
+    La priorità è data a Coinbase, poi a CryptoCompare.
+    Se non sono presenti chiavi API, restituisce una eccezione.
+    :param currency: Valuta di riferimento (default "USD")
+    :return: Lista di istanze di wrapper
+    """
     wrappers = []
 
     api_key = os.getenv("COINBASE_API_KEY")
@@ -25,5 +35,4 @@ def get_first_available_market_api(currency:str = "USD") -> BaseWrapper:
         wrappers.append(CryptoCompareWrapper(api_key=api_key, currency=currency))
 
     assert wrappers, "No valid API keys set in environment variables."
-    return wrappers[0]
-
+    return wrappers

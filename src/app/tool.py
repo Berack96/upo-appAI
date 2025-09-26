@@ -9,16 +9,14 @@ from app.models import Models
 class ToolAgent:
     """
     Classe principale che coordina gli agenti per rispondere alle richieste dell'utente.
-    available_models: lista dei modelli disponibili (Models.availables()).
-    all_styles: lista degli stili di previsione disponibili (PredictorStyle).
     """
 
-    def __init__(self, available_models: list[Models], all_styles: list[PredictorStyle]):
+    def __init__(self):
         """
-        Inizializza l'agente con i modelli e gli stili disponibili.
+        Inizializza l'agente con i modelli disponibili, gli stili e l'API di mercato.
         """
-        self.available_models = available_models
-        self.all_styles = all_styles
+        self.available_models = Models.availables()
+        self.all_styles = list(PredictorStyle)
 
         self.market = get_first_available_market_api(currency="USD")
         self.choose_provider(0) # Default to the first model
@@ -64,3 +62,15 @@ class ToolAgent:
 
         market_data = "\n".join([f"{product.symbol}: {product.price}" for product in market_data])
         return f"{market_data}\n{sentiment}\n\n📈 Consiglio finale:\n{output}"
+
+    def list_providers(self) -> list[str]:
+        """
+        Restituisce la lista dei nomi dei modelli disponibili.
+        """
+        return [model.name for model in self.available_models]
+
+    def list_styles(self) -> list[str]:
+        """
+        Restituisce la lista degli stili di previsione disponibili.
+        """
+        return [style.value for style in self.all_styles]
