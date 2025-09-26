@@ -48,4 +48,4 @@ if __name__ == "__main__":
 
         analyze_btn = gr.Button("🔎 Analizza")
         analyze_btn.click(fn=tool_agent.interact, inputs=[user_input, style], outputs=output)
-    demo.launch()
+    demo.launch(server_name="0.0.0.0", server_port=8000)

@@ -1,4 +1,5 @@
 import os
+import requests
 from enum import Enum
 from agno.agent import Agent
 from agno.models.base import BaseModel
@@ -14,10 +15,10 @@ class Models(Enum):
     """
     GEMINI = "gemini-2.0-flash" # API online
     GEMINI_PRO = "gemini-2.0-pro" # API online, più costoso ma migliore
-    OLLAMA = "llama3.1" # + fast (7b) - very very bad
-    OLLAMA_GPT = "gpt-oss" # + good - slow (13b) - doesn't follow instructions
-    OLLAMA_QWEN = "qwen3:8b" # + good + fast (8b), - doesn't follow instructions
+    OLLAMA_GPT = "gpt-oss:latest" # + good - slow (13b)
+    OLLAMA_QWEN = "qwen3:latest" # + good + fast (8b)
 
+    @staticmethod
     def availables() -> list['Models']:
         """
         Controlla quali provider di modelli LLM hanno le loro API keys disponibili
@@ -30,13 +31,39 @@ class Models(Enum):
         if os.getenv("GOOGLE_API_KEY"):
             availables.append(Models.GEMINI)
             availables.append(Models.GEMINI_PRO)
-        if os.getenv("OLLAMA_MODELS_PATH"):
-            availables.append(Models.OLLAMA)
-            availables.append(Models.OLLAMA_GPT)
-            availables.append(Models.OLLAMA_QWEN)
+
+        ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
+        result = requests.get(f"{ollama_host}/api/tags")
+        print(result)
+        if result.status_code == 200:
+            result = result.text
+            if Models.OLLAMA_GPT.value in result:
+                availables.append(Models.OLLAMA_GPT)
+            if Models.OLLAMA_QWEN.value in result:
+                availables.append(Models.OLLAMA_QWEN)
 
         assert availables, "No valid model API keys set in environment variables."
         return availables
+
+    @staticmethod
+    def extract_json_str_from_response(response: str) -> str:
+        """
+        Estrae il JSON dalla risposta del modello.
+        response: risposta del modello (stringa).
+        Ritorna la parte JSON della risposta come stringa.
+        Se non viene trovato nessun JSON, ritorna una stringa vuota.
+        ATTENZIONE: questa funzione è molto semplice e potrebbe non funzionare
+        in tutti i casi. Si assume che il JSON sia ben formato e che inizi con
+        '{' e finisca con '}'. Quindi anche solo un json array farà fallire questa funzione.
+        """
+        start = response.find("{")
+        assert start != -1, "No JSON found in the response."
+
+        end = response.rfind("}")
+        assert end != -1, "No JSON found in the response."
+
+        return response[start:end + 1].strip()
+
 
     def get_model(self, instructions:str) -> BaseModel:
         """
@@ -47,21 +74,22 @@ class Models(Enum):
         """
         name = self.value
         if self in {Models.GEMINI, Models.GEMINI_PRO}:
-            return Gemini(name, instructions=instructions)
-        elif self in {Models.OLLAMA, Models.OLLAMA_GPT, Models.OLLAMA_QWEN}:
-            return Ollama(name, instructions=instructions)
+            return Gemini(name, instructions=[instructions])
+        elif self in {Models.OLLAMA_GPT, Models.OLLAMA_QWEN}:
+            return Ollama(name, instructions=[instructions])
 
         raise ValueError(f"Modello non supportato: {self}")
 
-    def get_agent(self, instructions: str) -> Agent:
+    def get_agent(self, instructions: str, name: str = "") -> Agent:
         """
         Costruisce un agente con il modello e le istruzioni specificate.
         instructions: istruzioni da passare al modello (system prompt).
         Ritorna un'istanza di Agent.
         """
         return Agent(
-            model=self.get_model(instructions=instructions),
-            instructions=instructions,
+            model=self.get_model(instructions),
+            name=name,
+            use_json_mode=True,
             # TODO Eventuali altri parametri da mettere all'agente
             # anche se si possono comunque assegnare dopo la creazione
             # Esempio:

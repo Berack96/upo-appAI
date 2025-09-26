@@ -101,17 +101,13 @@ Usando la libreria ``gradio`` è stata creata un'interfaccia web semplice per in
 - **Multiple provider**: Supporta sia Coinbase (trading) che CryptoCompare (market data)
 - **Interfaccia unificata**: Un'unica API per accedere a tutti i provider
 
-### Problemi con i modelli LLM:
-1. **Ollama gpt-oss**: il modello `gpt-oss` funziona ma non riesce a seguire le istruzioni.
-2. **Ollama-gwen**: il modello `gwen` funziona più veloce di `gpt-oss` ma comunque non segue le istruzioni.
-
 ### ToDo
-1. [X] Per lo scraping online bisogna iscriversi e recuperare le chiavi API
-2. [X] **Market Agent**: [CryptoCompare](https://www.cryptocompare.com/cryptopian/api-keys)
-3. [X] **Market Agent**: [Coinbase](https://www.coinbase.com/cloud/discover/api-keys)
-4. [] **News Agent**: [CryptoPanic](https://cryptopanic.com/)
-5. [] **Social Agent**: [post più hot da r/CryptoCurrency (Reddit)](https://www.reddit.com/)
-6. [] Capire come `gpt-oss` parsifica la risposta e per questioni "estetiche" si può pensare di visualizzare lo stream dei token. Vedere il sorgente `src/ollama_demo.py` per risolvere il problema.
+- [X] Per lo scraping online bisogna iscriversi e recuperare le chiavi API
+- [X] **Market Agent**: [CryptoCompare](https://www.cryptocompare.com/cryptopian/api-keys)
+- [X] **Market Agent**: [Coinbase](https://www.coinbase.com/cloud/discover/api-keys)
+- [] **News Agent**: [CryptoPanic](https://cryptopanic.com/)
+- [] **Social Agent**: [post più hot da r/CryptoCurrency (Reddit)](https://www.reddit.com/)
+- [] Capire come `gpt-oss` parsifica la risposta e per questioni "estetiche" si può pensare di visualizzare lo stream dei token. Vedere il sorgente `src/ollama_demo.py` per risolvere il problema.
 
 ## Tests
 

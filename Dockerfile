@@ -19,4 +19,5 @@ COPY LICENSE .
 COPY src ./src
 
 # Comando di default all'avvio dell'applicazione
-CMD ["python", "src/app.py"]
+CMD ["echo", "Benvenuto in UPO AppAI!"]
+CMD ["uv", "run", "src/app.py"]

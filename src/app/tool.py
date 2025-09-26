@@ -60,8 +60,7 @@ class ToolAgent:
         )
 
         prediction = self.predictor.run(inputs)
-        #output = prediction.content.split("</think>")[-1] # remove thinking steps and reasoning from the final output
-        output = prediction.content
+        output = Models.extract_json_str_from_response(prediction.content)
 
         market_data = "\n".join([f"{product.symbol}: {product.price}" for product in market_data])
         return f"{market_data}\n{sentiment}\n\n📈 Consiglio finale:\n{output}"

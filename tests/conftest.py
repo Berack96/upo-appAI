@@ -30,6 +30,15 @@ def pytest_configure(config):
     config.addinivalue_line(
         "markers", "cryptocompare: marks tests that require CryptoCompare credentials"
     )
+    config.addinivalue_line(
+        "markers", "gemini: marks tests that use Gemini model"
+    )
+    config.addinivalue_line(
+        "markers", "ollama_gpt: marks tests that use Ollama GPT model"
+    )
+    config.addinivalue_line(
+        "markers", "ollama_qwen: marks tests that use Ollama Qwen model"
+    )
 
 
 def pytest_collection_modifyitems(config, items):
@@ -42,3 +51,10 @@ def pytest_collection_modifyitems(config, items):
         # Aggiungi marker 'slow' ai test che potrebbero essere lenti
         if "overview" in item.name.lower() or "analysis" in item.name.lower():
             item.add_marker(pytest.mark.slow)
+
+        if "gemini" in item.name.lower():
+            item.add_marker(pytest.mark.gemini)
+        if "ollama_gpt" in item.name.lower():
+            item.add_marker(pytest.mark.ollama_gpt)
+        if "ollama_qwen" in item.name.lower():
+            item.add_marker(pytest.mark.ollama_qwen)
