@@ -3,6 +3,7 @@ import gradio as gr
 from dotenv import load_dotenv
 from app.tool import ToolAgent
 from app.models import Models
+from app.agents.predictor import PredictorStyle
 
 ########################################
 # MAIN APP & GRADIO INTERFACE
@@ -16,21 +17,29 @@ if __name__ == "__main__":
     load_dotenv()
     ######################################
 
-    list_models = Models.available()
-    tool_agent = ToolAgent()
+    models = Models.availables()
+    styles = list(PredictorStyle)
+    models_names = [model.name for model in models]
+    styles_names = [style.value for style in styles]
+    print("✅ Modelli disponibili:", models_names)
+    print("✅ Stili disponibili:", styles_names)
+
+    tool_agent = ToolAgent(models, styles)
 
     with gr.Blocks() as demo:
         gr.Markdown("# 🤖 Agente di Analisi e Consulenza Crypto")
 
         with gr.Row():
             provider = gr.Dropdown(
-                choices=list_models,
-                value=list_models[0],
+                choices=models_names,
+                type="index",
                 label="Modello da usare"
             )
+            provider.change(fn=tool_agent.choose_provider, inputs=provider, outputs=None)
+
             style = gr.Dropdown(
-                choices=["conservative", "aggressive"],
-                value="conservative",
+                choices=styles_names,
+                type="index",
                 label="Stile di investimento"
             )
 
@@ -38,7 +47,5 @@ if __name__ == "__main__":
         output = gr.Textbox(label="Risultato analisi", lines=12)
 
         analyze_btn = gr.Button("🔎 Analizza")
-        analyze_btn.click(fn=tool_agent.interact, inputs=[user_input, provider, style], outputs=output)
-    if __name__ == "__main__":
-        demo.launch()
-
+        analyze_btn.click(fn=tool_agent.interact, inputs=[user_input, style], outputs=output)
+    demo.launch()

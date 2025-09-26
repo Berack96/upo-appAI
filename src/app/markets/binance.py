@@ -5,13 +5,13 @@ class PublicBinanceAgent:
     def __init__(self):
         # Client pubblico (senza credenziali)
         self.client = Client()
-    
+
     def get_public_prices(self):
         """Ottiene prezzi pubblici"""
         try:
             btc_price = self.client.get_symbol_ticker(symbol="BTCUSDT")
             eth_price = self.client.get_symbol_ticker(symbol="ETHUSDT")
-            
+
             return {
                 'BTC_USD': float(btc_price['price']),
                 'ETH_USD': float(eth_price['price']),

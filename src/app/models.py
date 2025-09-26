@@ -14,16 +14,14 @@ class Models(Enum):
     """
     GEMINI = "gemini-2.0-flash" # API online
     GEMINI_PRO = "gemini-2.0-pro" # API online, più costoso ma migliore
-    OLLAMA = "llama3.1" # little and fast (7b) but not so good
-    OLLAMA_GPT = "gpt-oss" # a bit big (13b) but very good (almost like gemini API)
-    OLLAMA_QWEN = "qwen3:8b" # good
-    MOCK = "mock"
+    OLLAMA = "llama3.1" # + fast (7b) - very very bad
+    OLLAMA_GPT = "gpt-oss" # + good - slow (13b) - doesn't follow instructions
+    OLLAMA_QWEN = "qwen3:8b" # + good + fast (8b), - doesn't follow instructions
 
-    def available() -> list[str]:
+    def availables() -> list['Models']:
         """
         Controlla quali provider di modelli LLM hanno le loro API keys disponibili
         come variabili d'ambiente e ritorna una lista di provider disponibili.
-        Se nessuna API key è disponibile, ritorna solo 'mock' come opzione.
         L'ordine di preferenza è:
         1. Gemini (Google)
         2. Ollama (locale)
@@ -37,11 +35,8 @@ class Models(Enum):
             availables.append(Models.OLLAMA_GPT)
             availables.append(Models.OLLAMA_QWEN)
 
-        return [Models.MOCK, *availables]
-
-    def __str__(self) -> str:
-        # Per semplificare la visualizzazione del modello come stringa.
-        return self.name
+        assert availables, "No valid model API keys set in environment variables."
+        return availables
 
     def get_model(self, instructions:str) -> BaseModel:
         """
@@ -51,13 +46,10 @@ class Models(Enum):
         Raise ValueError se il modello non è supportato.
         """
         name = self.value
-        if self in {Models.GEMINI}:
+        if self in {Models.GEMINI, Models.GEMINI_PRO}:
             return Gemini(name, instructions=instructions)
         elif self in {Models.OLLAMA, Models.OLLAMA_GPT, Models.OLLAMA_QWEN}:
             return Ollama(name, instructions=instructions)
-        elif self in {Models.MOCK}:
-            from agno.models.base import Model
-            return Model(name, instructions=instructions)
 
         raise ValueError(f"Modello non supportato: {self}")
 

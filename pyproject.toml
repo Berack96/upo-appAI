@@ -1,7 +1,7 @@
 [project]
 name = "upo-app-ai"
 version = "0.1.0"
-description = "Agente di Pianificazione Viaggi Intelligente"
+description = "Agente di analisi e consulenza crypto"
 requires-python = "==3.12.*"
 
 # Qui ho messo alcune librerie utili utilizzate durante il corso.
@@ -18,32 +18,17 @@ dependencies = [
     #"bs4",
     # ✅ per fare una UI web semplice con input e output
     "gradio",
-    # ✅ per la crittografia (necessaria per autenticazione Coinbase)
-    "cryptography",
-    # ❌ per l'elaborazione del linguaggio naturale in locale (https://huggingface.co/learn/llm-course/chapter1/3?fw=pt)
-    #"transformers",
-    # ❌ per fare chiamate a modelli indipendentemente dal modello specifico (astrae meglio rispetto a openai)
-    #"langchain",
+
     # ✅ per costruire agenti (ovvero modelli che possono fare più cose tramite tool) https://github.com/agno-agi/agno
     # altamente consigliata dato che ha anche tools integrati per fare scraping, calcoli e molto altro
     # oltre a questa è necessario installare anche le librerie specifiche per i modelli che si vogliono usare
     "agno",
+
     # ✅ Modelli supportati e installati (aggiungere qui sotto quelli che si vogliono usare)
     "google-genai",
     "ollama",
-    "openai",
-    "anthropic",
-    "google",
+
+    # ✅ per interagire con API di exchange di criptovalute
     "coinbase-advanced-py",
-    "cryptocompare",
-    "cdp-sdk",
     "python-binance",
-    "langchain>=0.3.27",
-    "langchain-community>=0.3.21",
-    "langchain-chroma>=0.2.2",
-    "langchain-ollama>=0.3.7",
-    "chromadb",
-    "fastapi",
-    "uvicorn",
-    "pydantic"
 ]
