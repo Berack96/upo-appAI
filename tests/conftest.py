@@ -15,46 +15,38 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-def pytest_configure(config):
-    """Configurazione pytest"""
-    # Aggiungi marker personalizzati
-    config.addinivalue_line(
-        "markers", "slow: marks tests as slow (deselect with '-m \"not slow\"')"
-    )
-    config.addinivalue_line(
-        "markers", "api: marks tests that require API access"
-    )
-    config.addinivalue_line(
-        "markers", "coinbase: marks tests that require Coinbase credentials"
-    )
-    config.addinivalue_line(
-        "markers", "cryptocompare: marks tests that require CryptoCompare credentials"
-    )
-    config.addinivalue_line(
-        "markers", "gemini: marks tests that use Gemini model"
-    )
-    config.addinivalue_line(
-        "markers", "ollama_gpt: marks tests that use Ollama GPT model"
-    )
-    config.addinivalue_line(
-        "markers", "ollama_qwen: marks tests that use Ollama Qwen model"
-    )
+def pytest_configure(config:pytest.Config):
+    """Configurazione pytest con marker personalizzati"""
 
+    markers = [
+        ("slow", "marks tests as slow (deselect with '-m \"not slow\"')"),
+        ("api", "marks tests that require API access"),
+        ("coinbase", "marks tests that require Coinbase credentials"),
+        ("cryptocompare", "marks tests that require CryptoCompare credentials"),
+        ("gemini", "marks tests that use Gemini model"),
+        ("ollama_gpt", "marks tests that use Ollama GPT model"),
+        ("ollama_qwen", "marks tests that use Ollama Qwen model"),
+    ]
+    for marker in markers:
+        line = f"{marker[0]}: {marker[1]}"
+        config.addinivalue_line("markers", line)
 
 def pytest_collection_modifyitems(config, items):
-    """Modifica automaticamente gli item di test"""
-    # Aggiungi marker 'api' a tutti i test che richiedono API
+    """Modifica automaticamente gli item di test aggiungendogli marker basati sul nome"""
+
+    markers_to_add = {
+        "api": pytest.mark.api,
+        "coinbase": pytest.mark.api,
+        "cryptocompare": pytest.mark.api,
+        "overview": pytest.mark.slow,
+        "analysis": pytest.mark.slow,
+        "gemini": pytest.mark.gemini,
+        "ollama_gpt": pytest.mark.ollama_gpt,
+        "ollama_qwen": pytest.mark.ollama_qwen,
+    }
+
     for item in items:
-        if "api" in item.name.lower() or "coinbase" in item.name.lower() or "cryptocompare" in item.name.lower():
-            item.add_marker(pytest.mark.api)
-
-        # Aggiungi marker 'slow' ai test che potrebbero essere lenti
-        if "overview" in item.name.lower() or "analysis" in item.name.lower():
-            item.add_marker(pytest.mark.slow)
-
-        if "gemini" in item.name.lower():
-            item.add_marker(pytest.mark.gemini)
-        if "ollama_gpt" in item.name.lower():
-            item.add_marker(pytest.mark.ollama_gpt)
-        if "ollama_qwen" in item.name.lower():
-            item.add_marker(pytest.mark.ollama_qwen)
+        name = item.name.lower()
+        for key, marker in markers_to_add.items():
+            if key in name:
+                item.add_marker(marker)

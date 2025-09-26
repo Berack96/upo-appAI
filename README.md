@@ -90,16 +90,19 @@ Il file `.env` verrà automaticamente caricato nel container grazie alla configu
 ***L'applicazione è attualmente in fase di sviluppo.***
 
 Usando la libreria ``gradio`` è stata creata un'interfaccia web semplice per interagire con l'agente principale. Gli agenti secondari si trovano nella cartella `src/app/agents` e sono:
-- **Market Agent**: ~~Agente unificato che supporta multiple fonti di dati (Coinbase + CryptoCompare) con auto-configurazione~~  (non proprio un agente per ora)
-- **News Agent**: Recupera le notizie finanziarie più recenti utilizzando. ***MOCK***
-- **Social Agent**: Analizza i sentimenti sui social media utilizzando. ***MOCK***
+- **Market Agent**: Agente unificato che supporta multiple fonti di dati (Coinbase + CryptoCompare) con auto-configurazione
+- **News Agent**: Recupera le notizie finanziarie più recenti utilizzando.
+- **Social Agent**: Analizza i sentimenti sui social media utilizzando.
 - **Predictor Agent**: Utilizza i dati raccolti dagli altri agenti per fare previsioni.
 
 ## Ultimo Aggiornamento
-### Market Agent Features:
-- **Auto-configurazione**: Configura automaticamente i provider disponibili basandosi sulle env vars
-- **Multiple provider**: Supporta sia Coinbase (trading) che CryptoCompare (market data)
-- **Interfaccia unificata**: Un'unica API per accedere a tutti i provider
+
+### Cose non funzionanti
+- **Market Agent**: Non è un vero agente dato che non usa LLM per ragionare ma prende solo i dati
+- **market_aggregator.py**: Non è usato per ora
+- **News Agent**: Non funziona lo scraping online, per ora usa dati mock
+- **Social Agent**: Non funziona lo scraping online, per ora usa dati mock
+- **Demos**: Le demos nella cartella [demos](demos) non sono aggiornate e non funzionano per ora
 
 ### ToDo
 - [X] Per lo scraping online bisogna iscriversi e recuperare le chiavi API
@@ -114,4 +117,12 @@ Usando la libreria ``gradio`` è stata creata un'interfaccia web semplice per in
 Per eseguire i test, assicurati di aver configurato correttamente le variabili d'ambiente nel file `.env` come descritto sopra. Poi esegui il comando:
 ```sh
 uv run pytest -v
+
+# Oppure per test specifici
+uv run pytest -v tests/agents/test_market.py
+uv run pytest -v tests/agents/test_predictor.py
+
+# Oppure usando i markers
+uv run pytest -v -m api
+uv run pytest -v -m "api and not slow"
 ```
