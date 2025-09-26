@@ -2,9 +2,8 @@
 Configurazione pytest per i test del progetto upo-appAI.
 """
 
-import pytest
-import os
 import sys
+import pytest
 from pathlib import Path
 
 # Aggiungi il path src al PYTHONPATH per tutti i test
@@ -43,16 +42,3 @@ def pytest_collection_modifyitems(config, items):
         # Aggiungi marker 'slow' ai test che potrebbero essere lenti
         if "overview" in item.name.lower() or "analysis" in item.name.lower():
             item.add_marker(pytest.mark.slow)
-
-
-@pytest.fixture(scope="session")
-def env_vars():
-    """Fixture per accedere alle variabili d'ambiente nei test"""
-    return {
-        'coinbase_configured': all([
-            os.getenv('COINBASE_API_KEY'),
-            os.getenv('COINBASE_SECRET'),
-            os.getenv('COINBASE_PASSPHRASE')
-        ]),
-        'cryptocompare_configured': bool(os.getenv('CRYPTOCOMPARE_API_KEY')),
-    }
