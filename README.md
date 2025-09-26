@@ -108,9 +108,9 @@ Usando la libreria ``gradio`` è stata creata un'interfaccia web semplice per in
 - [X] Per lo scraping online bisogna iscriversi e recuperare le chiavi API
 - [X] **Market Agent**: [CryptoCompare](https://www.cryptocompare.com/cryptopian/api-keys)
 - [X] **Market Agent**: [Coinbase](https://www.coinbase.com/cloud/discover/api-keys)
-- [] **News Agent**: [CryptoPanic](https://cryptopanic.com/)
-- [] **Social Agent**: [post più hot da r/CryptoCurrency (Reddit)](https://www.reddit.com/)
-- [] Capire come `gpt-oss` parsifica la risposta e per questioni "estetiche" si può pensare di visualizzare lo stream dei token. Vedere il sorgente `src/ollama_demo.py` per risolvere il problema.
+- [ ] **News Agent**: [CryptoPanic](https://cryptopanic.com/)
+- [ ] **Social Agent**: [post più hot da r/CryptoCurrency (Reddit)](https://www.reddit.com/)
+- [ ] Capire come `gpt-oss` parsifica la risposta e per questioni "estetiche" si può pensare di visualizzare lo stream dei token. Vedere il sorgente `src/ollama_demo.py` per risolvere il problema.
 
 ## Tests
 
@@ -126,3 +126,4 @@ uv run pytest -v tests/agents/test_predictor.py
 uv run pytest -v -m api
 uv run pytest -v -m "api and not slow"
 ```
+
