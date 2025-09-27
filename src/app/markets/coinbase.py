@@ -1,3 +1,4 @@
+import os
 from coinbase.rest import RESTClient
 from app.markets.base import ProductInfo, BaseWrapper, Price
 
@@ -6,8 +7,13 @@ class CoinBaseWrapper(BaseWrapper):
     Wrapper per le API di Coinbase.
     La documentazione delle API è disponibile qui: https://docs.cdp.coinbase.com/api-reference/advanced-trade-api/rest-api/introduction
     """
-    def __init__(self, api_key:str, api_private_key:str, currency: str = "USD"):
+    def __init__(self, api_key:str = None, api_private_key:str = None, currency: str = "USD"):
+        if api_key is None:
+            api_key = os.getenv("COINBASE_API_KEY")
         assert api_key is not None, "API key is required"
+
+        if api_private_key is None:
+            api_private_key = os.getenv("COINBASE_API_SECRET")
         assert api_private_key is not None, "API private key is required"
 
         self.currency = currency

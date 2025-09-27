@@ -2,6 +2,7 @@ import gradio as gr
 
 from dotenv import load_dotenv
 from app.tool import ToolAgent
+from agno.utils.log import log_info
 
 ########################################
 # MAIN APP & GRADIO INTERFACE
@@ -33,10 +34,14 @@ if __name__ == "__main__":
                 type="index",
                 label="Stile di investimento"
             )
+            style.change(fn=tool_agent.choose_style, inputs=style, outputs=None)
 
         user_input = gr.Textbox(label="Richiesta utente")
         output = gr.Textbox(label="Risultato analisi", lines=12)
 
         analyze_btn = gr.Button("🔎 Analizza")
-        analyze_btn.click(fn=tool_agent.interact, inputs=[user_input, style], outputs=output)
-    demo.launch(server_name="0.0.0.0", server_port=8000)
+        analyze_btn.click(fn=tool_agent.interact, inputs=[user_input], outputs=output)
+
+    server, port = ("0.0.0.0", 8000)
+    log_info(f"Starting UPO AppAI on http://{server}:{port}")
+    demo.launch(server_name=server, server_port=port, quiet=True)

@@ -1,5 +1,5 @@
 from agno.tools import Toolkit
-from app.markets import get_first_available_market_api
+from app.markets import MarketAPIs
 
 # TODO (?) in futuro fare in modo che la LLM faccia da sé per il mercato
 # Non so se può essere utile, per ora lo lascio qui
@@ -8,7 +8,7 @@ from app.markets import get_first_available_market_api
 # in base alle sue proprie chiamate API
 class MarketToolkit(Toolkit):
     def __init__(self):
-        self.market_agent = get_first_available_market_api("USD") # change currency if needed
+        self.market_api = MarketAPIs("USD") # change currency if needed
 
         super().__init__(
             name="Market Toolkit",
@@ -19,10 +19,10 @@ class MarketToolkit(Toolkit):
         )
 
     def get_historical_data(self, symbol: str):
-        return self.market_agent.get_historical_prices(symbol)
+        return self.market_api.get_historical_prices(symbol)
 
     def get_current_price(self, symbol: str):
-        return self.market_agent.get_products(symbol)
+        return self.market_api.get_products(symbol)
 
 def prepare_inputs():
     pass

@@ -4,15 +4,14 @@ from app.agents.market import MarketToolkit
 from app.markets.base import BaseWrapper
 from app.markets.coinbase import CoinBaseWrapper
 from app.markets.cryptocompare import CryptoCompareWrapper
-from app.markets import get_first_available_market_api
+from app.markets import MarketAPIs
 
 class TestMarketSystem:
     """Test suite per il sistema di mercato (wrappers + toolkit)"""
 
     @pytest.fixture(scope="class")
     def market_wrapper(self) -> BaseWrapper:
-        first = get_first_available_market_api("USD")
-        return first
+        return MarketAPIs("USD")
 
     def test_wrapper_initialization(self, market_wrapper):
         assert market_wrapper is not None
@@ -51,7 +50,7 @@ class TestMarketSystem:
             toolkit = MarketToolkit()
             assert toolkit is not None
             assert hasattr(toolkit, 'market_agent')
-            assert toolkit.market_agent is not None
+            assert toolkit.market_api is not None
 
             tools = toolkit.tools
             assert len(tools) > 0
@@ -122,9 +121,9 @@ class TestMarketSystem:
 
         if potential_providers == 0:
             with pytest.raises(AssertionError, match="No valid API keys"):
-                get_first_available_market_api()
+                MarketAPIs.get_list_available_market_apis()
         else:
-            wrapper = get_first_available_market_api("USD")
+            wrapper = MarketAPIs("USD")
             assert wrapper is not None
             assert hasattr(wrapper, 'get_product')
 

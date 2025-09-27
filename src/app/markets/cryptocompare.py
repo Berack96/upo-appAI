@@ -1,3 +1,4 @@
+import os
 import requests
 from app.markets.base import ProductInfo, BaseWrapper, Price
 
@@ -9,7 +10,9 @@ class CryptoCompareWrapper(BaseWrapper):
     La documentazione delle API è disponibile qui: https://developers.coindesk.com/documentation/legacy/Price/SingleSymbolPriceEndpoint
     !!ATTENZIONE!! sembra essere una API legacy e potrebbe essere deprecata in futuro.
     """
-    def __init__(self, api_key:str, currency:str='USD'):
+    def __init__(self, api_key:str = None, currency:str='USD'):
+        if api_key is None:
+            api_key = os.getenv("CRYPTOCOMPARE_API_KEY")
         assert api_key is not None, "API key is required"
 
         self.api_key = api_key

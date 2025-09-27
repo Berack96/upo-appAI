@@ -6,6 +6,8 @@ from agno.models.base import BaseModel
 from agno.models.google import Gemini
 from agno.models.ollama import Ollama
 
+from agno.utils.log import log_warning
+
 class Models(Enum):
     """
     Enum per i modelli supportati.
@@ -19,29 +21,52 @@ class Models(Enum):
     OLLAMA_QWEN = "qwen3:latest" # + good + fast (8b)
 
     @staticmethod
+    def availables_local() -> list['Models']:
+        """
+        Controlla quali provider di modelli LLM locali sono disponibili.
+        Ritorna una lista di provider disponibili.
+        """
+        ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
+        result = requests.get(f"{ollama_host}/api/tags")
+        if result.status_code != 200:
+            log_warning(f"Ollama is not running or not reachable {result}")
+            return []
+
+        availables = []
+        result = result.text
+        if Models.OLLAMA_GPT.value in result:
+            availables.append(Models.OLLAMA_GPT)
+        if Models.OLLAMA_QWEN.value in result:
+            availables.append(Models.OLLAMA_QWEN)
+        return availables
+
+    def availables_online() -> list['Models']:
+        """
+        Controlla quali provider di modelli LLM online hanno le loro API keys disponibili
+        come variabili d'ambiente e ritorna una lista di provider disponibili.
+        """
+        if not os.getenv("GOOGLE_API_KEY"):
+            log_warning("No GOOGLE_API_KEY set in environment variables.")
+            return []
+        availables = []
+        availables.append(Models.GEMINI)
+        availables.append(Models.GEMINI_PRO)
+        return availables
+
+    @staticmethod
     def availables() -> list['Models']:
         """
-        Controlla quali provider di modelli LLM hanno le loro API keys disponibili
-        come variabili d'ambiente e ritorna una lista di provider disponibili.
+        Controlla quali provider di modelli LLM locali sono disponibili e quali
+        provider di modelli LLM online hanno le loro API keys disponibili come variabili
+        d'ambiente e ritorna una lista di provider disponibili.
         L'ordine di preferenza è:
         1. Gemini (Google)
         2. Ollama (locale)
         """
-        availables = []
-        if os.getenv("GOOGLE_API_KEY"):
-            availables.append(Models.GEMINI)
-            availables.append(Models.GEMINI_PRO)
-
-        ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
-        result = requests.get(f"{ollama_host}/api/tags")
-        print(result)
-        if result.status_code == 200:
-            result = result.text
-            if Models.OLLAMA_GPT.value in result:
-                availables.append(Models.OLLAMA_GPT)
-            if Models.OLLAMA_QWEN.value in result:
-                availables.append(Models.OLLAMA_QWEN)
-
+        availables = [
+            *Models.availables_online(),
+            *Models.availables_local()
+        ]
         assert availables, "No valid model API keys set in environment variables."
         return availables
 
@@ -56,6 +81,10 @@ class Models(Enum):
         in tutti i casi. Si assume che il JSON sia ben formato e che inizi con
         '{' e finisca con '}'. Quindi anche solo un json array farà fallire questa funzione.
         """
+        think = response.rfind("</think>")
+        if think != -1:
+            response = response[think:]
+
         start = response.find("{")
         assert start != -1, "No JSON found in the response."
 
@@ -89,10 +118,8 @@ class Models(Enum):
         return Agent(
             model=self.get_model(instructions),
             name=name,
-            use_json_mode=True,
-            # TODO Eventuali altri parametri da mettere all'agente
-            # anche se si possono comunque assegnare dopo la creazione
-            # Esempio:
-            # retries=2,
-            # retry_delay=1,
+            retries=2,
+            delay_between_retries=5, # seconds
+            use_json_mode=True, # utile per fare in modo che l'agente risponda in JSON (anche se sembra essere solo placebo)
+            # TODO Eventuali altri parametri da mettere all'agente anche se si possono comunque assegnare dopo la creazione
         )
