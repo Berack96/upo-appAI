@@ -1,9 +1,8 @@
 from app.agents.news_agent import NewsAgent
 from app.agents.social_agent import SocialAgent
-from app.agents.predictor import PredictorStyle
-from app.agents import predictor
+from app.agents.predictor import PredictorStyle, PredictorInput, PredictorOutput, PREDICTOR_INSTRUCTIONS
 from app.markets import MarketAPIs
-from app.models import Models
+from app.models import AppModels
 from agno.utils.log import log_info
 
 class ToolAgent:
@@ -15,7 +14,7 @@ class ToolAgent:
         """
         Inizializza l'agente con i modelli disponibili, gli stili e l'API di mercato.
         """
-        self.available_models = Models.availables()
+        self.available_models = AppModels.availables()
         self.all_styles = list(PredictorStyle)
         self.style = self.all_styles[0]  # Default to the first style
 
@@ -31,7 +30,7 @@ class ToolAgent:
         # TODO https://docs.agno.com/introduction
         # Inoltre permette di creare dei team e workflow di agenti più facilmente
         self.chosen_model = self.available_models[index]
-        self.predictor = self.chosen_model.get_agent(predictor.instructions())
+        self.predictor = self.chosen_model.get_agent(PREDICTOR_INSTRUCTIONS, output=PredictorOutput)
         self.news_agent = NewsAgent()
         self.social_agent = SocialAgent()
 
@@ -64,18 +63,17 @@ class ToolAgent:
         sentiment = f"{news_sentiment}\n{social_sentiment}"
 
         # Step 3: previsione
-        inputs = predictor.prepare_inputs(
-            data=market_data,
-            style=self.style,
-            sentiment=sentiment
-        )
-
-        prediction = self.predictor.run(inputs)
-        output = Models.extract_json_str_from_response(prediction.content)
+        inputs = PredictorInput(data=market_data, style=self.style, sentiment=sentiment)
+        result = self.predictor.run(inputs)
+        prediction: PredictorOutput = result.content
         log_info(f"End of prediction")
 
         market_data = "\n".join([f"{product.symbol}: {product.price}" for product in market_data])
-        return f"{market_data}\n{sentiment}\n\n📈 Consiglio finale:\n{output}"
+        output = f"[{prediction.strategy}]\nPortafoglio:\n" + "\n".join(
+            [f"{item.asset} ({item.percentage}%): {item.motivation}" for item in prediction.portfolio]
+        )
+
+        return f"INPUT:\n{market_data}\n{sentiment}\n\n\nOUTPUT:\n{output}"
 
     def list_providers(self) -> list[str]:
         """

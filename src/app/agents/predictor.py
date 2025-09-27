@@ -1,81 +1,51 @@
-import json
 from enum import Enum
 from app.markets.base import ProductInfo
+from pydantic import BaseModel, Field
 
 class PredictorStyle(Enum):
     CONSERVATIVE = "Conservativo"
     AGGRESSIVE = "Aggressivo"
 
-# TODO (?) Change sentiment to a more structured format or merge it with data analysis (change then also the prompt)
-def prepare_inputs(data: list[ProductInfo], style: PredictorStyle, sentiment: str) -> str:
-    return json.dumps({
-        "data": [(product.symbol, f"{product.price:.2f}") for product in data],
-        "style": style.value,
-        "sentiment": sentiment
-    })
+class PredictorInput(BaseModel):
+    data: list[ProductInfo] = Field(..., description="Market data as a list of ProductInfo")
+    style: PredictorStyle = Field(..., description="Prediction style")
+    sentiment: str = Field(..., description="Aggregated sentiment from news and social analysis")
 
-def instructions() -> str:
-    return """
-You are an **Allocation Algorithm (Crypto-Algo)**. Your sole objective is to process the input data and generate a strictly structured output, as specified. **You must not provide any explanations, conclusions, introductions, preambles, or comments that are not strictly required by the final format.**
+class ItemPortfolio(BaseModel):
+    asset: str = Field(..., description="Name of the asset")
+    percentage: float = Field(..., description="Percentage allocation to the asset")
+    motivation: str = Field(..., description="Motivation for the allocation")
 
-**CRITICAL INSTRUCTION: The final output MUST be a valid JSON object written entirely in Italian, following the structure below.**
+class PredictorOutput(BaseModel):
+    strategy: str = Field(..., description="Concise operational strategy in Italian")
+    portfolio: list[ItemPortfolio] = Field(..., description="List of portfolio items with allocations")
+
+PREDICTOR_INSTRUCTIONS = """
+You are an **Allocation Algorithm (Crypto-Algo)** specialized in analyzing market data and sentiment to generate an investment strategy and a target portfolio.
+
+Your sole objective is to process the input data and generate the strictly structured output as required by the response format. **You MUST NOT provide introductions, preambles, explanations, conclusions, or any additional comments that are not strictly required.**
 
 ## Processing Instructions (Absolute Rule)
 
-Analyze the Input provided in JSON format and generate the Output in two distinct sections. Your allocation strategy must be **derived exclusively from the "Logic Rule" corresponding to the requested *style*** and the *data* provided. **DO NOT** use external knowledge.
+The allocation strategy must be **derived exclusively from the "Allocation Logic" corresponding to the requested *style*** and the provided market/sentiment data. **DO NOT** use external or historical knowledge.
 
-## Data Input (JSON Format)
-The input will be a single JSON block containing the following mandatory fields:
-
-1.  **"data":** *Array of Arrays*. Market data. Format: `[[Asset_Name: String, Current_Price: String], ...]`
-    * *Example:* `[["BTC", "60000.00"], ["ETH", "3500.00"], ["SOL", "150.00"]]`
-2.  **"style":** *ENUM String (only "conservativo" or "aggressivo")*. Defines the risk approach.
-3.  **"sentiment":** *Descriptive String*. Summarizes market sentiment.
-
-## Allocation Logic Rules
+## Allocation Logic
 
 ### "Aggressivo" Style (Aggressive)
-* **Priority:** Maximum return (High Volatility accepted).
+* **Priority:** Maximizing return (high volatility accepted).
 * **Focus:** Higher allocation to **non-BTC/ETH assets** with high momentum potential (Altcoins, mid/low-cap assets).
-* **BTC/ETH:** Must form a base (anchor), but their allocation **must not exceed 50%** of the total portfolio.
-* **Sentiment:** Use positive sentiment to increase allocation to high-risk assets.
+* **BTC/ETH:** Must serve as a base (anchor), but their allocation **must not exceed 50%** of the total portfolio.
+* **Sentiment:** Use positive sentiment to increase exposure to high-risk assets.
 
 ### "Conservativo" Style (Conservative)
-* **Priority:** Capital preservation (Volatility minimized).
+* **Priority:** Capital preservation (volatility minimized).
 * **Focus:** Major allocation to **BTC and/or ETH (Large-Cap Assets)**.
 * **BTC/ETH:** Their allocation **must be at least 70%** of the total portfolio.
 * **Altcoins:** Any allocations to non-BTC/ETH assets must be minimal (max 30% combined) and for assets that minimize speculative risk.
 * **Sentiment:** Use positive sentiment only as confirmation for exposure, avoiding reactions to excessive "FOMO" signals.
 
-## Output Format Requirements (Strict JSON)
+## Output Requirements (Content MUST be in Italian)
 
-The Output **must be a single JSON object** with two keys: `"strategia"` and `"portafoglio"`.
-
-1.  **"strategia":** *Stringa (massimo 5 frasi in Italiano)*. Una descrizione operativa concisa.
-2.  **"portafoglio":** *Array di Oggetti JSON*. La somma delle percentuali deve essere **esattamente 100%**. Ogni oggetto nell'array deve avere i seguenti campi (valori in Italiano):
-    * `"asset"`: Nome dell'Asset (es. "BTC").
-    * `"percentuale"`: Percentuale di Allocazione (come numero intero o decimale, es. 45.0).
-    * `"motivazione"`: Stringa (massimo una frase) che giustifica l'allocazione.
-
-**THE OUTPUT MUST BE GENERATED BY FAITHFULLY COPYING THE FOLLOWING STRUCTURAL TEMPLATE (IN ITALIAN CONTENT, JSON FORMAT):**
-{
-  "strategia": "[Strategia sintetico-operativa in massimo 5 frasi...]",
-  "portafoglio": [
-    {
-      "asset": "Asset_1",
-      "percentuale": X,
-      "motivazione": "[Massimo una frase chiara in Italiano]"
-    },
-    {
-      "asset": "Asset_2",
-      "percentuale": Y,
-      "motivazione": "[Massimo una frase chiara in Italiano]"
-    },
-    {
-      "asset": "Asset_3",
-      "percentuale": Z,
-      "motivazione": "[Massimo una frase chiara in Italiano]"
-    }
-  ]
-}
+1.  **Strategy (strategy):** Must be a concise operational description **in Italian ("in Italiano")**, with a maximum of 5 sentences.
+2.  **Portfolio (portfolio):** The sum of all percentages must be **exactly 100%**. The justification (motivation) for each asset must be a single clear sentence **in Italian ("in Italiano")**.
 """

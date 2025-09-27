@@ -1,5 +1,5 @@
 from coinbase.rest.types.product_types import Candle, GetProductResponse
-
+from pydantic import BaseModel
 
 class BaseWrapper:
     """
@@ -15,17 +15,17 @@ class BaseWrapper:
     def get_historical_prices(self, asset_id: str = "BTC") -> list['Price']:
         raise NotImplementedError
 
-class ProductInfo:
+class ProductInfo(BaseModel):
     """
     Informazioni sul prodotto, come ottenute dalle API di mercato.
     Implementa i metodi di conversione dai dati grezzi delle API.
     """
-    id: str
-    symbol: str
-    price: float
-    volume_24h: float
-    status: str
-    quote_currency: str
+    id: str = ""
+    symbol: str = ""
+    price: float = 0.0
+    volume_24h: float = 0.0
+    status: str = ""
+    quote_currency: str = ""
 
     def from_coinbase(product_data: GetProductResponse) -> 'ProductInfo':
         product = ProductInfo()
@@ -46,17 +46,17 @@ class ProductInfo:
         product.status = "" # Cryptocompare does not provide status
         return product
 
-class Price:
+class Price(BaseModel):
     """
     Rappresenta i dati di prezzo per un asset, come ottenuti dalle API di mercato.
     Implementa i metodi di conversione dai dati grezzi delle API.
     """
-    high: float
-    low: float
-    open: float
-    close: float
-    volume: float
-    time: str
+    high: float = 0.0
+    low: float = 0.0
+    open: float = 0.0
+    close: float = 0.0
+    volume: float = 0.0
+    time: str = ""
 
     def from_coinbase(candle_data: Candle) -> 'Price':
         price = Price()

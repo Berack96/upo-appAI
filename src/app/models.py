@@ -1,14 +1,15 @@
 import os
 import requests
 from enum import Enum
+from pydantic import BaseModel
 from agno.agent import Agent
-from agno.models.base import BaseModel
+from agno.models.base import Model
 from agno.models.google import Gemini
 from agno.models.ollama import Ollama
 
 from agno.utils.log import log_warning
 
-class Models(Enum):
+class AppModels(Enum):
     """
     Enum per i modelli supportati.
     Aggiungere nuovi modelli qui se necessario.
@@ -21,7 +22,7 @@ class Models(Enum):
     OLLAMA_QWEN = "qwen3:latest" # + good + fast (8b)
 
     @staticmethod
-    def availables_local() -> list['Models']:
+    def availables_local() -> list['AppModels']:
         """
         Controlla quali provider di modelli LLM locali sono disponibili.
         Ritorna una lista di provider disponibili.
@@ -34,13 +35,13 @@ class Models(Enum):
 
         availables = []
         result = result.text
-        if Models.OLLAMA_GPT.value in result:
-            availables.append(Models.OLLAMA_GPT)
-        if Models.OLLAMA_QWEN.value in result:
-            availables.append(Models.OLLAMA_QWEN)
+        if AppModels.OLLAMA_GPT.value in result:
+            availables.append(AppModels.OLLAMA_GPT)
+        if AppModels.OLLAMA_QWEN.value in result:
+            availables.append(AppModels.OLLAMA_QWEN)
         return availables
 
-    def availables_online() -> list['Models']:
+    def availables_online() -> list['AppModels']:
         """
         Controlla quali provider di modelli LLM online hanno le loro API keys disponibili
         come variabili d'ambiente e ritorna una lista di provider disponibili.
@@ -49,12 +50,12 @@ class Models(Enum):
             log_warning("No GOOGLE_API_KEY set in environment variables.")
             return []
         availables = []
-        availables.append(Models.GEMINI)
-        availables.append(Models.GEMINI_PRO)
+        availables.append(AppModels.GEMINI)
+        availables.append(AppModels.GEMINI_PRO)
         return availables
 
     @staticmethod
-    def availables() -> list['Models']:
+    def availables() -> list['AppModels']:
         """
         Controlla quali provider di modelli LLM locali sono disponibili e quali
         provider di modelli LLM online hanno le loro API keys disponibili come variabili
@@ -64,8 +65,8 @@ class Models(Enum):
         2. Ollama (locale)
         """
         availables = [
-            *Models.availables_online(),
-            *Models.availables_local()
+            *AppModels.availables_online(),
+            *AppModels.availables_local()
         ]
         assert availables, "No valid model API keys set in environment variables."
         return availables
@@ -94,7 +95,7 @@ class Models(Enum):
         return response[start:end + 1].strip()
 
 
-    def get_model(self, instructions:str) -> BaseModel:
+    def get_model(self, instructions:str) -> Model:
         """
         Restituisce un'istanza del modello specificato.
         instructions: istruzioni da passare al modello (system prompt).
@@ -102,14 +103,14 @@ class Models(Enum):
         Raise ValueError se il modello non è supportato.
         """
         name = self.value
-        if self in {Models.GEMINI, Models.GEMINI_PRO}:
+        if self in {AppModels.GEMINI, AppModels.GEMINI_PRO}:
             return Gemini(name, instructions=[instructions])
-        elif self in {Models.OLLAMA_GPT, Models.OLLAMA_QWEN}:
+        elif self in {AppModels.OLLAMA_GPT, AppModels.OLLAMA_QWEN}:
             return Ollama(name, instructions=[instructions])
 
         raise ValueError(f"Modello non supportato: {self}")
 
-    def get_agent(self, instructions: str, name: str = "") -> Agent:
+    def get_agent(self, instructions: str, name: str = "", output: BaseModel | None = None) -> Agent:
         """
         Costruisce un agente con il modello e le istruzioni specificate.
         instructions: istruzioni da passare al modello (system prompt).
@@ -120,6 +121,6 @@ class Models(Enum):
             name=name,
             retries=2,
             delay_between_retries=5, # seconds
-            use_json_mode=True, # utile per fare in modo che l'agente risponda in JSON (anche se sembra essere solo placebo)
+            output_schema=output # se si usa uno schema di output, lo si passa qui
             # TODO Eventuali altri parametri da mettere all'agente anche se si possono comunque assegnare dopo la creazione
         )
