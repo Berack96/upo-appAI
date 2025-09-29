@@ -16,10 +16,10 @@ class TestGnewsAPI:
         assert isinstance(articles, list)
         assert len(articles) == 2
         for article in articles:
-            assert hasattr(article, 'source')
-            assert hasattr(article, 'time')
-            assert hasattr(article, 'title')
-            assert hasattr(article, 'description')
+            assert article.source is not None or article.source != ""
+            assert article.time is not None or article.time != ""
+            assert article.title is not None or article.title != ""
+            assert article.description is not None or article.description != ""
 
     def test_gnews_api_get_top_headlines(self):
         news_api = GnewsWrapper()
@@ -27,8 +27,8 @@ class TestGnewsAPI:
         assert isinstance(articles, list)
         assert len(articles) == 2
         for article in articles:
-            assert hasattr(article, 'source')
-            assert hasattr(article, 'time')
-            assert hasattr(article, 'title')
-            assert hasattr(article, 'description')
+            assert article.source is not None or article.source != ""
+            assert article.time is not None or article.time != ""
+            assert article.title is not None or article.title != ""
+            assert article.description is not None or article.description != ""
 

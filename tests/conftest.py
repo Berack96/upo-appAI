@@ -21,6 +21,7 @@ def pytest_configure(config:pytest.Config):
         ("ollama_gpt", "marks tests that use Ollama GPT model"),
         ("ollama_qwen", "marks tests that use Ollama Qwen model"),
         ("news", "marks tests that use news"),
+        ("limited", "marks tests that have limited execution due to API constraints"),
     ]
     for marker in markers:
         line = f"{marker[0]}: {marker[1]}"
@@ -44,3 +45,13 @@ def pytest_collection_modifyitems(config, items):
         for key, marker in markers_to_add.items():
             if key in name:
                 item.add_marker(marker)
+
+    # Rimuovo i test "limited" e "slow" se non richiesti esplicitamente
+    mark_to_remove = ['limited', 'slow']
+    for mark in mark_to_remove:
+        markexpr = getattr(config.option, "markexpr", None)
+        if markexpr and mark in markexpr.lower():
+            continue
+
+        new_mark = (f"({markexpr}) and " if markexpr else "") + f"not {mark}"
+        setattr(config.option, "markexpr", new_mark)
