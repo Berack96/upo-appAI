@@ -1,7 +1,6 @@
 import os
 import newsapi
-from .base import Article
-
+from .base import Article, NewsWrapper
 
 def result_to_article(result: dict) -> Article:
     article = Article()
@@ -11,7 +10,7 @@ def result_to_article(result: dict) -> Article:
     article.description = result.get("description", "")
     return article
 
-class NewsAPI:
+class NewsApiWrapper(NewsWrapper):
     def __init__(self):
         api_key = os.getenv("NEWS_API_KEY")
         assert api_key is not None, "NEWS_API_KEY environment variable not set"
@@ -21,7 +20,7 @@ class NewsAPI:
         self.language = "en" # TODO Only English articles for now?
         self.max_page_size = 100
 
-    def get_top_headlines(self, query:str, total:int=100) -> list[Article]:
+    def get_top_headlines(self, query: str, total: int = 100) -> list[Article]:
         page_size = min(self.max_page_size, total)
         pages = (total // page_size) + (1 if total % page_size > 0 else 0)
 
@@ -32,4 +31,14 @@ class NewsAPI:
             articles.extend(results)
         return articles
 
+    def get_latest_news(self, query: str, total: int = 100) -> list[Article]:
+        page_size = min(self.max_page_size, total)
+        pages = (total // page_size) + (1 if total % page_size > 0 else 0)
+
+        articles = []
+        for page in range(1, pages + 1):
+            everything = self.client.get_everything(q=query, language=self.language, sort_by="publishedAt", page_size=page_size, page=page)
+            results = [result_to_article(article) for article in everything.get("articles", [])]
+            articles.extend(results)
+        return articles
 

@@ -30,7 +30,6 @@ def pytest_collection_modifyitems(config, items):
     """Modifica automaticamente gli item di test aggiungendogli marker basati sul nome"""
 
     markers_to_add = {
-        "api": pytest.mark.api,
         "coinbase": pytest.mark.api,
         "cryptocompare": pytest.mark.api,
         "overview": pytest.mark.slow,
@@ -38,7 +37,6 @@ def pytest_collection_modifyitems(config, items):
         "gemini": pytest.mark.gemini,
         "ollama_gpt": pytest.mark.ollama_gpt,
         "ollama_qwen": pytest.mark.ollama_qwen,
-        "news": pytest.mark.news,
     }
 
     for item in items:

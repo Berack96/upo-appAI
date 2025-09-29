@@ -1,3 +1,4 @@
-from .news_api import NewsAPI
+from .news_api import NewsApiWrapper
+from .gnews_api import GnewsWrapper
 
-__all__ = ["NewsAPI"]
+__all__ = ["NewsApiWrapper", "GnewsWrapper"]

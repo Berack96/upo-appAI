@@ -14,8 +14,6 @@ dependencies = [
     "pytest",
     # ✅ per gestire variabili d'ambiente (generalmente API keys od opzioni)
     "dotenv",
-    # 🟡 per fare scraping di pagine web
-    #"bs4",
     # ✅ per fare una UI web semplice con input e output
     "gradio",
 
@@ -34,6 +32,7 @@ dependencies = [
 
     # ✅ per interagire con API di notizie
     "newsapi-python",
+    "gnews",
 ]
 
 [tool.pytest.ini_options]
