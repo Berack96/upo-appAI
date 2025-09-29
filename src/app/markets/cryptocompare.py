@@ -49,7 +49,7 @@ class CryptoCompareWrapper(BaseWrapper):
     def get_all_products(self) -> list[ProductInfo]:
         raise NotImplementedError("CryptoCompare does not support fetching all assets")
 
-    def get_historical_prices(self, asset_id: str, day_back: int = 10) -> list[dict]:
+    def get_historical_prices(self, asset_id: str, day_back: int = 10) -> list[Price]:
         assert day_back <= 30, "day_back should be less than or equal to 30"
         response = self.__request("/data/v2/histohour", params = {
             "fsym": asset_id,
