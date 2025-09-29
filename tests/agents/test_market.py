@@ -1,10 +1,10 @@
 import os
 import pytest
-from app.agents.market import MarketToolkit
-from app.markets.base import BaseWrapper
-from app.markets.coinbase import CoinBaseWrapper
-from app.markets.cryptocompare import CryptoCompareWrapper
-from app.markets import MarketAPIs
+from src.app.agents.market import MarketToolkit
+from src.app.markets.base import BaseWrapper
+from src.app.markets.coinbase import CoinBaseWrapper
+from src.app.markets.cryptocompare import CryptoCompareWrapper
+from src.app.markets import MarketAPIs
 
 class TestMarketSystem:
     """Test suite per il sistema di mercato (wrappers + toolkit)"""

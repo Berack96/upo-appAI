@@ -1,6 +1,6 @@
-from app.markets.base import BaseWrapper
-from app.markets.coinbase import CoinBaseWrapper
-from app.markets.cryptocompare import CryptoCompareWrapper
+from src.app.markets.base import BaseWrapper
+from src.app.markets.coinbase import CoinBaseWrapper
+from src.app.markets.cryptocompare import CryptoCompareWrapper
 
 from agno.utils.log import log_warning
 
@@ -30,8 +30,8 @@ class MarketAPIs(BaseWrapper):
         for wrapper in wrapper_builders:
             try:
                 result.append(wrapper(currency=currency))
-            except Exception as _:
-                log_warning(f"{wrapper} cannot be initialized, maybe missing API key?")
+            except Exception as e:
+                log_warning(f"{wrapper} cannot be initialized: {e}")
 
         assert result, "No market API keys set in environment variables."
         return result
@@ -39,7 +39,9 @@ class MarketAPIs(BaseWrapper):
     def __init__(self, currency: str = "USD"):
         """
         Inizializza la classe con la valuta di riferimento e la priorità dei provider.
-        :param currency: Valuta di riferimento (default "USD")
+
+        Args:
+            currency: Valuta di riferimento (default "USD")
         """
         self.currency = currency
         self.wrappers = MarketAPIs.get_list_available_market_apis(currency=currency)

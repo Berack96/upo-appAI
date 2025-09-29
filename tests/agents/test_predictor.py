@@ -1,11 +1,11 @@
 import pytest
-from app.agents.predictor import PREDICTOR_INSTRUCTIONS, PredictorInput, PredictorOutput, PredictorStyle
-from app.markets.base import ProductInfo
-from app.models import AppModels
+from src.app.agents.predictor import PREDICTOR_INSTRUCTIONS, PredictorInput, PredictorOutput, PredictorStyle
+from src.app.markets.base import ProductInfo
+from src.app.models import AppModels
 
-def unified_checks(model: AppModels, input):
-    llm = model.get_agent(PREDICTOR_INSTRUCTIONS, output=PredictorOutput)
-    result = llm.run(input)
+def unified_checks(model: AppModels, user_input):
+    llm = model.get_agent(PREDICTOR_INSTRUCTIONS, output=PredictorOutput) # type: ignore[arg-type]
+    result = llm.run(user_input)
     content = result.content
 
     assert isinstance(content, PredictorOutput)

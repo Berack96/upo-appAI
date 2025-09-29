@@ -1,6 +1,6 @@
 import os
 import requests
-from app.markets.base import ProductInfo, BaseWrapper, Price
+from src.app.markets.base import ProductInfo, BaseWrapper, Price
 
 BASE_URL = "https://min-api.cryptocompare.com"
 
@@ -8,7 +8,7 @@ class CryptoCompareWrapper(BaseWrapper):
     """
     Wrapper per le API pubbliche di CryptoCompare.
     La documentazione delle API è disponibile qui: https://developers.coindesk.com/documentation/legacy/Price/SingleSymbolPriceEndpoint
-    !!ATTENZIONE!! sembra essere una API legacy e potrebbe essere deprecata in futuro.
+    !ATTENZIONE! Sembra essere una API legacy e potrebbe essere deprecata in futuro.
     """
     def __init__(self, api_key:str = None, currency:str='USD'):
         if api_key is None:

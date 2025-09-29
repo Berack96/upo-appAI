@@ -1,6 +1,6 @@
 import os
 from coinbase.rest import RESTClient
-from app.markets.base import ProductInfo, BaseWrapper, Price
+from src.app.markets.base import ProductInfo, BaseWrapper, Price
 
 class CoinBaseWrapper(BaseWrapper):
     """

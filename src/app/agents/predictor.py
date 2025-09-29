@@ -1,5 +1,5 @@
 from enum import Enum
-from app.markets.base import ProductInfo
+from src.app.markets.base import ProductInfo
 from pydantic import BaseModel, Field
 
 class PredictorStyle(Enum):
@@ -23,7 +23,7 @@ class PredictorOutput(BaseModel):
 PREDICTOR_INSTRUCTIONS = """
 You are an **Allocation Algorithm (Crypto-Algo)** specialized in analyzing market data and sentiment to generate an investment strategy and a target portfolio.
 
-Your sole objective is to process the input data and generate the strictly structured output as required by the response format. **You MUST NOT provide introductions, preambles, explanations, conclusions, or any additional comments that are not strictly required.**
+Your sole objective is to process the user_input data and generate the strictly structured output as required by the response format. **You MUST NOT provide introductions, preambles, explanations, conclusions, or any additional comments that are not strictly required.**
 
 ## Processing Instructions (Absolute Rule)
 

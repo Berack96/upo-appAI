@@ -16,7 +16,7 @@ dependencies = [
     "dotenv",
     # 🟡 per fare scraping di pagine web
     #"bs4",
-    # ✅ per fare una UI web semplice con input e output
+    # ✅ per fare una UI web semplice con user_input e output
     "gradio",
 
     # ✅ per costruire agenti (ovvero modelli che possono fare più cose tramite tool) https://github.com/agno-agi/agno

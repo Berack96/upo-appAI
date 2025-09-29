@@ -41,6 +41,7 @@ class AppModels(Enum):
             availables.append(AppModels.OLLAMA_QWEN)
         return availables
 
+    @staticmethod
     def availables_online() -> list['AppModels']:
         """
         Controlla quali provider di modelli LLM online hanno le loro API keys disponibili
@@ -49,9 +50,7 @@ class AppModels(Enum):
         if not os.getenv("GOOGLE_API_KEY"):
             log_warning("No GOOGLE_API_KEY set in environment variables.")
             return []
-        availables = []
-        availables.append(AppModels.GEMINI)
-        availables.append(AppModels.GEMINI_PRO)
+        availables = [AppModels.GEMINI, AppModels.GEMINI_PRO]
         return availables
 
     @staticmethod
@@ -75,9 +74,13 @@ class AppModels(Enum):
     def extract_json_str_from_response(response: str) -> str:
         """
         Estrae il JSON dalla risposta del modello.
-        response: risposta del modello (stringa).
-        Ritorna la parte JSON della risposta come stringa.
-        Se non viene trovato nessun JSON, ritorna una stringa vuota.
+        Args:
+            response: risposta del modello (stringa).
+
+        Returns:
+             La parte JSON della risposta come stringa.
+            Se non viene trovato nessun JSON, ritorna una stringa vuota.
+
         ATTENZIONE: questa funzione è molto semplice e potrebbe non funzionare
         in tutti i casi. Si assume che il JSON sia ben formato e che inizi con
         '{' e finisca con '}'. Quindi anche solo un json array farà fallire questa funzione.
@@ -98,9 +101,15 @@ class AppModels(Enum):
     def get_model(self, instructions:str) -> Model:
         """
         Restituisce un'istanza del modello specificato.
-        instructions: istruzioni da passare al modello (system prompt).
-        Ritorna un'istanza di BaseModel o una sua sottoclasse.
-        Raise ValueError se il modello non è supportato.
+
+        Args:
+            instructions: istruzioni da passare al modello (system prompt).
+
+        Returns:
+             Un'istanza di BaseModel o una sua sottoclasse.
+
+        Raise:
+            ValueError se il modello non è supportato.
         """
         name = self.value
         if self in {AppModels.GEMINI, AppModels.GEMINI_PRO}:
@@ -113,8 +122,13 @@ class AppModels(Enum):
     def get_agent(self, instructions: str, name: str = "", output: BaseModel | None = None) -> Agent:
         """
         Costruisce un agente con il modello e le istruzioni specificate.
-        instructions: istruzioni da passare al modello (system prompt).
-        Ritorna un'istanza di Agent.
+        Args:
+            instructions: istruzioni da passare al modello (system prompt)
+            name: nome dell'agente (opzionale)
+            output: schema di output opzionale (Pydantic BaseModel)
+
+        Returns:
+             Un'istanza di Agent.
         """
         return Agent(
             model=self.get_model(instructions),

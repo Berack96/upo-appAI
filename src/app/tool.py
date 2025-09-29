@@ -1,8 +1,8 @@
-from app.agents.news_agent import NewsAgent
-from app.agents.social_agent import SocialAgent
-from app.agents.predictor import PredictorStyle, PredictorInput, PredictorOutput, PREDICTOR_INSTRUCTIONS
-from app.markets import MarketAPIs
-from app.models import AppModels
+from src.app.agents.news_agent import NewsAgent
+from src.app.agents.social_agent import SocialAgent
+from src.app.agents.predictor import PredictorStyle, PredictorInput, PredictorOutput, PREDICTOR_INSTRUCTIONS
+from src.app.markets import MarketAPIs
+from src.app.models import AppModels
 from agno.utils.log import log_info
 
 class ToolAgent:
@@ -14,6 +14,10 @@ class ToolAgent:
         """
         Inizializza l'agente con i modelli disponibili, gli stili e l'API di mercato.
         """
+        self.social_agent = None
+        self.news_agent = None
+        self.predictor = None
+        self.chosen_model = None
         self.available_models = AppModels.availables()
         self.all_styles = list(PredictorStyle)
         self.style = self.all_styles[0]  # Default to the first style
@@ -24,7 +28,9 @@ class ToolAgent:
     def choose_provider(self, index: int):
         """
         Sceglie il modello LLM da utilizzare in base all'indice fornito.
-        index: indice del modello nella lista available_models.
+
+        Args:
+            index: indice del modello nella lista available_models.
         """
         # TODO Utilizzare AGNO per gestire i modelli... è molto più semplice e permette di cambiare modello facilmente
         # TODO https://docs.agno.com/introduction
@@ -37,15 +43,18 @@ class ToolAgent:
     def choose_style(self, index: int):
         """
         Sceglie lo stile di previsione da utilizzare in base all'indice fornito.
-        index: indice dello stile nella lista all_styles.
+
+        Args:
+            index: indice dello stile nella lista all_styles.
         """
         self.style = self.all_styles[index]
 
     def interact(self, query: str) -> str:
         """
         Funzione principale che coordina gli agenti per rispondere alla richiesta dell'utente.
-        query: richiesta dell'utente (es. "Qual è la previsione per Bitcoin?")
-        style_index: indice dello stile di previsione nella lista all_styles.
+
+        Args:
+            query: richiesta dell'utente (es. "Qual è la previsione per Bitcoin?")
         """
 
         log_info(f"[model={self.chosen_model.name}] [style={self.style.name}] [query=\"{query.replace('"', "'")}\"]")
