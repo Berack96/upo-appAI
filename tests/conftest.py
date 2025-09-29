@@ -20,6 +20,7 @@ def pytest_configure(config:pytest.Config):
         ("gemini", "marks tests that use Gemini model"),
         ("ollama_gpt", "marks tests that use Ollama GPT model"),
         ("ollama_qwen", "marks tests that use Ollama Qwen model"),
+        ("news", "marks tests that use news"),
     ]
     for marker in markers:
         line = f"{marker[0]}: {marker[1]}"
@@ -37,6 +38,7 @@ def pytest_collection_modifyitems(config, items):
         "gemini": pytest.mark.gemini,
         "ollama_gpt": pytest.mark.ollama_gpt,
         "ollama_qwen": pytest.mark.ollama_qwen,
+        "news": pytest.mark.news,
     }
 
     for item in items:

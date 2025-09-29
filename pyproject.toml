@@ -31,6 +31,9 @@ dependencies = [
     # ✅ per interagire con API di exchange di criptovalute
     "coinbase-advanced-py",
     "python-binance",
+
+    # ✅ per interagire con API di notizie
+    "newsapi-python",
 ]
 
 [tool.pytest.ini_options]
