@@ -2,16 +2,10 @@
 Configurazione pytest per i test del progetto upo-appAI.
 """
 
-import sys
 import pytest
-from pathlib import Path
-
-# Aggiungi il path src al PYTHONPATH per tutti i test
-src_path = Path(__file__).parent.parent / "src"
-sys.path.insert(0, str(src_path))
+from dotenv import load_dotenv
 
 # Carica le variabili d'ambiente per tutti i test
-from dotenv import load_dotenv
 load_dotenv()
 
 

@@ -32,3 +32,7 @@ dependencies = [
     "coinbase-advanced-py",
     "python-binance",
 ]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
