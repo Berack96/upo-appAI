@@ -71,17 +71,16 @@ class MarketAgent(Agent):
         results = []
         products: List[ProductInfo] = []
 
-        for sym in symbols:
-            try:
-                product = self.toolkit.get_current_price(sym)  # supponiamo ritorni un ProductInfo o simile
-                if isinstance(product, list):
-                    products.extend(product)
-                else:
-                    products.append(product)
-
-                results.append(f"{sym}: {product.price if hasattr(product, 'price') else product}")
-            except Exception as e:
-                results.append(f"{sym}: errore ({e})")
+        try:
+            products.extend(self.toolkit.get_current_prices(symbols))  # supponiamo ritorni un ProductInfo o simile
+            # Usa list comprehension per iterare symbols e products insieme
+            results.extend([
+                f"{symbol}: ${product.price:.2f}" if hasattr(product,
+                                                             'price') and product.price else f"{symbol}: N/A"
+                for symbol, product in zip(symbols, products)
+            ])
+        except Exception as e:
+            results.extend(f"Errore: impossibile recuperare i dati di mercato\n {e}")
 
         # 4. Preparo output leggibile + metadati strutturati
         output_text = "📊 Dati di mercato:\n" + "\n".join(results)
