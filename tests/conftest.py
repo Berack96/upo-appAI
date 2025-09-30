@@ -22,6 +22,7 @@ def pytest_configure(config:pytest.Config):
         ("ollama_qwen", "marks tests that use Ollama Qwen model"),
         ("news", "marks tests that use news"),
         ("limited", "marks tests that have limited execution due to API constraints"),
+        ("wrapper", "marks tests for wrapper handler"),
     ]
     for marker in markers:
         line = f"{marker[0]}: {marker[1]}"
