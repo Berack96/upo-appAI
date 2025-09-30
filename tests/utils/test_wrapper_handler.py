@@ -5,6 +5,10 @@ class MockWrapper:
     def do_something(self) -> str:
         return "Success"
 
+class MockWrapper2(MockWrapper):
+    def do_something(self) -> str:
+        return "Success 2"
+
 class FailingWrapper(MockWrapper):
     def do_something(self):
         raise Exception("Intentional Failure")
@@ -59,19 +63,26 @@ class TestWrapperHandler:
         assert handler.index == 1  # Should return to the second wrapper after failure
         assert handler.retry_count == 0
 
-    def test_try_call_all(self):
+    def test_try_call_all_success(self):
+        wrappers = [MockWrapper, MockWrapper2]
+        handler: WrapperHandler[MockWrapper] = WrapperHandler.build_wrappers(wrappers, try_per_wrapper=1, retry_delay=0)
+        results = handler.try_call_all(lambda w: w.do_something())
+        assert results == {MockWrapper: "Success", MockWrapper2: "Success 2"}
+
+    def test_try_call_all_partial_failures(self):
+        # Only the second wrapper should succeed
         wrappers = [FailingWrapper, MockWrapper, FailingWrapper]
         handler: WrapperHandler[MockWrapper] = WrapperHandler.build_wrappers(wrappers, try_per_wrapper=1, retry_delay=0)
-
         results = handler.try_call_all(lambda w: w.do_something())
-        assert results == ["Success"]  # Only the second wrapper should succeed
+        assert results == {MockWrapper: "Success"}
 
-        wrappers = [FailingWrapper, MockWrapper, FailingWrapper, MockWrapper]
+        # Only the second and fourth wrappers should succeed
+        wrappers = [FailingWrapper, MockWrapper, FailingWrapper, MockWrapper2]
         handler: WrapperHandler[MockWrapper] = WrapperHandler.build_wrappers(wrappers, try_per_wrapper=1, retry_delay=0)
-
         results = handler.try_call_all(lambda w: w.do_something())
-        assert results == ["Success", "Success"]  # Only the second and fourth wrappers should succeed
+        assert results == {MockWrapper: "Success", MockWrapper2: "Success 2"}
 
+    def test_try_call_all_all_fail(self):
         # Test when all wrappers fail
         handler_all_fail: WrapperHandler[MockWrapper] = WrapperHandler.build_wrappers([FailingWrapper, FailingWrapper], try_per_wrapper=1, retry_delay=0)
         with pytest.raises(Exception) as exc_info:

@@ -61,7 +61,7 @@ class WrapperHandler(Generic[W]):
 
         raise Exception(f"All wrappers failed after retries")
 
-    def try_call_all(self, func: Callable[[W], T]) -> list[T]:
+    def try_call_all(self, func: Callable[[W], T]) -> dict[str, T]:
         """
         Calls the provided function on all wrappers, collecting results.
         If a wrapper fails, it logs a warning and continues with the next.
@@ -73,11 +73,11 @@ class WrapperHandler(Generic[W]):
         Raises:
             Exception: If all wrappers fail.
         """
-        results = []
+        results = {}
         for wrapper in self.wrappers:
             try:
                 result = func(wrapper)
-                results.append(result)
+                results[wrapper.__class__] = result
             except Exception as e:
                 log_warning(f"{wrapper} failed: {e}")
         if not results:
