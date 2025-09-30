@@ -9,32 +9,21 @@ from app.markets import MarketAPIs
 # in base alle sue proprie chiamate API
 class MarketToolkit(Toolkit):
     def __init__(self):
-        self.market_api = MarketAPIs("USD") # change currency if needed
+        self.market_api = MarketAPIs()
 
         super().__init__(
             name="Market Toolkit",
             tools=[
-                self.get_historical_data,
-                self.get_current_prices,
+                self.market_api.get_historical_prices,
+                self.market_api.get_product,
             ],
         )
-
-    def get_historical_data(self, symbol: str):
-        return self.market_api.get_historical_prices(symbol)
-
-    def get_current_prices(self, symbol: list):
-        return self.market_api.get_products(symbol)
-
-def prepare_inputs():
-    pass
 
 def instructions():
     return """
     Utilizza questo strumento per ottenere dati di mercato storici e attuali per criptovalute specifiche.
     Puoi richiedere i prezzi storici o il prezzo attuale di una criptovaluta specifica.
     Esempio di utilizzo:
-    - get_historical_data("BTC")
-    - get_current_price("ETH")
-
+    - get_historical_prices("BTC", limit=10) # ottieni gli ultimi 10 prezzi storici di Bitcoin
+    - get_product("ETH")
     """
-
