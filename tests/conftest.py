@@ -21,6 +21,7 @@ def pytest_configure(config:pytest.Config):
         ("ollama_gpt", "marks tests that use Ollama GPT model"),
         ("ollama_qwen", "marks tests that use Ollama Qwen model"),
         ("news", "marks tests that use news"),
+        ("social", "marks tests that use social media"),
         ("limited", "marks tests that have limited execution due to API constraints"),
         ("wrapper", "marks tests for wrapper handler"),
     ]
