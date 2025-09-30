@@ -1,8 +1,9 @@
+from agno.utils.log import log_warning
+
 from src.app.markets.base import BaseWrapper
 from src.app.markets.coinbase import CoinBaseWrapper
 from src.app.markets.cryptocompare import CryptoCompareWrapper
 
-from agno.utils.log import log_warning
 
 class MarketAPIs(BaseWrapper):
     """

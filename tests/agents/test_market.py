@@ -1,6 +1,6 @@
 import os
 import pytest
-from src.app.agents.market import MarketToolkit
+from src.app.agents.market_toolkit import MarketToolkit
 from src.app.markets.base import BaseWrapper
 from src.app.markets.coinbase import CoinBaseWrapper
 from src.app.markets.cryptocompare import CryptoCompareWrapper

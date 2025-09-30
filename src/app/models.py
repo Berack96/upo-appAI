@@ -1,13 +1,14 @@
 import os
-import requests
 from enum import Enum
-from pydantic import BaseModel
+
+import requests
 from agno.agent import Agent
 from agno.models.base import Model
 from agno.models.google import Gemini
 from agno.models.ollama import Ollama
-
 from agno.utils.log import log_warning
+from pydantic import BaseModel
+
 
 class AppModels(Enum):
     """

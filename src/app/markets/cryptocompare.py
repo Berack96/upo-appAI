@@ -1,5 +1,7 @@
 import os
+
 import requests
+
 from src.app.markets.base import ProductInfo, BaseWrapper, Price
 
 BASE_URL = "https://min-api.cryptocompare.com"

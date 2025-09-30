@@ -1,8 +1,8 @@
 import gradio as gr
-
-from dotenv import load_dotenv
-from app.tool import ToolAgent
 from agno.utils.log import log_info
+from dotenv import load_dotenv
+
+from app.pipeline import Pipeline
 
 ########################################
 # MAIN APP & GRADIO INTERFACE
@@ -16,31 +16,31 @@ if __name__ == "__main__":
     load_dotenv()
     ######################################
 
-    tool_agent = ToolAgent()
+    pipeline = Pipeline()
 
     with gr.Blocks() as demo:
         gr.Markdown("# 🤖 Agente di Analisi e Consulenza Crypto")
 
         with gr.Row():
             provider = gr.Dropdown(
-                choices=tool_agent.list_providers(),
+                choices=pipeline.list_providers(),
                 type="index",
                 label="Modello da usare"
             )
-            provider.change(fn=tool_agent.choose_provider, inputs=provider, outputs=None)
+            provider.change(fn=pipeline.choose_provider, inputs=provider, outputs=None)
 
             style = gr.Dropdown(
-                choices=tool_agent.list_styles(),
+                choices=pipeline.list_styles(),
                 type="index",
                 label="Stile di investimento"
             )
-            style.change(fn=tool_agent.choose_style, inputs=style, outputs=None)
+            style.change(fn=pipeline.choose_style, inputs=style, outputs=None)
 
         user_input = gr.Textbox(label="Richiesta utente")
         output = gr.Textbox(label="Risultato analisi", lines=12)
 
         analyze_btn = gr.Button("🔎 Analizza")
-        analyze_btn.click(fn=tool_agent.interact, inputs=[user_input], outputs=output)
+        analyze_btn.click(fn=pipeline.interact, inputs=[user_input], outputs=output)
 
     server, port = ("0.0.0.0", 8000)
     log_info(f"Starting UPO AppAI on http://{server}:{port}")
