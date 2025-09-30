@@ -30,6 +30,7 @@ class RedditWrapper(SocialWrapper):
     Requires the following environment variables to be set:
     - REDDIT_API_CLIENT_ID
     - REDDIT_API_CLIENT_SECRET
+
     You can get them by creating an app at https://www.reddit.com/prefs/apps
     """
 
@@ -46,7 +47,7 @@ class RedditWrapper(SocialWrapper):
             user_agent="upo-appAI",
         )
 
-    def get_top_crypto_posts(self, limit=5) -> list[SocialPost]:
+    def get_top_crypto_posts(self, limit:int = 5) -> list[SocialPost]:
         subreddit = self.tool.subreddit("CryptoCurrency")
         top_posts = subreddit.top(limit=limit, time_filter="week")
         return [create_social_post(post) for post in top_posts]

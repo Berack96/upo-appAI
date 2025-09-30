@@ -1,9 +1,10 @@
+from agno.tools import Toolkit
+from app.utils.wrapper_handler import WrapperHandler
 from .base import SocialPost, SocialWrapper
 from .reddit import RedditWrapper
-from app.utils.wrapper_handler import WrapperHandler
-from agno.tools import Toolkit
 
 __all__ = ["SocialAPIsTool", "SOCIAL_INSTRUCTIONS", "RedditWrapper"]
+
 
 class SocialAPIsTool(SocialWrapper, Toolkit):
     """
@@ -41,12 +42,20 @@ class SocialAPIsTool(SocialWrapper, Toolkit):
         return self.wrapper_handler.try_call(lambda w: w.get_top_crypto_posts(limit))
 
 
-# TODO migliorare il prompt
 SOCIAL_INSTRUCTIONS = """
-Utilizza questo strumento per ottenere i post più recenti e gli argomenti di tendenza sui social media. Puoi richiedere i post più recenti o gli argomenti di tendenza.
+**TASK:** You are a specialized **Social Media Sentiment Analyst**. Your objective is to find the most relevant and trending online posts related to cryptocurrencies, and then **analyze the collective sentiment** to provide a concise report to the team leader.
 
-Esempio di utilizzo:
-- get_latest_news("crypto", limit=5) # ottieni le ultime 5 notizie su "crypto", la query può essere qualsiasi argomento di interesse
-- get_top_headlines(limit=3) # ottieni i 3 titoli principali delle notizie globali
+**AVAILABLE TOOLS:**
+1.  `get_top_crypto_posts(limit: int)`: Get the 'limit' maximum number of top posts specifically related to cryptocurrencies.
 
+**USAGE GUIDELINE:**
+* Always use the `get_top_crypto_posts` tool to fulfill the request.
+* The default limit for posts should be 5 unless specified otherwise.
+* If the tool doesn't return any posts, respond with "No relevant social media posts found."
+
+**REPORTING REQUIREMENT:**
+1.  **Analyze** the tone and prevailing opinions across the retrieved social posts.
+2.  **Summarize** the overall **community sentiment** (e.g., high enthusiasm/FOMO, uncertainty, FUD/fear) based on the content.
+3.  **Identify** the top 2-3 **trending narratives** or specific coins being discussed.
+4.  **Output** a single, brief report summarizing these findings. Do not output the raw posts.
 """

@@ -14,6 +14,15 @@ class FailingWrapper(MockWrapper):
         raise Exception("Intentional Failure")
 
 
+class MockWrapperWithParameters:
+    def do_something(self, param1: str, param2: int) -> str:
+        return f"Success {param1} and {param2}"
+
+class FailingWrapperWithParameters(MockWrapperWithParameters):
+    def do_something(self, param1: str, param2: int):
+        raise Exception("Intentional Failure")
+
+
 @pytest.mark.wrapper
 class TestWrapperHandler:
     def test_all_wrappers_fail(self):
@@ -88,3 +97,13 @@ class TestWrapperHandler:
         with pytest.raises(Exception) as exc_info:
             handler_all_fail.try_call_all(lambda w: w.do_something())
         assert "All wrappers failed" in str(exc_info.value)
+
+
+    def test_wrappers_with_parameters(self):
+        wrappers = [FailingWrapperWithParameters, MockWrapperWithParameters]
+        handler: WrapperHandler[MockWrapperWithParameters] = WrapperHandler.build_wrappers(wrappers, try_per_wrapper=2, retry_delay=0)
+
+        result = handler.try_call(lambda w: w.do_something("test", 42))
+        assert result == "Success test and 42"
+        assert handler.index == 1  # Should have switched to the second wrapper
+        assert handler.retry_count == 0

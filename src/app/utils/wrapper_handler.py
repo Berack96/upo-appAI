@@ -1,6 +1,6 @@
 import time
 from typing import TypeVar, Callable, Generic, Iterable, Type
-from agno.utils.log import log_warning
+from agno.utils.log import log_warning, log_info
 
 W = TypeVar("W")
 T = TypeVar("T")
@@ -46,17 +46,19 @@ class WrapperHandler(Generic[W]):
         while iterations < len(self.wrappers):
             try:
                 wrapper = self.wrappers[self.index]
+                log_info(f"Trying wrapper: {wrapper} - function {func}")
                 result = func(wrapper)
                 self.retry_count = 0
                 return result
             except Exception as e:
                 self.retry_count += 1
+                log_warning(f"{wrapper} failed {self.retry_count}/{self.retry_per_wrapper}: {e}")
+
                 if self.retry_count >= self.retry_per_wrapper:
                     self.index = (self.index + 1) % len(self.wrappers)
                     self.retry_count = 0
                     iterations += 1
                 else:
-                    log_warning(f"{wrapper} failed {self.retry_count}/{self.retry_per_wrapper}: {e}")
                     time.sleep(self.retry_delay)
 
         raise Exception(f"All wrappers failed after retries")
@@ -74,6 +76,7 @@ class WrapperHandler(Generic[W]):
             Exception: If all wrappers fail.
         """
         results = {}
+        log_info(f"All wrappers: {[wrapper.__class__ for wrapper in self.wrappers]} - function {func}")
         for wrapper in self.wrappers:
             try:
                 result = func(wrapper)
