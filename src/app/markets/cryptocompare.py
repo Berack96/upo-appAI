@@ -10,9 +10,8 @@ class CryptoCompareWrapper(BaseWrapper):
     La documentazione delle API è disponibile qui: https://developers.coindesk.com/documentation/legacy/Price/SingleSymbolPriceEndpoint
     !!ATTENZIONE!! sembra essere una API legacy e potrebbe essere deprecata in futuro.
     """
-    def __init__(self, api_key:str = None, currency:str='USD'):
-        if api_key is None:
-            api_key = os.getenv("CRYPTOCOMPARE_API_KEY")
+    def __init__(self, currency:str='USD'):
+        api_key = os.getenv("CRYPTOCOMPARE_API_KEY")
         assert api_key is not None, "API key is required"
 
         self.api_key = api_key
@@ -49,12 +48,11 @@ class CryptoCompareWrapper(BaseWrapper):
     def get_all_products(self) -> list[ProductInfo]:
         raise NotImplementedError("CryptoCompare does not support fetching all assets")
 
-    def get_historical_prices(self, asset_id: str, day_back: int = 10) -> list[dict]:
-        assert day_back <= 30, "day_back should be less than or equal to 30"
+    def get_historical_prices(self, asset_id: str, limit: int = 100) -> list[dict]:
         response = self.__request("/data/v2/histohour", params = {
             "fsym": asset_id,
             "tsym": self.currency,
-            "limit": day_back * 24
+            "limit": limit-1 # because the API returns limit+1 items (limit + current)
         })
 
         data = response.get('Data', {}).get('Data', [])

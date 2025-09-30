@@ -12,7 +12,7 @@ class BaseWrapper:
         raise NotImplementedError
     def get_all_products(self) -> list['ProductInfo']:
         raise NotImplementedError
-    def get_historical_prices(self, asset_id: str = "BTC") -> list['Price']:
+    def get_historical_prices(self, asset_id: str = "BTC", limit: int = 100) -> list['Price']:
         raise NotImplementedError
 
 class ProductInfo(BaseModel):
