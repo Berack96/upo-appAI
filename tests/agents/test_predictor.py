@@ -1,5 +1,5 @@
 import pytest
-from app.agents.predictor import PREDICTOR_INSTRUCTIONS, PredictorInput, PredictorOutput, PredictorStyle
+from app.predictor import PREDICTOR_INSTRUCTIONS, PredictorInput, PredictorOutput, PredictorStyle
 from app.markets.base import ProductInfo
 from app.models import AppModels
 

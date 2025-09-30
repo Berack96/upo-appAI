@@ -1,11 +1,11 @@
 from app.agents.news_agent import NewsAgent
 from app.agents.social_agent import SocialAgent
-from app.agents.predictor import PredictorStyle, PredictorInput, PredictorOutput, PREDICTOR_INSTRUCTIONS
+from app.predictor import PredictorStyle, PredictorInput, PredictorOutput, PREDICTOR_INSTRUCTIONS
 from app.markets import MarketAPIs
 from app.models import AppModels
 from agno.utils.log import log_info
 
-class ToolAgent:
+class Pipeline:
     """
     Classe principale che coordina gli agenti per rispondere alle richieste dell'utente.
     """
