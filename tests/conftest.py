@@ -15,8 +15,7 @@ def pytest_configure(config:pytest.Config):
     markers = [
         ("slow", "marks tests as slow (deselect with '-m \"not slow\"')"),
         ("api", "marks tests that require API access"),
-        ("coinbase", "marks tests that require Coinbase credentials"),
-        ("cryptocompare", "marks tests that require CryptoCompare credentials"),
+        ("market", "marks tests that use market data"),
         ("gemini", "marks tests that use Gemini model"),
         ("ollama_gpt", "marks tests that use Ollama GPT model"),
         ("ollama_qwen", "marks tests that use Ollama Qwen model"),
@@ -30,24 +29,7 @@ def pytest_configure(config:pytest.Config):
         config.addinivalue_line("markers", line)
 
 def pytest_collection_modifyitems(config, items):
-    """Modifica automaticamente gli item di test aggiungendogli marker basati sul nome"""
-
-    markers_to_add = {
-        "coinbase": pytest.mark.api,
-        "cryptocompare": pytest.mark.api,
-        "overview": pytest.mark.slow,
-        "analysis": pytest.mark.slow,
-        "gemini": pytest.mark.gemini,
-        "ollama_gpt": pytest.mark.ollama_gpt,
-        "ollama_qwen": pytest.mark.ollama_qwen,
-    }
-
-    for item in items:
-        name = item.name.lower()
-        for key, marker in markers_to_add.items():
-            if key in name:
-                item.add_marker(marker)
-
+    """Modifica automaticamente degli item di test rimovendoli"""
     # Rimuovo i test "limited" e "slow" se non richiesti esplicitamente
     mark_to_remove = ['limited', 'slow']
     for mark in mark_to_remove:
