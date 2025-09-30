@@ -23,6 +23,7 @@ def pytest_configure(config:pytest.Config):
         ("social", "marks tests that use social media"),
         ("limited", "marks tests that have limited execution due to API constraints"),
         ("wrapper", "marks tests for wrapper handler"),
+        ("tools", "marks tests for tools"),
     ]
     for marker in markers:
         line = f"{marker[0]}: {marker[1]}"

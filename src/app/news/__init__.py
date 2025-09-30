@@ -2,7 +2,7 @@ from agno.tools import Toolkit
 from app.utils.wrapper_handler import WrapperHandler
 from .base import NewsWrapper, Article
 from .news_api import NewsApiWrapper
-from .gnews_api import GoogleNewsWrapper
+from .googlenews import GoogleNewsWrapper
 from .cryptopanic_api import CryptoPanicWrapper
 from .duckduckgo import DuckDuckGoWrapper
 
@@ -24,6 +24,15 @@ class NewsAPIsTool(NewsWrapper, Toolkit):
     """
 
     def __init__(self):
+        """
+        Initialize the NewsAPIsTool with multiple news API wrappers.
+        The tool uses WrapperHandler to manage and invoke the different news API wrappers.
+        The following wrappers are included in this order:
+        - GoogleNewsWrapper.
+        - DuckDuckGoWrapper.
+        - NewsApiWrapper.
+        - CryptoPanicWrapper.
+        """
         wrappers = [GoogleNewsWrapper, DuckDuckGoWrapper, NewsApiWrapper, CryptoPanicWrapper]
         self.wrapper_handler: WrapperHandler[NewsWrapper] = WrapperHandler.build_wrappers(wrappers)
 
