@@ -13,7 +13,7 @@ class NewsAPIs(NewsWrapper):
     A wrapper class that aggregates multiple news API wrappers and tries them in order until one succeeds.
     This class uses the WrapperHandler to manage multiple NewsWrapper instances.
     It includes, and tries, the following news API wrappers in this order:
-    - GnewsWrapper
+    - GoogleNewsWrapper
     - DuckDuckGoWrapper
     - NewsApiWrapper
     - CryptoPanicWrapper

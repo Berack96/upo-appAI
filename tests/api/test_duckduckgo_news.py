@@ -6,11 +6,11 @@ from app.news import DuckDuckGoWrapper
 @pytest.mark.api
 class TestDuckDuckGoNews:
 
-    def test_news_api_initialization(self):
+    def test_duckduckgo_initialization(self):
         news = DuckDuckGoWrapper()
         assert news.tool is not None
 
-    def test_news_api_get_latest_news(self):
+    def test_duckduckgo_get_latest_news(self):
         news = DuckDuckGoWrapper()
         articles = news.get_latest_news(query="crypto", total=2)
         assert isinstance(articles, list)
@@ -21,8 +21,7 @@ class TestDuckDuckGoNews:
             assert article.title is not None or article.title != ""
             assert article.description is not None or article.description != ""
 
-
-    def test_news_api_get_top_headlines(self):
+    def test_duckduckgo_get_top_headlines(self):
         news = DuckDuckGoWrapper()
         articles = news.get_top_headlines(total=2)
         assert isinstance(articles, list)
