@@ -16,14 +16,14 @@ class MarketToolkit(Toolkit):
             name="Market Toolkit",
             tools=[
                 self.get_historical_data,
-                self.get_current_price,
+                self.get_current_prices,
             ],
         )
 
     def get_historical_data(self, symbol: str):
         return self.market_api.get_historical_prices(symbol)
 
-    def get_current_price(self, symbol: str):
+    def get_current_prices(self, symbol: list):
         return self.market_api.get_products(symbol)
 
 def prepare_inputs():

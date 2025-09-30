@@ -1,0 +1,110 @@
+import time
+from typing import TypeVar, Callable, Generic, Iterable, Type
+from agno.utils.log import log_warning
+
+W = TypeVar("W")
+T = TypeVar("T")
+
+class WrapperHandler(Generic[W]):
+    """
+    A handler for managing multiple wrappers with retry logic.
+    It attempts to call a function on the current wrapper, and if it fails,
+    it retries a specified number of times before switching to the next wrapper.
+    If all wrappers fail, it raises an exception.
+
+    Note: use `build_wrappers` to create an instance of this class for better error handling.
+    """
+
+    def __init__(self, wrappers: list[W], try_per_wrapper: int = 3, retry_delay: int = 2):
+        """
+        Initializes the WrapperHandler with a list of wrappers and retry settings.\n
+        Use `build_wrappers` to create an instance of this class for better error handling.
+        Args:
+            wrappers (list[W]): A list of wrapper instances to manage.
+            try_per_wrapper (int): Number of retries per wrapper before switching to the next.
+            retry_delay (int): Delay in seconds between retries.
+        """
+        self.wrappers = wrappers
+        self.retry_per_wrapper = try_per_wrapper
+        self.retry_delay = retry_delay
+        self.index = 0
+        self.retry_count = 0
+
+    def try_call(self, func: Callable[[W], T]) -> T:
+        """
+        Attempts to call the provided function on the current wrapper.
+        If it fails, it retries a specified number of times before switching to the next wrapper.
+        If all wrappers fail, it raises an exception.
+        Args:
+            func (Callable[[W], T]): A function that takes a wrapper and returns a result.
+        Returns:
+            T: The result of the function call.
+        Raises:
+            Exception: If all wrappers fail after retries.
+        """
+        iterations = 0
+        while iterations < len(self.wrappers):
+            try:
+                wrapper = self.wrappers[self.index]
+                result = func(wrapper)
+                self.retry_count = 0
+                return result
+            except Exception as e:
+                self.retry_count += 1
+                if self.retry_count >= self.retry_per_wrapper:
+                    self.index = (self.index + 1) % len(self.wrappers)
+                    self.retry_count = 0
+                    iterations += 1
+                else:
+                    log_warning(f"{wrapper} failed {self.retry_count}/{self.retry_per_wrapper}: {e}")
+                    time.sleep(self.retry_delay)
+
+        raise Exception(f"All wrappers failed after retries")
+
+    def try_call_all(self, func: Callable[[W], T]) -> dict[str, T]:
+        """
+        Calls the provided function on all wrappers, collecting results.
+        If a wrapper fails, it logs a warning and continues with the next.
+        If all wrappers fail, it raises an exception.
+        Args:
+            func (Callable[[W], T]): A function that takes a wrapper and returns a result.
+        Returns:
+            list[T]: A list of results from the function calls.
+        Raises:
+            Exception: If all wrappers fail.
+        """
+        results = {}
+        for wrapper in self.wrappers:
+            try:
+                result = func(wrapper)
+                results[wrapper.__class__] = result
+            except Exception as e:
+                log_warning(f"{wrapper} failed: {e}")
+        if not results:
+            raise Exception("All wrappers failed")
+        return results
+
+    @staticmethod
+    def build_wrappers(constructors: Iterable[Type[W]], try_per_wrapper: int = 3, retry_delay: int = 2) -> 'WrapperHandler[W]':
+        """
+        Builds a WrapperHandler instance with the given wrapper constructors.
+        It attempts to initialize each wrapper and logs a warning if any cannot be initialized.
+        Only successfully initialized wrappers are included in the handler.
+        Args:
+            constructors (Iterable[Type[W]]): An iterable of wrapper classes to instantiate. e.g. [WrapperA, WrapperB]
+            try_per_wrapper (int): Number of retries per wrapper before switching to the next.
+            retry_delay (int): Delay in seconds between retries.
+        Returns:
+            WrapperHandler[W]: An instance of WrapperHandler with the initialized wrappers.
+        Raises:
+            Exception: If no wrappers could be initialized.
+        """
+        result = []
+        for wrapper_class in constructors:
+            try:
+                wrapper = wrapper_class()
+                result.append(wrapper)
+            except Exception as e:
+                log_warning(f"{wrapper_class} cannot be initialized: {e}")
+
+        return WrapperHandler(result, try_per_wrapper, retry_delay)
