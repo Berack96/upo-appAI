@@ -1,9 +1,14 @@
+from base import BaseWrapper
+from app.markets.coinbase import CoinBaseWrapper
+from app.markets.cryptocompare import CryptoCompareWrapper
+from app.markets.binance import BinanceWrapper
+from app.markets.binance_public import PublicBinanceAgent
+from app.markets.error_handler import ProviderFallback, MarketAPIError, safe_execute
+
 from agno.utils.log import log_warning
+import logging
 
-from src.app.markets.base import BaseWrapper
-from src.app.markets.coinbase import CoinBaseWrapper
-from src.app.markets.cryptocompare import CryptoCompareWrapper
-
+logger = logging.getLogger(__name__)
 
 class MarketAPIs(BaseWrapper):
     """
@@ -46,15 +51,37 @@ class MarketAPIs(BaseWrapper):
         """
         self.currency = currency
         self.wrappers = MarketAPIs.get_list_available_market_apis(currency=currency)
+        self.fallback_manager = ProviderFallback(self.wrappers)
 
-    # Metodi che semplicemente chiamano il metodo corrispondente del primo wrapper disponibile
-    # TODO magari fare in modo che se il primo fallisce, prova con il secondo, ecc.
-    # oppure fare un round-robin tra i vari wrapper oppure usarli tutti e fare una media dei risultati
-    def get_product(self, asset_id):
-        return self.wrappers[0].get_product(asset_id)
+    # Metodi con fallback robusto tra provider multipli
+    def get_product(self, asset_id: str):
+        """Ottiene informazioni su un prodotto con fallback automatico tra provider."""
+        try:
+            return self.fallback_manager.execute_with_fallback("get_product", asset_id)
+        except MarketAPIError as e:
+            logger.error(f"Failed to get product {asset_id}: {str(e)}")
+            raise
+
     def get_products(self, asset_ids: list):
-        return self.wrappers[0].get_products(asset_ids)
+        """Ottiene informazioni su più prodotti con fallback automatico tra provider."""
+        try:
+            return self.fallback_manager.execute_with_fallback("get_products", asset_ids)
+        except MarketAPIError as e:
+            logger.error(f"Failed to get products {asset_ids}: {str(e)}")
+            raise
+
     def get_all_products(self):
-        return self.wrappers[0].get_all_products()
-    def get_historical_prices(self, asset_id = "BTC"):
-        return self.wrappers[0].get_historical_prices(asset_id)
+        """Ottiene tutti i prodotti con fallback automatico tra provider."""
+        try:
+            return self.fallback_manager.execute_with_fallback("get_all_products")
+        except MarketAPIError as e:
+            logger.error(f"Failed to get all products: {str(e)}")
+            raise
+
+    def get_historical_prices(self, asset_id: str = "BTC"):
+        """Ottiene prezzi storici con fallback automatico tra provider."""
+        try:
+            return self.fallback_manager.execute_with_fallback("get_historical_prices", asset_id)
+        except MarketAPIError as e:
+            logger.error(f"Failed to get historical prices for {asset_id}: {str(e)}")
+            raise

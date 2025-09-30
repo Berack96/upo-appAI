@@ -1,8 +1,8 @@
 import gradio as gr
-from agno.utils.log import log_info
-from dotenv import load_dotenv
 
+from dotenv import load_dotenv
 from app.pipeline import Pipeline
+from agno.utils.log import log_info
 
 ########################################
 # MAIN APP & GRADIO INTERFACE
