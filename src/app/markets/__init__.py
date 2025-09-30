@@ -1,9 +1,10 @@
 from .base import BaseWrapper
 from .coinbase import CoinBaseWrapper
+from .binance import BinanceWrapper
 from .cryptocompare import CryptoCompareWrapper
 from app.utils.wrapper_handler import WrapperHandler
 
-__all__ = [ "MarketAPIs", "BaseWrapper", "CoinBaseWrapper", "CryptoCompareWrapper" ]
+__all__ = [ "MarketAPIs", "BinanceWrapper", "CoinBaseWrapper", "CryptoCompareWrapper" ]
 
 
 # TODO se si vuole usare un aggregatore di dati di mercato, si può aggiungere qui facendo una classe extra (simile a questa) che per ogni chiamata chiama tutti i wrapper e aggrega i risultati
