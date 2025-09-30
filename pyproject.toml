@@ -33,6 +33,7 @@ dependencies = [
     # ✅ per interagire con API di notizie
     "newsapi-python",
     "gnews",
+    "ddgs",
 ]
 
 [tool.pytest.ini_options]

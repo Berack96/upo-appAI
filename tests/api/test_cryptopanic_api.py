@@ -27,7 +27,7 @@ class TestCryptoPanicAPI:
     # Useless since both methods use the same endpoint
     # def test_crypto_panic_api_get_top_headlines(self):
     #     crypto = CryptoPanicWrapper()
-    #     articles = crypto.get_top_headlines(query="crypto", total=2)
+    #     articles = crypto.get_top_headlines(total=2)
     #     assert isinstance(articles, list)
     #     assert len(articles) == 2
     #     for article in articles:

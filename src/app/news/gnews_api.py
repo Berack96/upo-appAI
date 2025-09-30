@@ -9,8 +9,13 @@ def result_to_article(result: dict) -> Article:
     article.description = result.get("description", "")
     return article
 
-class GnewsWrapper(NewsWrapper):
-    def get_top_headlines(self, query: str, total: int = 100) -> list[Article]:
+class GoogleNewsWrapper(NewsWrapper):
+    """
+    A wrapper for the Google News RSS Feed (Documentation: https://github.com/ranahaani/GNews/?tab=readme-ov-file#about-gnews)
+    It does not require an API key and is free to use.
+    """
+
+    def get_top_headlines(self, total: int = 100) -> list[Article]:
         gnews = GNews(language='en', max_results=total, period='7d')
         results = gnews.get_top_news()
 

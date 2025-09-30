@@ -31,6 +31,13 @@ def get_articles(response: dict) -> list[Article]:
     return articles
 
 class CryptoPanicWrapper(NewsWrapper):
+    """
+    A wrapper for the CryptoPanic API (Documentation: https://cryptopanic.com/developers/api/)
+    Requires an API key set in the environment variable CRYPTOPANIC_API_KEY.
+    It is free to use, but has rate limits and restrictions based on the plan type (the free plan is 'developer' with 100 req/month).
+    Supports different plan types via the CRYPTOPANIC_API_PLAN environment variable (developer, growth, enterprise).
+    """
+
     def __init__(self):
         self.api_key = os.getenv("CRYPTOPANIC_API_KEY", "")
         assert self.api_key, "CRYPTOPANIC_API_KEY environment variable not set"
@@ -55,7 +62,10 @@ class CryptoPanicWrapper(NewsWrapper):
     def set_filter(self, filter: CryptoPanicFilter):
         self.filter = filter
 
-    def get_top_headlines(self, query: str, total: int = 100) -> list[Article]:
+    def get_top_headlines(self, total: int = 100) -> list[Article]:
+        return self.get_latest_news("", total) # same endpoint so just call the other method
+
+    def get_latest_news(self, query: str, total: int = 100) -> list[Article]:
         params = self.get_base_params()
         params['currencies'] = query
 
@@ -65,6 +75,3 @@ class CryptoPanicWrapper(NewsWrapper):
         json_response = response.json()
         articles = get_articles(json_response)
         return articles[:total]
-
-    def get_latest_news(self, query: str, total: int = 100) -> list[Article]:
-        return self.get_top_headlines(query, total) # same endpoint for both, so just call it

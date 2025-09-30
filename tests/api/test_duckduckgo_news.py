@@ -1,22 +1,20 @@
-import os
 import pytest
-from app.news import NewsApiWrapper
+from app.news import DuckDuckGoWrapper
 
 
 @pytest.mark.news
 @pytest.mark.api
-@pytest.mark.skipif(not os.getenv("NEWS_API_KEY"), reason="NEWS_API_KEY not set")
-class TestNewsAPI:
+class TestDuckDuckGoNews:
 
     def test_news_api_initialization(self):
-        news_api = NewsApiWrapper()
-        assert news_api.client is not None
+        news = DuckDuckGoWrapper()
+        assert news.tool is not None
 
     def test_news_api_get_latest_news(self):
-        news_api = NewsApiWrapper()
-        articles = news_api.get_latest_news(query="crypto", total=2)
+        news = DuckDuckGoWrapper()
+        articles = news.get_latest_news(query="crypto", total=2)
         assert isinstance(articles, list)
-        assert len(articles) > 0 # Ensure we got some articles (apparently it doesn't always return the requested number)
+        assert len(articles) == 2
         for article in articles:
             assert article.source is not None or article.source != ""
             assert article.time is not None or article.time != ""
@@ -25,10 +23,10 @@ class TestNewsAPI:
 
 
     def test_news_api_get_top_headlines(self):
-        news_api = NewsApiWrapper()
-        articles = news_api.get_top_headlines(total=2)
+        news = DuckDuckGoWrapper()
+        articles = news.get_top_headlines(total=2)
         assert isinstance(articles, list)
-        # assert len(articles) > 0 # apparently it doesn't always return SOME articles
+        assert len(articles) == 2
         for article in articles:
             assert article.source is not None or article.source != ""
             assert article.time is not None or article.time != ""

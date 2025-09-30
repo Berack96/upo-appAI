@@ -11,6 +11,12 @@ def result_to_article(result: dict) -> Article:
     return article
 
 class NewsApiWrapper(NewsWrapper):
+    """
+    A wrapper for the NewsAPI (Documentation: https://newsapi.org/docs/get-started)
+    Requires an API key set in the environment variable NEWS_API_KEY.
+    It is free to use, but has rate limits and restrictions based on the plan type (the free plan is 'developer' with 100 req/day).
+    """
+
     def __init__(self):
         api_key = os.getenv("NEWS_API_KEY")
         assert api_key is not None, "NEWS_API_KEY environment variable not set"
@@ -20,13 +26,13 @@ class NewsApiWrapper(NewsWrapper):
         self.language = "en" # TODO Only English articles for now?
         self.max_page_size = 100
 
-    def get_top_headlines(self, query: str, total: int = 100) -> list[Article]:
+    def get_top_headlines(self, total: int = 100) -> list[Article]:
         page_size = min(self.max_page_size, total)
         pages = (total // page_size) + (1 if total % page_size > 0 else 0)
 
         articles = []
         for page in range(1, pages + 1):
-            headlines = self.client.get_top_headlines(q=query, category=self.category, language=self.language, page_size=page_size, page=page)
+            headlines = self.client.get_top_headlines(q="", category=self.category, language=self.language, page_size=page_size, page=page)
             results = [result_to_article(article) for article in headlines.get("articles", [])]
             articles.extend(results)
         return articles
