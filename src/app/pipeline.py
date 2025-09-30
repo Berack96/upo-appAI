@@ -4,11 +4,11 @@ from agno.team import Team
 from agno.utils.log import log_info
 
 from app.agents.market_agent import MarketAgent
-from src.app.agents.news_agent import NewsAgent
-from src.app.agents.social_agent import SocialAgent
-from src.app.markets import MarketAPIs
-from src.app.models import AppModels
-from src.app.predictor import PredictorStyle, PredictorInput, PredictorOutput, PREDICTOR_INSTRUCTIONS
+from app.agents.news_agent import NewsAgent
+from app.agents.social_agent import SocialAgent
+from app.markets import MarketAPIs
+from app.models import AppModels
+from app.predictor import PredictorStyle, PredictorInput, PredictorOutput, PREDICTOR_INSTRUCTIONS
 
 
 class Pipeline:

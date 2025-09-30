@@ -1,4 +1,4 @@
-from base import BaseWrapper
+from .base import BaseWrapper
 from app.markets.coinbase import CoinBaseWrapper
 from app.markets.cryptocompare import CryptoCompareWrapper
 from app.markets.binance import BinanceWrapper

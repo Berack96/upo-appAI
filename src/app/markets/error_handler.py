@@ -14,7 +14,7 @@ from functools import wraps
 from typing import Any, Callable, Optional, Type, Union, List
 from requests.exceptions import RequestException, Timeout, ConnectionError
 from binance.exceptions import BinanceAPIException, BinanceRequestException
-from base import ProductInfo
+from .base import ProductInfo
 
 # Configurazione logging
 logger = logging.getLogger(__name__)

@@ -1,7 +1,6 @@
 import os
-from enum import Enum
-
 import requests
+from enum import Enum
 from agno.agent import Agent
 from agno.models.base import Model
 from agno.models.google import Gemini

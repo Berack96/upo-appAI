@@ -1,8 +1,6 @@
 from enum import Enum
-
 from pydantic import BaseModel, Field
-
-from src.app.markets.base import ProductInfo
+from app.markets.base import ProductInfo
 
 
 class PredictorStyle(Enum):
