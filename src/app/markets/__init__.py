@@ -23,9 +23,9 @@ class MarketAPIsTool(BaseWrapper, Toolkit):
     """
 
     def __init__(self, currency: str = "USD", enable_aggregation: bool = False):
-        self.currency = currency
+        kwargs = {"currency": currency or "USD"}
         wrappers = [ BinanceWrapper, CoinBaseWrapper, CryptoCompareWrapper, YFinanceWrapper ]
-        self.wrappers: WrapperHandler[BaseWrapper] = WrapperHandler.build_wrappers(wrappers)
+        self.wrappers: WrapperHandler[BaseWrapper] = WrapperHandler.build_wrappers(wrappers, kwargs=kwargs)
 
         # Inizializza l'aggregatore solo se richiesto (lazy initialization)
         self._aggregator = None

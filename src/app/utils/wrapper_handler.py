@@ -100,7 +100,7 @@ class WrapperHandler(Generic[W]):
         return f"{e} [\"{last_frame.filename}\", line {last_frame.lineno}]"
 
     @staticmethod
-    def build_wrappers(constructors: Iterable[Type[W]], try_per_wrapper: int = 3, retry_delay: int = 2) -> 'WrapperHandler[W]':
+    def build_wrappers(constructors: Iterable[Type[W]], try_per_wrapper: int = 3, retry_delay: int = 2, kwargs: dict | None = None) -> 'WrapperHandler[W]':
         """
         Builds a WrapperHandler instance with the given wrapper constructors.
         It attempts to initialize each wrapper and logs a warning if any cannot be initialized.
@@ -109,6 +109,7 @@ class WrapperHandler(Generic[W]):
             constructors (Iterable[Type[W]]): An iterable of wrapper classes to instantiate. e.g. [WrapperA, WrapperB]
             try_per_wrapper (int): Number of retries per wrapper before switching to the next.
             retry_delay (int): Delay in seconds between retries.
+            kwargs (dict | None): Optional dictionary with keyword arguments common to all wrappers.
         Returns:
             WrapperHandler[W]: An instance of WrapperHandler with the initialized wrappers.
         Raises:
@@ -119,7 +120,7 @@ class WrapperHandler(Generic[W]):
         result = []
         for wrapper_class in constructors:
             try:
-                wrapper = wrapper_class()
+                wrapper = wrapper_class(**(kwargs or {}))
                 result.append(wrapper)
             except Exception as e:
                 log_warning(f"{wrapper_class} cannot be initialized: {e}")
