@@ -23,10 +23,7 @@ class BinanceWrapper(BaseWrapper):
 
     def __init__(self, currency: str = "USDT"):
         api_key = os.getenv("BINANCE_API_KEY")
-        assert api_key is None, "API key is required"
-
         api_secret = os.getenv("BINANCE_API_SECRET")
-        assert api_secret is None, "API secret is required"
 
         self.currency = currency
         self.client = Client(api_key=api_key, api_secret=api_secret)

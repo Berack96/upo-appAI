@@ -30,8 +30,7 @@ from dotenv import load_dotenv
 from app.markets import ( 
     CoinBaseWrapper, 
     CryptoCompareWrapper, 
-    BinanceWrapper, 
-    PublicBinanceAgent,
+    BinanceWrapper,
     YFinanceWrapper,
     BaseWrapper
 )
@@ -241,13 +240,6 @@ def initialize_providers() -> Dict[str, BaseWrapper]:
     providers = {}
     env_vars = check_environment_variables()
     
-    # PublicBinanceAgent (sempre disponibile)
-    try:
-        providers["PublicBinance"] = PublicBinanceAgent()
-        print("✅ PublicBinanceAgent inizializzato con successo")
-    except Exception as e:
-        print(f"❌ Errore nell'inizializzazione di PublicBinanceAgent: {e}")
-    
     # CryptoCompareWrapper
     if env_vars["CRYPTOCOMPARE_API_KEY"]:
         try:
@@ -269,14 +261,11 @@ def initialize_providers() -> Dict[str, BaseWrapper]:
         print("⚠️ CoinBaseWrapper saltato: credenziali Coinbase non complete")
     
     # BinanceWrapper
-    if env_vars["BINANCE_API_KEY"] and env_vars["BINANCE_API_SECRET"]:
-        try:
-            providers["Binance"] = BinanceWrapper()
-            print("✅ BinanceWrapper inizializzato con successo")
-        except Exception as e:
-            print(f"❌ Errore nell'inizializzazione di BinanceWrapper: {e}")
-    else:
-        print("⚠️ BinanceWrapper saltato: credenziali Binance non complete")
+    try:
+        providers["Binance"] = BinanceWrapper()
+        print("✅ BinanceWrapper inizializzato con successo")
+    except Exception as e:
+        print(f"❌ Errore nell'inizializzazione di BinanceWrapper: {e}")
     
     # YFinanceWrapper (sempre disponibile - dati azionari e crypto gratuiti)
     try:
@@ -284,7 +273,6 @@ def initialize_providers() -> Dict[str, BaseWrapper]:
         print("✅ YFinanceWrapper inizializzato con successo")
     except Exception as e:
         print(f"❌ Errore nell'inizializzazione di YFinanceWrapper: {e}")
-    
     return providers
 
 def print_summary(results: List[Dict[str, Any]]):
