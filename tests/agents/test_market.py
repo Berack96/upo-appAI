@@ -1,12 +1,12 @@
 import os
 import pytest
 from app.agents.market_agent import MarketToolkit
-from app.markets import MarketAPIs
+from app.markets import MarketAPIsTool
 
 @pytest.mark.limited # usa molte api calls e non voglio esaurire le chiavi api
-class TestMarketAPIs:
+class TestMarketAPIsTool:
     def test_wrapper_initialization(self):
-        market_wrapper = MarketAPIs("USD")
+        market_wrapper = MarketAPIsTool("USD")
         assert market_wrapper is not None
         assert hasattr(market_wrapper, 'get_product')
         assert hasattr(market_wrapper, 'get_products')
@@ -14,7 +14,7 @@ class TestMarketAPIs:
         assert hasattr(market_wrapper, 'get_historical_prices')
 
     def test_wrapper_capabilities(self):
-        market_wrapper = MarketAPIs("USD")
+        market_wrapper = MarketAPIsTool("USD")
         capabilities = []
         if hasattr(market_wrapper, 'get_product'):
             capabilities.append('single_product')
@@ -25,7 +25,7 @@ class TestMarketAPIs:
         assert len(capabilities) > 0
 
     def test_market_data_retrieval(self):
-        market_wrapper = MarketAPIs("USD")
+        market_wrapper = MarketAPIsTool("USD")
         btc_product = market_wrapper.get_product("BTC")
         assert btc_product is not None
         assert hasattr(btc_product, 'symbol')
@@ -55,14 +55,14 @@ class TestMarketAPIs:
 
     def test_error_handling(self):
         try:
-            market_wrapper = MarketAPIs("USD")
+            market_wrapper = MarketAPIsTool("USD")
             fake_product = market_wrapper.get_product("NONEXISTENT_CRYPTO_SYMBOL_12345")
             assert fake_product is None or fake_product.price == 0
         except Exception as e:
             pass
 
     def test_wrapper_currency_support(self):
-        market_wrapper = MarketAPIs("USD")
+        market_wrapper = MarketAPIsTool("USD")
         assert hasattr(market_wrapper, 'currency')
         assert isinstance(market_wrapper.currency, str)
         assert len(market_wrapper.currency) >= 3  # USD, EUR, etc.

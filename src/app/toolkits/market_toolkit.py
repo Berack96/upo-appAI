@@ -1,5 +1,5 @@
 from agno.tools import Toolkit
-from app.markets import MarketAPIs
+from app.markets import MarketAPIsTool
 
 
 # TODO (?) in futuro fare in modo che la LLM faccia da sé per il mercato
@@ -9,7 +9,7 @@ from app.markets import MarketAPIs
 # in base alle sue proprie chiamate API
 class MarketToolkit(Toolkit):
     def __init__(self):
-        self.market_api = MarketAPIs("USD") # change currency if needed
+        self.market_api = MarketAPIsTool("USD") # change currency if needed
 
         super().__init__(
             name="Market Toolkit",

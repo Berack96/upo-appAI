@@ -6,7 +6,6 @@ from agno.utils.log import log_info
 from app.agents.market_agent import MarketAgent
 from app.agents.news_agent import NewsAgent
 from app.agents.social_agent import SocialAgent
-from app.markets import MarketAPIs
 from app.models import AppModels
 from app.predictor import PredictorStyle, PredictorInput, PredictorOutput, PREDICTOR_INSTRUCTIONS
 

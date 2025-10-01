@@ -9,7 +9,6 @@ from typing import Optional, Dict, Any
 from datetime import datetime, timedelta
 from binance.client import Client
 from .base import BaseWrapper, ProductInfo, Price
-from .error_handler import retry_on_failure, handle_api_errors, MarketAPIError
 
 
 class PublicBinanceAgent(BaseWrapper):
@@ -38,8 +37,6 @@ class PublicBinanceAgent(BaseWrapper):
             return asset_id
         return f"{asset_id}USDT"
 
-    @retry_on_failure(max_retries=3, delay=1.0)
-    @handle_api_errors
     def get_product(self, asset_id: str) -> ProductInfo:
         """
         Ottiene informazioni su un singolo prodotto.
@@ -59,8 +56,6 @@ class PublicBinanceAgent(BaseWrapper):
             print(f"Errore nel recupero del prodotto {asset_id}: {e}")
             return ProductInfo(id=asset_id, symbol=asset_id)
 
-    @retry_on_failure(max_retries=3, delay=1.0)
-    @handle_api_errors
     def get_products(self, asset_ids: list[str]) -> list[ProductInfo]:
         """
         Ottiene informazioni su più prodotti.
@@ -77,8 +72,6 @@ class PublicBinanceAgent(BaseWrapper):
             products.append(product)
         return products
 
-    @retry_on_failure(max_retries=3, delay=1.0)
-    @handle_api_errors
     def get_all_products(self) -> list[ProductInfo]:
         """
         Ottiene informazioni su tutti i prodotti disponibili.
@@ -90,8 +83,6 @@ class PublicBinanceAgent(BaseWrapper):
         major_assets = ["BTC", "ETH", "BNB", "ADA", "DOT", "LINK", "LTC", "XRP"]
         return self.get_products(major_assets)
 
-    @retry_on_failure(max_retries=3, delay=1.0)
-    @handle_api_errors
     def get_historical_prices(self, asset_id: str = "BTC") -> list[Price]:
         """
         Ottiene i prezzi storici per un asset.

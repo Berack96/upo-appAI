@@ -35,7 +35,6 @@ dependencies = [
     # API di social media
     "praw", # Reddit
 ]
-
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]

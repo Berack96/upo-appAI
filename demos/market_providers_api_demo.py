@@ -26,7 +26,7 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root / "src"))
 
 from dotenv import load_dotenv
-from src.app.markets import (
+from app.markets import ( 
     CoinBaseWrapper, 
     CryptoCompareWrapper, 
     BinanceWrapper, 
