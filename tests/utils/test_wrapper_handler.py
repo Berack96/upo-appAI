@@ -25,6 +25,29 @@ class FailingWrapperWithParameters(MockWrapperWithParameters):
 
 @pytest.mark.wrapper
 class TestWrapperHandler:
+    def test_init_failing(self):
+        with pytest.raises(AssertionError) as exc_info:
+            WrapperHandler([MockWrapper, MockWrapper2])
+        assert exc_info.type == AssertionError
+
+    def test_init_failing_empty(self):
+        with pytest.raises(AssertionError) as exc_info:
+            WrapperHandler.build_wrappers([])
+        assert exc_info.type == AssertionError
+
+    def test_init_failing_with_instances(self):
+        with pytest.raises(AssertionError) as exc_info:
+            WrapperHandler.build_wrappers([MockWrapper(), MockWrapper2()])
+        assert exc_info.type == AssertionError
+
+    def test_init_not_failing(self):
+        handler = WrapperHandler.build_wrappers([MockWrapper, MockWrapper2])
+        assert handler is not None
+        assert len(handler.wrappers) == 2
+        handler = WrapperHandler([MockWrapper(), MockWrapper2()])
+        assert handler is not None
+        assert len(handler.wrappers) == 2
+
     def test_all_wrappers_fail(self):
         wrappers = [FailingWrapper, FailingWrapper]
         handler: WrapperHandler[MockWrapper] = WrapperHandler.build_wrappers(wrappers, try_per_wrapper=2, retry_delay=0)

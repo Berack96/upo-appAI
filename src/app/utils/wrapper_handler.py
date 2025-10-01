@@ -24,6 +24,8 @@ class WrapperHandler(Generic[W]):
             try_per_wrapper (int): Number of retries per wrapper before switching to the next.
             retry_delay (int): Delay in seconds between retries.
         """
+        assert not WrapperHandler.__check(wrappers), "All wrappers must be instances of their respective classes. Use `build_wrappers` to create the WrapperHandler."
+
         self.wrappers = wrappers
         self.retry_per_wrapper = try_per_wrapper
         self.retry_delay = retry_delay
@@ -88,6 +90,10 @@ class WrapperHandler(Generic[W]):
         return results
 
     @staticmethod
+    def __check(wrappers: list[W]) -> bool:
+        return all(w.__class__ is type for w in wrappers)
+
+    @staticmethod
     def build_wrappers(constructors: Iterable[Type[W]], try_per_wrapper: int = 3, retry_delay: int = 2) -> 'WrapperHandler[W]':
         """
         Builds a WrapperHandler instance with the given wrapper constructors.
@@ -102,6 +108,8 @@ class WrapperHandler(Generic[W]):
         Raises:
             Exception: If no wrappers could be initialized.
         """
+        assert WrapperHandler.__check(constructors), f"All constructors must be classes. Received: {constructors}"
+
         result = []
         for wrapper_class in constructors:
             try:

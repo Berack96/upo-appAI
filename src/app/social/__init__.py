@@ -26,7 +26,7 @@ class SocialAPIsTool(SocialWrapper, Toolkit):
         """
 
         wrappers = [RedditWrapper]
-        self.wrapper_handler: WrapperHandler[SocialWrapper] = WrapperHandler(wrappers)
+        self.wrapper_handler: WrapperHandler[SocialWrapper] = WrapperHandler.build_wrappers(wrappers)
 
         Toolkit.__init__(
             self,
@@ -38,7 +38,7 @@ class SocialAPIsTool(SocialWrapper, Toolkit):
 
     # TODO Pensare se ha senso restituire i post da TUTTI i wrapper o solo dal primo che funziona
     # la modifica è banale, basta usare try_call_all invece di try_call
-    def get_top_crypto_posts(self, limit:int = 5) -> list[SocialPost]:
+    def get_top_crypto_posts(self, limit: int = 5) -> list[SocialPost]:
         return self.wrapper_handler.try_call(lambda w: w.get_top_crypto_posts(limit))
 
 

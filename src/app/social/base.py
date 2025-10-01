@@ -17,6 +17,7 @@ class SocialWrapper:
     Base class for social media API wrappers.
     All social media API wrappers should inherit from this class and implement the methods.
     """
+
     def get_top_crypto_posts(self, limit: int = 5) -> list[SocialPost]:
         """
         Get top cryptocurrency-related posts, optionally limited by total.

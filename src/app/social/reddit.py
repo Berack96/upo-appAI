@@ -35,19 +35,19 @@ class RedditWrapper(SocialWrapper):
     """
 
     def __init__(self):
-        self.client_id = os.getenv("REDDIT_API_CLIENT_ID")
-        assert self.client_id is not None, "REDDIT_API_CLIENT_ID environment variable is not set"
+        client_id = os.getenv("REDDIT_API_CLIENT_ID")
+        assert client_id is not None, "REDDIT_API_CLIENT_ID environment variable is not set"
 
-        self.client_secret = os.getenv("REDDIT_API_CLIENT_SECRET")
-        assert self.client_secret is not None, "REDDIT_API_CLIENT_SECRET environment variable is not set"
+        client_secret = os.getenv("REDDIT_API_CLIENT_SECRET")
+        assert client_secret is not None, "REDDIT_API_CLIENT_SECRET environment variable is not set"
 
         self.tool = Reddit(
-            client_id=self.client_id,
-            client_secret=self.client_secret,
+            client_id=client_id,
+            client_secret=client_secret,
             user_agent="upo-appAI",
         )
 
-    def get_top_crypto_posts(self, limit:int = 5) -> list[SocialPost]:
+    def get_top_crypto_posts(self, limit: int = 5) -> list[SocialPost]:
         subreddit = self.tool.subreddit("CryptoCurrency")
         top_posts = subreddit.top(limit=limit, time_filter="week")
         return [create_social_post(post) for post in top_posts]
