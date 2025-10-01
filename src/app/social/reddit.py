@@ -4,8 +4,8 @@ from praw.models import Submission, MoreComments
 from .base import SocialWrapper, SocialPost, SocialComment
 
 MAX_COMMENTS = 5
-# TODO mettere piu' subreddit?
-# scelti da https://lkiconsulting.io/marketing/best-crypto-subreddits/
+# metterne altri se necessario.
+# fonti: https://lkiconsulting.io/marketing/best-crypto-subreddits/
 SUBREDDITS = [
     "CryptoCurrency", 
     "Bitcoin",

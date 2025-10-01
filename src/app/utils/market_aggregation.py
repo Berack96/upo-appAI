@@ -63,9 +63,6 @@ def aggregate_product_info(products: dict[str, list[ProductInfo]]) -> list[Produ
         product.price = (prices / volume_sum) if volume_sum > 0 else 0.0
 
         aggregated_products.append(product)
-
-        confidence = _calculate_confidence(product_list, sources) # TODO necessary?
-
     return aggregated_products
 
 def _calculate_confidence(products: list[ProductInfo], sources: list[str]) -> float:

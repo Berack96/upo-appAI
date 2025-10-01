@@ -45,12 +45,31 @@ class NewsAPIsTool(NewsWrapper, Toolkit):
             ],
         )
 
-    # TODO Pensare se ha senso restituire gli articoli da TUTTI i wrapper o solo dal primo che funziona
-    # la modifica è banale, basta usare try_call_all invece di try_call
     def get_top_headlines(self, limit: int = 100) -> list[Article]:
         return self.wrapper_handler.try_call(lambda w: w.get_top_headlines(limit))
     def get_latest_news(self, query: str, limit: int = 100) -> list[Article]:
         return self.wrapper_handler.try_call(lambda w: w.get_latest_news(query, limit))
+
+    def get_top_headlines_aggregated(self, limit: int = 100) -> dict[str, list[Article]]:
+        """
+        Calls get_top_headlines on all wrappers/providers and returns a dictionary mapping their names to their articles.
+        Args:
+            limit (int): Maximum number of articles to retrieve from each provider.
+        Returns:
+            dict[str, list[Article]]: A dictionary mapping providers names to their list of Articles
+        """
+        return self.wrapper_handler.try_call_all(lambda w: w.get_top_headlines(limit))
+
+    def get_latest_news_aggregated(self, query: str, limit: int = 100) -> dict[str, list[Article]]:
+        """
+        Calls get_latest_news on all wrappers/providers and returns a dictionary mapping their names to their articles.
+        Args:
+            query (str): The search query to find relevant news articles.
+            limit (int): Maximum number of articles to retrieve from each provider.
+        Returns:
+            dict[str, list[Article]]: A dictionary mapping providers names to their list of Articles
+        """
+        return self.wrapper_handler.try_call_all(lambda w: w.get_latest_news(query, limit))
 
 
 NEWS_INSTRUCTIONS = """
@@ -59,6 +78,8 @@ NEWS_INSTRUCTIONS = """
 **AVAILABLE TOOLS:**
 1.  `get_latest_news(query: str, limit: int)`: Get the 'limit' most recent news articles for a specific 'query'.
 2.  `get_top_headlines(limit: int)`: Get the 'limit' top global news headlines.
+3.  `get_latest_news_aggregated(query: str, limit: int)`: Get aggregated latest news articles for a specific 'query'.
+4.  `get_top_headlines_aggregated(limit: int)`: Get aggregated top global news headlines.
 
 **USAGE GUIDELINE:**
 * Always use `get_latest_news` with a relevant crypto-related query first.
