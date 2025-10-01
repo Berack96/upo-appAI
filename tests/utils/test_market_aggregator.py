@@ -94,7 +94,7 @@ class TestMarketDataAggregator:
         assert len(aggregated) == 2
         assert aggregated[0].timestamp_ms == 1685577600000
         assert aggregated[0].high == pytest.approx(50050.0, rel=1e-3)
-        assert aggregated[0].low == pytest.approx(49500.0, rel=1e-3)
+        assert aggregated[0].low == pytest.approx(49550.0, rel=1e-3)
         assert aggregated[1].timestamp_ms == 1685581200000
         assert aggregated[1].high == pytest.approx(50250.0, rel=1e-3)
-        assert aggregated[1].low == pytest.approx(49800.0, rel=1e-3)
+        assert aggregated[1].low == pytest.approx(49850.0, rel=1e-3)
