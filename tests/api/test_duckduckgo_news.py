@@ -12,7 +12,7 @@ class TestDuckDuckGoNews:
 
     def test_duckduckgo_get_latest_news(self):
         news = DuckDuckGoWrapper()
-        articles = news.get_latest_news(query="crypto", total=2)
+        articles = news.get_latest_news(query="crypto", limit=2)
         assert isinstance(articles, list)
         assert len(articles) == 2
         for article in articles:
@@ -23,7 +23,7 @@ class TestDuckDuckGoNews:
 
     def test_duckduckgo_get_top_headlines(self):
         news = DuckDuckGoWrapper()
-        articles = news.get_top_headlines(total=2)
+        articles = news.get_top_headlines(limit=2)
         assert isinstance(articles, list)
         assert len(articles) == 2
         for article in articles:

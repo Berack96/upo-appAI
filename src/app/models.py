@@ -6,6 +6,7 @@ from agno.models.base import Model
 from agno.models.google import Gemini
 from agno.models.ollama import Ollama
 from agno.utils.log import log_warning
+from agno.tools import Toolkit
 from pydantic import BaseModel
 
 
@@ -20,6 +21,8 @@ class AppModels(Enum):
     GEMINI_PRO = "gemini-2.0-pro" # API online, più costoso ma migliore
     OLLAMA_GPT = "gpt-oss:latest" # + good - slow (13b)
     OLLAMA_QWEN = "qwen3:latest" # + good + fast (8b)
+    OLLAMA_QWEN_4B = "qwen3:4b" # + fast + decent (4b)
+    OLLAMA_QWEN_1B = "qwen3:1.7b" # + very fast + decent (1.7b)
 
     @staticmethod
     def availables_local() -> list['AppModels']:
@@ -35,10 +38,9 @@ class AppModels(Enum):
 
         availables = []
         result = result.text
-        if AppModels.OLLAMA_GPT.value in result:
-            availables.append(AppModels.OLLAMA_GPT)
-        if AppModels.OLLAMA_QWEN.value in result:
-            availables.append(AppModels.OLLAMA_QWEN)
+        for model in [model for model in AppModels if model.name.startswith("OLLAMA")]:
+            if model.value in result:
+                availables.append(model)
         return availables
 
     @staticmethod
@@ -70,63 +72,31 @@ class AppModels(Enum):
         assert availables, "No valid model API keys set in environment variables."
         return availables
 
-    @staticmethod
-    def extract_json_str_from_response(response: str) -> str:
-        """
-        Estrae il JSON dalla risposta del modello.
-        Args:
-            response: risposta del modello (stringa).
-
-        Returns:
-             La parte JSON della risposta come stringa.
-            Se non viene trovato nessun JSON, ritorna una stringa vuota.
-
-        ATTENZIONE: questa funzione è molto semplice e potrebbe non funzionare
-        in tutti i casi. Si assume che il JSON sia ben formato e che inizi con
-        '{' e finisca con '}'. Quindi anche solo un json array farà fallire questa funzione.
-        """
-        think = response.rfind("</think>")
-        if think != -1:
-            response = response[think:]
-
-        start = response.find("{")
-        assert start != -1, "No JSON found in the response."
-
-        end = response.rfind("}")
-        assert end != -1, "No JSON found in the response."
-
-        return response[start:end + 1].strip()
-
-
     def get_model(self, instructions:str) -> Model:
         """
         Restituisce un'istanza del modello specificato.
-
         Args:
             instructions: istruzioni da passare al modello (system prompt).
-
         Returns:
              Un'istanza di BaseModel o una sua sottoclasse.
-
         Raise:
             ValueError se il modello non è supportato.
         """
         name = self.value
-        if self in {AppModels.GEMINI, AppModels.GEMINI_PRO}:
+        if self in {model for model in AppModels if model.name.startswith("GEMINI")}:
             return Gemini(name, instructions=[instructions])
-        elif self in {AppModels.OLLAMA_GPT, AppModels.OLLAMA_QWEN}:
+        elif self in {model for model in AppModels if model.name.startswith("OLLAMA")}:
             return Ollama(name, instructions=[instructions])
 
         raise ValueError(f"Modello non supportato: {self}")
 
-    def get_agent(self, instructions: str, name: str = "", output: BaseModel | None = None) -> Agent:
+    def get_agent(self, instructions: str, name: str = "", output: BaseModel | None = None, tools: list[Toolkit] = []) -> Agent:
         """
         Costruisce un agente con il modello e le istruzioni specificate.
         Args:
             instructions: istruzioni da passare al modello (system prompt)
             name: nome dell'agente (opzionale)
             output: schema di output opzionale (Pydantic BaseModel)
-
         Returns:
              Un'istanza di Agent.
         """
@@ -134,6 +104,7 @@ class AppModels(Enum):
             model=self.get_model(instructions),
             name=name,
             retries=2,
+            tools=tools,
             delay_between_retries=5, # seconds
             output_schema=output # se si usa uno schema di output, lo si passa qui
             # TODO Eventuali altri parametri da mettere all'agente anche se si possono comunque assegnare dopo la creazione

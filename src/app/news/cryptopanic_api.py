@@ -62,10 +62,10 @@ class CryptoPanicWrapper(NewsWrapper):
     def set_filter(self, filter: CryptoPanicFilter):
         self.filter = filter
 
-    def get_top_headlines(self, total: int = 100) -> list[Article]:
-        return self.get_latest_news("", total) # same endpoint so just call the other method
+    def get_top_headlines(self, limit: int = 100) -> list[Article]:
+        return self.get_latest_news("", limit) # same endpoint so just call the other method
 
-    def get_latest_news(self, query: str, total: int = 100) -> list[Article]:
+    def get_latest_news(self, query: str, limit: int = 100) -> list[Article]:
         params = self.get_base_params()
         params['currencies'] = query
 
@@ -74,4 +74,4 @@ class CryptoPanicWrapper(NewsWrapper):
 
         json_response = response.json()
         articles = get_articles(json_response)
-        return articles[:total]
+        return articles[:limit]

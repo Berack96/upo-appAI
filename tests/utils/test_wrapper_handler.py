@@ -14,8 +14,40 @@ class FailingWrapper(MockWrapper):
         raise Exception("Intentional Failure")
 
 
+class MockWrapperWithParameters:
+    def do_something(self, param1: str, param2: int) -> str:
+        return f"Success {param1} and {param2}"
+
+class FailingWrapperWithParameters(MockWrapperWithParameters):
+    def do_something(self, param1: str, param2: int):
+        raise Exception("Intentional Failure")
+
+
 @pytest.mark.wrapper
 class TestWrapperHandler:
+    def test_init_failing(self):
+        with pytest.raises(AssertionError) as exc_info:
+            WrapperHandler([MockWrapper, MockWrapper2])
+        assert exc_info.type == AssertionError
+
+    def test_init_failing_empty(self):
+        with pytest.raises(AssertionError) as exc_info:
+            WrapperHandler.build_wrappers([])
+        assert exc_info.type == AssertionError
+
+    def test_init_failing_with_instances(self):
+        with pytest.raises(AssertionError) as exc_info:
+            WrapperHandler.build_wrappers([MockWrapper(), MockWrapper2()])
+        assert exc_info.type == AssertionError
+
+    def test_init_not_failing(self):
+        handler = WrapperHandler.build_wrappers([MockWrapper, MockWrapper2])
+        assert handler is not None
+        assert len(handler.wrappers) == 2
+        handler = WrapperHandler([MockWrapper(), MockWrapper2()])
+        assert handler is not None
+        assert len(handler.wrappers) == 2
+
     def test_all_wrappers_fail(self):
         wrappers = [FailingWrapper, FailingWrapper]
         handler: WrapperHandler[MockWrapper] = WrapperHandler.build_wrappers(wrappers, try_per_wrapper=2, retry_delay=0)
@@ -88,3 +120,13 @@ class TestWrapperHandler:
         with pytest.raises(Exception) as exc_info:
             handler_all_fail.try_call_all(lambda w: w.do_something())
         assert "All wrappers failed" in str(exc_info.value)
+
+
+    def test_wrappers_with_parameters(self):
+        wrappers = [FailingWrapperWithParameters, MockWrapperWithParameters]
+        handler: WrapperHandler[MockWrapperWithParameters] = WrapperHandler.build_wrappers(wrappers, try_per_wrapper=2, retry_delay=0)
+
+        result = handler.try_call(lambda w: w.do_something("test", 42))
+        assert result == "Success test and 42"
+        assert handler.index == 1  # Should have switched to the second wrapper
+        assert handler.retry_count == 0

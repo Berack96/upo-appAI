@@ -20,13 +20,13 @@ class DuckDuckGoWrapper(NewsWrapper):
         self.tool = DuckDuckGoTools()
         self.query = "crypto"
 
-    def get_top_headlines(self, total: int = 100) -> list[Article]:
-        results = self.tool.duckduckgo_news(self.query, max_results=total)
+    def get_top_headlines(self, limit: int = 100) -> list[Article]:
+        results = self.tool.duckduckgo_news(self.query, max_results=limit)
         json_results = json.loads(results)
         return [create_article(result) for result in json_results]
 
-    def get_latest_news(self, query: str, total: int = 100) -> list[Article]:
-        results = self.tool.duckduckgo_news(query or self.query, max_results=total)
+    def get_latest_news(self, query: str, limit: int = 100) -> list[Article]:
+        results = self.tool.duckduckgo_news(query or self.query, max_results=limit)
         json_results = json.loads(results)
         return [create_article(result) for result in json_results]
 

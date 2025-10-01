@@ -15,7 +15,7 @@ class TestCryptoPanicAPI:
 
     def test_crypto_panic_api_get_latest_news(self):
         crypto = CryptoPanicWrapper()
-        articles = crypto.get_latest_news(query="", total=2)
+        articles = crypto.get_latest_news(query="", limit=2)
         assert isinstance(articles, list)
         assert len(articles) == 2
         for article in articles:

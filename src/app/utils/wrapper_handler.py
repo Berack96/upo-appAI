@@ -1,6 +1,7 @@
 import time
+import traceback
 from typing import TypeVar, Callable, Generic, Iterable, Type
-from agno.utils.log import log_warning
+from agno.utils.log import log_warning, log_info
 
 W = TypeVar("W")
 T = TypeVar("T")
@@ -24,6 +25,8 @@ class WrapperHandler(Generic[W]):
             try_per_wrapper (int): Number of retries per wrapper before switching to the next.
             retry_delay (int): Delay in seconds between retries.
         """
+        assert not WrapperHandler.__check(wrappers), "All wrappers must be instances of their respective classes. Use `build_wrappers` to create the WrapperHandler."
+
         self.wrappers = wrappers
         self.retry_per_wrapper = try_per_wrapper
         self.retry_delay = retry_delay
@@ -46,17 +49,19 @@ class WrapperHandler(Generic[W]):
         while iterations < len(self.wrappers):
             try:
                 wrapper = self.wrappers[self.index]
+                log_info(f"Trying wrapper: {wrapper} - function {func}")
                 result = func(wrapper)
                 self.retry_count = 0
                 return result
             except Exception as e:
                 self.retry_count += 1
+                log_warning(f"{wrapper} failed {self.retry_count}/{self.retry_per_wrapper}: {WrapperHandler.__concise_error(e)}")
+
                 if self.retry_count >= self.retry_per_wrapper:
                     self.index = (self.index + 1) % len(self.wrappers)
                     self.retry_count = 0
                     iterations += 1
                 else:
-                    log_warning(f"{wrapper} failed {self.retry_count}/{self.retry_per_wrapper}: {e}")
                     time.sleep(self.retry_delay)
 
         raise Exception(f"All wrappers failed after retries")
@@ -74,15 +79,24 @@ class WrapperHandler(Generic[W]):
             Exception: If all wrappers fail.
         """
         results = {}
+        log_info(f"All wrappers: {[wrapper.__class__ for wrapper in self.wrappers]} - function {func}")
         for wrapper in self.wrappers:
             try:
                 result = func(wrapper)
                 results[wrapper.__class__] = result
             except Exception as e:
-                log_warning(f"{wrapper} failed: {e}")
+                log_warning(f"{wrapper} failed: {WrapperHandler.__concise_error(e)}")
         if not results:
             raise Exception("All wrappers failed")
         return results
+
+    @staticmethod
+    def __check(wrappers: list[W]) -> bool:
+        return all(w.__class__ is type for w in wrappers)
+
+    def __concise_error(e: Exception) -> str:
+        last_frame = traceback.extract_tb(e.__traceback__)[-1]
+        return f"{e} [\"{last_frame.filename}\", line {last_frame.lineno}]"
 
     @staticmethod
     def build_wrappers(constructors: Iterable[Type[W]], try_per_wrapper: int = 3, retry_delay: int = 2) -> 'WrapperHandler[W]':
@@ -99,6 +113,8 @@ class WrapperHandler(Generic[W]):
         Raises:
             Exception: If no wrappers could be initialized.
         """
+        assert WrapperHandler.__check(constructors), f"All constructors must be classes. Received: {constructors}"
+
         result = []
         for wrapper_class in constructors:
             try:

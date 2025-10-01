@@ -14,7 +14,7 @@ class TestNewsAPI:
 
     def test_news_api_get_latest_news(self):
         news_api = NewsApiWrapper()
-        articles = news_api.get_latest_news(query="crypto", total=2)
+        articles = news_api.get_latest_news(query="crypto", limit=2)
         assert isinstance(articles, list)
         assert len(articles) > 0 # Ensure we got some articles (apparently it doesn't always return the requested number)
         for article in articles:
@@ -26,7 +26,7 @@ class TestNewsAPI:
 
     def test_news_api_get_top_headlines(self):
         news_api = NewsApiWrapper()
-        articles = news_api.get_top_headlines(total=2)
+        articles = news_api.get_top_headlines(limit=2)
         assert isinstance(articles, list)
         # assert len(articles) > 0 # apparently it doesn't always return SOME articles
         for article in articles:
