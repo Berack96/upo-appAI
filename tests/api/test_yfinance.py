@@ -43,13 +43,14 @@ class TestYFinance:
 
     def test_yfinance_crypto_history(self):
         market = YFinanceWrapper()
-        history = market.get_historical_prices("BTC", limit=3)
+        history = market.get_historical_prices("BTC", limit=5)
         assert history is not None
         assert isinstance(history, list)
-        assert len(history) == 3
+        assert len(history) == 5
         for entry in history:
-            assert hasattr(entry, 'time')
+            assert hasattr(entry, 'timestamp_ms')
             assert hasattr(entry, 'close')
+            assert hasattr(entry, 'high')
             assert entry.close > 0
-            assert hasattr(entry, 'open')
-            assert entry.open > 0
+            assert entry.high > 0
+            assert entry.timestamp_ms > 0

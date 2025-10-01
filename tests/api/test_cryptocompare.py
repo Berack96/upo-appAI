@@ -49,8 +49,9 @@ class TestCryptoCompare:
         assert isinstance(history, list)
         assert len(history) == 5
         for entry in history:
-            assert hasattr(entry, 'time')
+            assert hasattr(entry, 'timestamp_ms')
             assert hasattr(entry, 'close')
             assert hasattr(entry, 'high')
             assert entry.close > 0
             assert entry.high > 0
+            assert entry.timestamp_ms > 0

@@ -3,15 +3,24 @@ from datetime import datetime
 from binance.client import Client
 from .base import ProductInfo, BaseWrapper, Price
 
-def get_product(currency: str, ticker_data: dict[str, str]) -> 'ProductInfo':
+def get_product(currency: str, ticker_data: dict[str, str]) -> ProductInfo:
     product = ProductInfo()
     product.id = ticker_data.get('symbol')
     product.symbol = ticker_data.get('symbol', '').replace(currency, '')
     product.price = float(ticker_data.get('price', 0))
     product.volume_24h = float(ticker_data.get('volume', 0))
-    product.status = "TRADING"  # Binance non fornisce status esplicito
     product.quote_currency = currency
     return product
+
+def get_price(kline_data: list) -> Price:
+    price = Price()
+    price.open = float(kline_data[1])
+    price.high = float(kline_data[2])
+    price.low = float(kline_data[3])
+    price.close = float(kline_data[4])
+    price.volume = float(kline_data[5])
+    price.timestamp_ms = kline_data[0]
+    return price
 
 class BinanceWrapper(BaseWrapper):
     """
@@ -63,15 +72,5 @@ class BinanceWrapper(BaseWrapper):
             interval=Client.KLINE_INTERVAL_1HOUR,
             limit=limit,
         )
+        return [get_price(kline) for kline in klines]
 
-        prices = []
-        for kline in klines:
-            price = Price()
-            price.open = float(kline[1])
-            price.high = float(kline[2])
-            price.low = float(kline[3])
-            price.close = float(kline[4])
-            price.volume = float(kline[5])
-            price.time = str(datetime.fromtimestamp(kline[0] / 1000))
-            prices.append(price)
-        return prices

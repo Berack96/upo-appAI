@@ -1,26 +1,26 @@
 import os
 import requests
-from typing import Optional, Dict, Any
 from .base import ProductInfo, BaseWrapper, Price
 
 
-def get_product(asset_data: dict) -> 'ProductInfo':
+def get_product(asset_data: dict) -> ProductInfo:
     product = ProductInfo()
-    product.id = asset_data['FROMSYMBOL'] + '-' + asset_data['TOSYMBOL']
-    product.symbol = asset_data['FROMSYMBOL']
-    product.price = float(asset_data['PRICE'])
-    product.volume_24h = float(asset_data['VOLUME24HOUR'])
-    product.status = "" # Cryptocompare does not provide status
+    product.id = asset_data.get('FROMSYMBOL', '') + '-' + asset_data.get('TOSYMBOL', '')
+    product.symbol = asset_data.get('FROMSYMBOL', '')
+    product.price = float(asset_data.get('PRICE', 0))
+    product.volume_24h = float(asset_data.get('VOLUME24HOUR', 0))
+    assert product.price > 0, "Invalid price data received from CryptoCompare"
     return product
 
-def get_price(price_data: dict) -> 'Price':
+def get_price(price_data: dict) -> Price:
     price = Price()
-    price.high = float(price_data['high'])
-    price.low = float(price_data['low'])
-    price.open = float(price_data['open'])
-    price.close = float(price_data['close'])
-    price.volume = float(price_data['volumeto'])
-    price.time = str(price_data['time'])
+    price.high = float(price_data.get('high', 0))
+    price.low = float(price_data.get('low', 0))
+    price.open = float(price_data.get('open', 0))
+    price.close = float(price_data.get('close', 0))
+    price.volume = float(price_data.get('volumeto', 0))
+    price.timestamp_ms = price_data.get('time', 0) * 1000
+    assert price.timestamp_ms > 0, "Invalid timestamp data received from CryptoCompare"
     return price
 
 
@@ -39,7 +39,7 @@ class CryptoCompareWrapper(BaseWrapper):
         self.api_key = api_key
         self.currency = currency
 
-    def __request(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def __request(self, endpoint: str, params: dict[str, str] | None = None) -> dict[str, str]:
         if params is None:
             params = {}
         params['api_key'] = self.api_key
@@ -67,7 +67,7 @@ class CryptoCompareWrapper(BaseWrapper):
             assets.append(get_product(asset_data))
         return assets
 
-    def get_historical_prices(self, asset_id: str, limit: int = 100) -> list[dict]:
+    def get_historical_prices(self, asset_id: str, limit: int = 100) -> list[Price]:
         response = self.__request("/data/v2/histohour", params = {
             "fsym": asset_id,
             "tsym": self.currency,

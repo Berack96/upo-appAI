@@ -2,7 +2,7 @@ import statistics
 from app.markets.base import ProductInfo, Price
 
 
-def aggregate_history_prices(prices: dict[str, list[Price]]) -> list[float]:
+def aggregate_history_prices(prices: dict[str, list[Price]]) -> list[Price]:
     """Aggrega i prezzi storici per symbol calcolando la media"""
     raise NotImplementedError("Funzione non ancora implementata per problemi di timestamp he deve essere uniformato prima di usare questa funzione.")
     # TODO implementare l'aggregazione dopo aver modificato la classe Price in modo che abbia un timestamp integer
@@ -39,11 +39,6 @@ def aggregate_product_info(products: dict[str, list[ProductInfo]]) -> list[Produ
         product.id = f"{symbol}_AGG"
         product.symbol = symbol
         product.quote_currency = next(p.quote_currency for p in product_list if p.quote_currency)
-
-        statuses = {}
-        for p in product_list:
-            statuses[p.status] = statuses.get(p.status, 0) + 1
-        product.status = max(statuses, key=statuses.get) if statuses else ""
 
         prices = [p.price for p in product_list]
         product.price = statistics.mean(prices)

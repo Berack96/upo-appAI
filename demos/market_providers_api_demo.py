@@ -154,7 +154,7 @@ class ProviderTester:
                 if product:
                     print(f"📦 Product: {product.symbol} (ID: {product.id})")
                     print(f"   Price: ${product.price:.2f}, Quote: {product.quote_currency}")
-                    print(f"   Status: {product.status}, Volume 24h: {product.volume_24h:,.2f}")
+                    print(f"   Volume 24h: {product.volume_24h:,.2f}")
                 else:
                     print(f"📦 Product: Nessun prodotto trovato per {symbol}")
                 

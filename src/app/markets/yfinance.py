@@ -12,7 +12,6 @@ def create_product_info(stock_data: dict[str, str]) -> ProductInfo:
     product.symbol = product.id.split('-')[0]  # Rimuovi il suffisso della valuta per le crypto
     product.price = float(stock_data.get('Current Stock Price', f"0.0 USD").split(" ")[0]) # prende solo il numero
     product.volume_24h = 0.0 # YFinance non fornisce il volume 24h direttamente
-    product.status = "trading" if product.price > 0 else "offline"
     product.quote_currency = product.id.split('-')[0]  # La valuta è la parte dopo il '-'
     return product
 
@@ -26,7 +25,7 @@ def create_price_from_history(hist_data: dict[str, str]) -> Price:
     price.open = float(hist_data.get('Open', 0.0))
     price.close = float(hist_data.get('Close', 0.0))
     price.volume = float(hist_data.get('Volume', 0.0))
-    price.time = hist_data.get('Timestamp', '')
+    price.timestamp_ms = int(hist_data.get('Timestamp', '0'))
     return price
 
 

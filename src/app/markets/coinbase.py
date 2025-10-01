@@ -6,24 +6,22 @@ from coinbase.rest.types.product_types import Candle, GetProductResponse, Produc
 from .base import ProductInfo, BaseWrapper, Price
 
 
-def get_product(product_data: GetProductResponse | Product) -> 'ProductInfo':
+def get_product(product_data: GetProductResponse | Product) -> ProductInfo:
     product = ProductInfo()
     product.id = product_data.product_id or ""
     product.symbol = product_data.base_currency_id or ""
     product.price = float(product_data.price) if product_data.price else 0.0
     product.volume_24h = float(product_data.volume_24h) if product_data.volume_24h else 0.0
-    # TODO Check what status means in Coinbase
-    product.status = product_data.status or ""
     return product
 
-def get_price(candle_data: Candle) -> 'Price':
+def get_price(candle_data: Candle) -> Price:
     price = Price()
     price.high = float(candle_data.high) if candle_data.high else 0.0
     price.low = float(candle_data.low) if candle_data.low else 0.0
     price.open = float(candle_data.open) if candle_data.open else 0.0
     price.close = float(candle_data.close) if candle_data.close else 0.0
     price.volume = float(candle_data.volume) if candle_data.volume else 0.0
-    price.time = str(candle_data.start) if candle_data.start else ""
+    price.timestamp_ms = int(candle_data.start) * 1000 if candle_data.start else 0
     return price
 
 

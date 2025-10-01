@@ -46,7 +46,6 @@ class ProductInfo(BaseModel):
     symbol: str = ""
     price: float = 0.0
     volume_24h: float = 0.0
-    status: str = ""
     quote_currency: str = ""
 
 class Price(BaseModel):
@@ -59,4 +58,4 @@ class Price(BaseModel):
     open: float = 0.0
     close: float = 0.0
     volume: float = 0.0
-    time: str = ""
+    timestamp_ms: int = 0  # Timestamp in milliseconds
