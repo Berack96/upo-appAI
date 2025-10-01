@@ -13,7 +13,7 @@ class TestNewsAPITool:
 
     def test_news_api_tool_get_top(self):
         tool = NewsAPIsTool()
-        result = tool.wrapper_handler.try_call(lambda w: w.get_top_headlines(total=2))
+        result = tool.wrapper_handler.try_call(lambda w: w.get_top_headlines(limit=2))
         assert isinstance(result, list)
         assert len(result) > 0
         for article in result:
@@ -22,7 +22,7 @@ class TestNewsAPITool:
 
     def test_news_api_tool_get_latest(self):
         tool = NewsAPIsTool()
-        result = tool.wrapper_handler.try_call(lambda w: w.get_latest_news(query="crypto", total=2))
+        result = tool.wrapper_handler.try_call(lambda w: w.get_latest_news(query="crypto", limit=2))
         assert isinstance(result, list)
         assert len(result) > 0
         for article in result:
@@ -31,7 +31,7 @@ class TestNewsAPITool:
 
     def test_news_api_tool_get_top__all_results(self):
         tool = NewsAPIsTool()
-        result = tool.wrapper_handler.try_call_all(lambda w: w.get_top_headlines(total=2))
+        result = tool.wrapper_handler.try_call_all(lambda w: w.get_top_headlines(limit=2))
         assert isinstance(result, dict)
         assert len(result.keys()) > 0
         print("Results from providers:", result.keys())
@@ -43,7 +43,7 @@ class TestNewsAPITool:
 
     def test_news_api_tool_get_latest__all_results(self):
         tool = NewsAPIsTool()
-        result = tool.wrapper_handler.try_call_all(lambda w: w.get_latest_news(query="crypto", total=2))
+        result = tool.wrapper_handler.try_call_all(lambda w: w.get_latest_news(query="crypto", limit=2))
         assert isinstance(result, dict)
         assert len(result.keys()) > 0
         print("Results from providers:", result.keys())

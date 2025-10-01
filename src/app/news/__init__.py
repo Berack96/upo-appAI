@@ -47,10 +47,10 @@ class NewsAPIsTool(NewsWrapper, Toolkit):
 
     # TODO Pensare se ha senso restituire gli articoli da TUTTI i wrapper o solo dal primo che funziona
     # la modifica è banale, basta usare try_call_all invece di try_call
-    def get_top_headlines(self, total: int = 100) -> list[Article]:
-        return self.wrapper_handler.try_call(lambda w: w.get_top_headlines(total))
-    def get_latest_news(self, query: str, total: int = 100) -> list[Article]:
-        return self.wrapper_handler.try_call(lambda w: w.get_latest_news(query, total))
+    def get_top_headlines(self, limit: int = 100) -> list[Article]:
+        return self.wrapper_handler.try_call(lambda w: w.get_top_headlines(limit))
+    def get_latest_news(self, query: str, limit: int = 100) -> list[Article]:
+        return self.wrapper_handler.try_call(lambda w: w.get_latest_news(query, limit))
 
 
 NEWS_INSTRUCTIONS = """

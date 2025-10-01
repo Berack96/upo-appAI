@@ -12,7 +12,7 @@ class TestGoogleNews:
 
     def test_gnews_api_get_latest_news(self):
         gnews_api = GoogleNewsWrapper()
-        articles = gnews_api.get_latest_news(query="crypto", total=2)
+        articles = gnews_api.get_latest_news(query="crypto", limit=2)
         assert isinstance(articles, list)
         assert len(articles) == 2
         for article in articles:
@@ -23,7 +23,7 @@ class TestGoogleNews:
 
     def test_gnews_api_get_top_headlines(self):
         news_api = GoogleNewsWrapper()
-        articles = news_api.get_top_headlines(total=2)
+        articles = news_api.get_top_headlines(limit=2)
         assert isinstance(articles, list)
         assert len(articles) == 2
         for article in articles:

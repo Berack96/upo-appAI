@@ -15,8 +15,8 @@ class GoogleNewsWrapper(NewsWrapper):
     It does not require an API key and is free to use.
     """
 
-    def get_top_headlines(self, total: int = 100) -> list[Article]:
-        gnews = GNews(language='en', max_results=total, period='7d')
+    def get_top_headlines(self, limit: int = 100) -> list[Article]:
+        gnews = GNews(language='en', max_results=limit, period='7d')
         results = gnews.get_top_news()
 
         articles = []
@@ -25,8 +25,8 @@ class GoogleNewsWrapper(NewsWrapper):
             articles.append(article)
         return articles
 
-    def get_latest_news(self, query: str, total: int = 100) -> list[Article]:
-        gnews = GNews(language='en', max_results=total, period='7d')
+    def get_latest_news(self, query: str, limit: int = 100) -> list[Article]:
+        gnews = GNews(language='en', max_results=limit, period='7d')
         results = gnews.get_news(query)
 
         articles = []
