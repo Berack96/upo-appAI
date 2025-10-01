@@ -21,7 +21,8 @@ class AppModels(Enum):
     GEMINI_PRO = "gemini-2.0-pro" # API online, più costoso ma migliore
     OLLAMA_GPT = "gpt-oss:latest" # + good - slow (13b)
     OLLAMA_QWEN = "qwen3:latest" # + good + fast (8b)
-    OLLAMA_QWEN_4B = "qwen3:4b" # + fast - decent (4b)
+    OLLAMA_QWEN_4B = "qwen3:4b" # + fast + decent (4b)
+    OLLAMA_QWEN_1B = "qwen3:1.7b" # + very fast + decent (1.7b)
 
     @staticmethod
     def availables_local() -> list['AppModels']:

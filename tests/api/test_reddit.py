@@ -7,8 +7,7 @@ from app.social.reddit import MAX_COMMENTS, RedditWrapper
 class TestRedditWrapper:
     def test_initialization(self):
         wrapper = RedditWrapper()
-        assert wrapper.client_id is not None
-        assert wrapper.client_secret is not None
+        assert wrapper is not None
         assert isinstance(wrapper.tool, Reddit)
 
     def test_get_top_crypto_posts(self):

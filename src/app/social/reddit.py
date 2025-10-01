@@ -4,6 +4,21 @@ from praw.models import Submission, MoreComments
 from .base import SocialWrapper, SocialPost, SocialComment
 
 MAX_COMMENTS = 5
+# TODO mettere piu' subreddit?
+# scelti da https://lkiconsulting.io/marketing/best-crypto-subreddits/
+SUBREDDITS = [
+    "CryptoCurrency", 
+    "Bitcoin",
+    "Ethereum",
+    "CryptoMarkets",
+    "Dogecoin",
+    "Altcoin",
+    "DeFi",
+    "NFT",
+    "BitcoinBeginners",
+    "CryptoTechnology",
+    "btc" # alt subs of Bitcoin
+]
 
 
 def create_social_post(post: Submission) -> SocialPost:
@@ -46,9 +61,8 @@ class RedditWrapper(SocialWrapper):
             client_secret=client_secret,
             user_agent="upo-appAI",
         )
+        self.subreddits = self.tool.subreddit("+".join(SUBREDDITS))
 
     def get_top_crypto_posts(self, limit: int = 5) -> list[SocialPost]:
-        subreddit = self.tool.subreddit("CryptoCurrency")
-        top_posts = subreddit.top(limit=limit, time_filter="week")
+        top_posts = self.subreddits.top(limit=limit, time_filter="week")
         return [create_social_post(post) for post in top_posts]
-

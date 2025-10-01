@@ -18,7 +18,7 @@ class MarketAPIs(BaseWrapper):
 
     def __init__(self, currency: str = "USD"):
         self.currency = currency
-        wrappers = [ CoinBaseWrapper, CryptoCompareWrapper ]
+        wrappers = [ BinanceWrapper, CoinBaseWrapper, CryptoCompareWrapper ]
         self.wrappers: WrapperHandler[BaseWrapper] = WrapperHandler.build_wrappers(wrappers)
 
     def get_product(self, asset_id):
