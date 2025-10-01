@@ -94,6 +94,7 @@ class WrapperHandler(Generic[W]):
     def __check(wrappers: list[W]) -> bool:
         return all(w.__class__ is type for w in wrappers)
 
+    @staticmethod
     def __concise_error(e: Exception) -> str:
         last_frame = traceback.extract_tb(e.__traceback__)[-1]
         return f"{e} [\"{last_frame.filename}\", line {last_frame.lineno}]"
