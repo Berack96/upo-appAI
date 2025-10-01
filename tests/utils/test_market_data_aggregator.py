@@ -1,88 +1,104 @@
 import pytest
-from app.utils.market_data_aggregator import MarketDataAggregator
-from app.utils.aggregated_models import AggregatedProductInfo
 from app.markets.base import ProductInfo, Price
+from app.utils.market_aggregation import aggregate_history_prices, aggregate_product_info
+
 
 @pytest.mark.aggregator
-@pytest.mark.limited
 @pytest.mark.market
-@pytest.mark.api
 class TestMarketDataAggregator:
-    
-    def test_initialization(self):
-        """Test che il MarketDataAggregator si inizializzi correttamente"""
-        aggregator = MarketDataAggregator()
-        assert aggregator is not None
-        assert aggregator.is_aggregation_enabled() == True
-        
-    def test_aggregation_toggle(self):
-        """Test del toggle dell'aggregazione"""
-        aggregator = MarketDataAggregator()
-        
-        # Disabilita aggregazione
-        aggregator.enable_aggregation(False)
-        assert aggregator.is_aggregation_enabled() == False
-        
-        # Riabilita aggregazione
-        aggregator.enable_aggregation(True)
-        assert aggregator.is_aggregation_enabled() == True
-        
-    def test_aggregated_product_info_creation(self):
-        """Test creazione AggregatedProductInfo da fonti multiple"""
-        
-        # Crea dati di esempio
-        product1 = ProductInfo(
-            id="BTC-USD",
-            symbol="BTC-USD",
+
+    def __product(self, symbol: str, price: float, volume: float, status: str, currency: str) -> ProductInfo:
+        prod = ProductInfo()
+        prod.id=f"{symbol}-{currency}"
+        prod.symbol=symbol
+        prod.price=price
+        prod.volume_24h=volume
+        prod.status=status
+        prod.quote_currency=currency
+        return prod
+
+    def test_aggregate_product_info(self):
+        products: dict[str, list[ProductInfo]] = {
+            "Provider1": [self.__product("BTC", 50000.0, 1000.0, "active", "USD")],
+            "Provider2": [self.__product("BTC", 50100.0, 1100.0, "active", "USD")],
+            "Provider3": [self.__product("BTC", 49900.0, 900.0, "inactive", "USD")],
+        }
+
+        aggregated = aggregate_product_info(products)
+        print(aggregated)
+        assert len(aggregated) == 1
+
+        info = aggregated[0]
+        assert info is not None
+        assert info.symbol == "BTC"
+        assert info.price == pytest.approx(50000.0, rel=1e-3)
+
+        avg_weighted_volume = (50000.0 * 1000.0 + 50100.0 * 1100.0 + 49900.0 * 900.0) / (1000.0 + 1100.0 + 900.0)
+        assert info.volume_24h == pytest.approx(avg_weighted_volume, rel=1e-3)
+        assert info.status == "active"
+        assert info.quote_currency == "USD"
+
+    def test_aggregate_product_info_multiple_symbols(self):
+        products = {
+            "Provider1": [
+                self.__product("BTC", 50000.0, 1000.0, "active", "USD"),
+                self.__product("ETH", 4000.0, 2000.0, "active", "USD"),
+            ],
+            "Provider2": [
+                self.__product("BTC", 50100.0, 1100.0, "active", "USD"),
+                self.__product("ETH", 4050.0, 2100.0, "active", "USD"),
+            ],
+        }
+
+        aggregated = aggregate_product_info(products)
+        assert len(aggregated) == 2
+
+        btc_info = next((p for p in aggregated if p.symbol == "BTC"), None)
+        eth_info = next((p for p in aggregated if p.symbol == "ETH"), None)
+
+        assert btc_info is not None
+        assert btc_info.price == pytest.approx(50050.0, rel=1e-3)
+        avg_weighted_volume_btc = (50000.0 * 1000.0 + 50100.0 * 1100.0) / (1000.0 + 1100.0)
+        assert btc_info.volume_24h == pytest.approx(avg_weighted_volume_btc, rel=1e-3)
+        assert btc_info.status == "active"
+        assert btc_info.quote_currency == "USD"
+
+        assert eth_info is not None
+        assert eth_info.price == pytest.approx(4025.0, rel=1e-3)
+        avg_weighted_volume_eth = (4000.0 * 2000.0 + 4050.0 * 2100.0) / (2000.0 + 2100.0)
+        assert eth_info.volume_24h == pytest.approx(avg_weighted_volume_eth, rel=1e-3)
+        assert eth_info.status == "active"
+        assert eth_info.quote_currency == "USD"
+
+    def test_aggregate_history_prices(self):
+        """Test aggregazione di prezzi storici usando aggregate_history_prices"""
+
+        price1 = Price(
+            timestamp="2024-06-01T00:00:00Z",
             price=50000.0,
-            volume_24h=1000.0,
-            status="active",
-            quote_currency="USD"
+            source="exchange1"
         )
-        
-        product2 = ProductInfo(
-            id="BTC-USD",
-            symbol="BTC-USD", 
+        price2 = Price(
+            timestamp="2024-06-01T00:00:00Z",
             price=50100.0,
-            volume_24h=1100.0,
-            status="active",
-            quote_currency="USD"
+            source="exchange2"
         )
-        
-        # Aggrega i prodotti
-        aggregated = AggregatedProductInfo.from_multiple_sources([product1, product2])
-        
-        assert aggregated.symbol == "BTC-USD"
-        assert aggregated.price == pytest.approx(50050.0, rel=1e-3)  # media tra 50000 e 50100
-        assert aggregated.volume_24h == 50052.38095  # somma dei volumi
-        assert aggregated.status == "active"  # majority vote
-        assert aggregated.id == "BTC-USD_AGG"  # mapping_id con suffisso aggregazione
-        
-    def test_confidence_calculation(self):
-        """Test del calcolo della confidence"""
-        
-        product1 = ProductInfo(
-            id="BTC-USD",
-            symbol="BTC-USD",
-            price=50000.0,
-            volume_24h=1000.0,
-            status="active",
-            quote_currency="USD"
+        price3 = Price(
+            timestamp="2024-06-01T01:00:00Z",
+            price=50200.0,
+            source="exchange1"
         )
-        
-        product2 = ProductInfo(
-            id="BTC-USD",
-            symbol="BTC-USD",
-            price=50100.0,
-            volume_24h=1100.0,
-            status="active",
-            quote_currency="USD"
+        price4 = Price(
+            timestamp="2024-06-01T01:00:00Z",
+            price=50300.0,
+            source="exchange2"
         )
-        
-        aggregated = AggregatedProductInfo.from_multiple_sources([product1, product2])
-        
-        # Verifica che ci siano metadati
-        assert aggregated._metadata is not None
-        assert len(aggregated._metadata.sources_used) > 0
-        assert aggregated._metadata.aggregation_timestamp != ""
-        # La confidence può essere 0.0 se ci sono fonti "unknown"
+
+        prices = [price1, price2, price3, price4]
+        aggregated_prices = aggregate_history_prices(prices)
+
+        assert len(aggregated_prices) == 2
+        assert aggregated_prices[0].timestamp == "2024-06-01T00:00:00Z"
+        assert aggregated_prices[0].price == pytest.approx(50050.0, rel=1e-3)
+        assert aggregated_prices[1].timestamp == "2024-06-01T01:00:00Z"
+        assert aggregated_prices[1].price == pytest.approx(50250.0, rel=1e-3)
