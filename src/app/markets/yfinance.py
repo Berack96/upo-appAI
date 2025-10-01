@@ -12,7 +12,7 @@ def create_product_info(stock_data: dict[str, str]) -> ProductInfo:
     product.symbol = product.id.split('-')[0]  # Rimuovi il suffisso della valuta per le crypto
     product.price = float(stock_data.get('Current Stock Price', f"0.0 USD").split(" ")[0]) # prende solo il numero
     product.volume_24h = 0.0 # YFinance non fornisce il volume 24h direttamente
-    product.quote_currency = product.id.split('-')[0]  # La valuta è la parte dopo il '-'
+    product.quote_currency = product.id.split('-')[1]  # La valuta è la parte dopo il '-'
     return product
 
 def create_price_from_history(hist_data: dict[str, str]) -> Price:

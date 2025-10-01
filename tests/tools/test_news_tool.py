@@ -33,10 +33,8 @@ class TestNewsAPITool:
         result = tool.wrapper_handler.try_call_all(lambda w: w.get_top_headlines(limit=2))
         assert isinstance(result, dict)
         assert len(result.keys()) > 0
-        print("Results from providers:", result.keys())
         for provider, articles in result.items():
             for article in articles:
-                print(provider, article.title)
                 assert article.title is not None
                 assert article.source is not None
 
@@ -45,9 +43,7 @@ class TestNewsAPITool:
         result = tool.wrapper_handler.try_call_all(lambda w: w.get_latest_news(query="crypto", limit=2))
         assert isinstance(result, dict)
         assert len(result.keys()) > 0
-        print("Results from providers:", result.keys())
         for provider, articles in result.items():
             for article in articles:
-                print(provider, article.title)
                 assert article.title is not None
                 assert article.source is not None

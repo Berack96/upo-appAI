@@ -34,7 +34,6 @@ class TestMarketDataAggregator:
         }
 
         aggregated = aggregate_product_info(products)
-        print(aggregated)
         assert len(aggregated) == 1
 
         info = aggregated[0]
