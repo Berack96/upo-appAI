@@ -24,6 +24,7 @@ def pytest_configure(config:pytest.Config):
         ("limited", "marks tests that have limited execution due to API constraints"),
         ("wrapper", "marks tests for wrapper handler"),
         ("tools", "marks tests for tools"),
+        ("aggregator", "marks tests for market data aggregator"),
     ]
     for marker in markers:
         line = f"{marker[0]}: {marker[1]}"

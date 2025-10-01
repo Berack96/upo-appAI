@@ -1,5 +1,5 @@
 from agno.tools import Toolkit
-from app.markets import MarketAPIs
+from app.markets import MarketAPIsTool
 
 
 # TODO (?) in futuro fare in modo che la LLM faccia da sé per il mercato

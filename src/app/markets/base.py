@@ -3,16 +3,47 @@ from pydantic import BaseModel
 
 class BaseWrapper:
     """
-    Interfaccia per i wrapper delle API di mercato.
-    Implementa i metodi di base che ogni wrapper deve avere.
+    Base class for market API wrappers.
+    All market API wrappers should inherit from this class and implement the methods.
     """
+
     def get_product(self, asset_id: str) -> 'ProductInfo':
+        """
+        Get product information for a specific asset ID.
+        Args:
+            asset_id (str): The asset ID to retrieve information for.
+        Returns:
+            ProductInfo: An object containing product information.
+        """
         raise NotImplementedError
+
     def get_products(self, asset_ids: list[str]) -> list['ProductInfo']:
+        """
+        Get product information for multiple asset IDs.
+        Args:
+            asset_ids (list[str]): The list of asset IDs to retrieve information for.
+        Returns:
+            list[ProductInfo]: A list of objects containing product information.
+        """
         raise NotImplementedError
+
     def get_all_products(self) -> list['ProductInfo']:
+        """
+        Get product information for all available assets.
+        Returns:
+            list[ProductInfo]: A list of objects containing product information.
+        """
         raise NotImplementedError
+
     def get_historical_prices(self, asset_id: str = "BTC", limit: int = 100) -> list['Price']:
+        """
+        Get historical price data for a specific asset ID.
+        Args:
+            asset_id (str): The asset ID to retrieve price data for.
+            limit (int): The maximum number of price data points to return.
+        Returns:
+            list[Price]: A list of Price objects.
+        """
         raise NotImplementedError
 
 class ProductInfo(BaseModel):
