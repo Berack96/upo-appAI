@@ -3,7 +3,7 @@ from app.utils.market_data_aggregator import MarketDataAggregator
 from app.utils.aggregated_models import AggregatedProductInfo
 from app.markets.base import ProductInfo, Price
 
-
+@pytest.mark.aggregator
 @pytest.mark.limited
 @pytest.mark.market
 @pytest.mark.api

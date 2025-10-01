@@ -8,6 +8,7 @@ Questo script dimostra l'utilizzo di tutti i wrapper che implementano BaseWrappe
 - CryptoCompareWrapper (richiede API key)
 - BinanceWrapper (richiede credenziali)
 - PublicBinanceAgent (accesso pubblico)
+- YFinanceWrapper (accesso gratuito a dati azionari e crypto)
 
 Lo script effettua chiamate GET a diversi provider e visualizza i dati
 in modo strutturato con informazioni dettagliate su timestamp, stato
@@ -29,7 +30,8 @@ from dotenv import load_dotenv
 from app.markets import ( 
     CoinBaseWrapper, 
     CryptoCompareWrapper, 
-    BinanceWrapper, 
+    BinanceWrapper,
+    YFinanceWrapper,
     BaseWrapper
 )
 
@@ -259,13 +261,18 @@ def initialize_providers() -> Dict[str, BaseWrapper]:
         print("⚠️ CoinBaseWrapper saltato: credenziali Coinbase non complete")
     
     # BinanceWrapper
-    
     try:
         providers["Binance"] = BinanceWrapper()
         print("✅ BinanceWrapper inizializzato con successo")
     except Exception as e:
         print(f"❌ Errore nell'inizializzazione di BinanceWrapper: {e}")
     
+    # YFinanceWrapper (sempre disponibile - dati azionari e crypto gratuiti)
+    try:
+        providers["YFinance"] = YFinanceWrapper()
+        print("✅ YFinanceWrapper inizializzato con successo")
+    except Exception as e:
+        print(f"❌ Errore nell'inizializzazione di YFinanceWrapper: {e}")
     return providers
 
 def print_summary(results: List[Dict[str, Any]]):
