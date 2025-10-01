@@ -2,13 +2,14 @@ from .base import BaseWrapper, ProductInfo, Price
 from .coinbase import CoinBaseWrapper
 from .binance import BinanceWrapper
 from .cryptocompare import CryptoCompareWrapper
+from .yfinance import YFinanceWrapper
 from .binance_public import PublicBinanceAgent
 from app.utils.wrapper_handler import WrapperHandler
 from typing import List, Optional
 from agno.tools import Toolkit
 
 
-__all__ = [ "MarketAPIs", "BinanceWrapper", "CoinBaseWrapper", "CryptoCompareWrapper", "PublicBinanceAgent" ]
+__all__ = [ "MarketAPIs", "BinanceWrapper", "CoinBaseWrapper", "CryptoCompareWrapper", "YFinanceWrapper", "PublicBinanceAgent" ]
 
 
 class MarketAPIsTool(BaseWrapper, Toolkit):
@@ -24,7 +25,7 @@ class MarketAPIsTool(BaseWrapper, Toolkit):
 
     def __init__(self, currency: str = "USD", enable_aggregation: bool = False):
         self.currency = currency
-        wrappers = [ BinanceWrapper, CoinBaseWrapper, CryptoCompareWrapper ]
+        wrappers = [ BinanceWrapper, CoinBaseWrapper, CryptoCompareWrapper, YFinanceWrapper ]
         self.wrappers: WrapperHandler[BaseWrapper] = WrapperHandler.build_wrappers(wrappers)
         
         # Inizializza l'aggregatore solo se richiesto (lazy initialization)

@@ -4,7 +4,7 @@ from app.utils.market_data_aggregator import MarketDataAggregator
 from app.utils.aggregated_models import AggregatedProductInfo
 from app.markets.base import ProductInfo, Price
 
-
+@pytest.mark.aggregator
 class TestMarketDataAggregator:
     
     def test_initialization(self):

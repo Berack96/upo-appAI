@@ -12,8 +12,8 @@ class MarketDataAggregator:
     
     def __init__(self, currency: str = "USD"):
         # Import lazy per evitare circular import
-        from app.markets import MarketAPIs
-        self._market_apis = MarketAPIs(currency)
+        from app.markets import MarketAPIsTool
+        self._market_apis = MarketAPIsTool(currency)
         self._aggregation_enabled = True
     
     def get_product(self, asset_id: str) -> ProductInfo:

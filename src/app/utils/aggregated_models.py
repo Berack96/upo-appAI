@@ -77,6 +77,8 @@ class AggregatedProductInfo(ProductInfo):
             return "binance"
         elif "crypto" in product.id.lower() or "cc" in product.id.lower():
             return "cryptocompare"
+        elif "yfinance" in product.id.lower() or "yf" in product.id.lower():
+            return "yfinance"
         else:
             return "unknown"
     
