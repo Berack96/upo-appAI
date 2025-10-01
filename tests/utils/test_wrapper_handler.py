@@ -54,7 +54,7 @@ class TestWrapperHandler:
 
         with pytest.raises(Exception) as exc_info:
             handler.try_call(lambda w: w.do_something())
-        assert "All wrappers failed after retries" in str(exc_info.value)
+        assert "All wrappers failed" in str(exc_info.value)
 
     def test_success_on_first_try(self):
         wrappers = [MockWrapper, FailingWrapper]
@@ -121,7 +121,6 @@ class TestWrapperHandler:
             handler_all_fail.try_call_all(lambda w: w.do_something())
         assert "All wrappers failed" in str(exc_info.value)
 
-
     def test_wrappers_with_parameters(self):
         wrappers = [FailingWrapperWithParameters, MockWrapperWithParameters]
         handler: WrapperHandler[MockWrapperWithParameters] = WrapperHandler.build_wrappers(wrappers, try_per_wrapper=2, retry_delay=0)
@@ -130,3 +129,24 @@ class TestWrapperHandler:
         assert result == "Success test and 42"
         assert handler.index == 1  # Should have switched to the second wrapper
         assert handler.retry_count == 0
+
+    def test_wrappers_with_parameters_all_fail(self):
+        wrappers = [FailingWrapperWithParameters, FailingWrapperWithParameters]
+        handler: WrapperHandler[MockWrapperWithParameters] = WrapperHandler.build_wrappers(wrappers, try_per_wrapper=1, retry_delay=0)
+
+        with pytest.raises(Exception) as exc_info:
+            handler.try_call(lambda w: w.do_something("test", 42))
+        assert "All wrappers failed" in str(exc_info.value)
+
+    def test_try_call_all_with_parameters(self):
+        wrappers = [FailingWrapperWithParameters, MockWrapperWithParameters]
+        handler: WrapperHandler[MockWrapperWithParameters] = WrapperHandler.build_wrappers(wrappers, try_per_wrapper=1, retry_delay=0)
+        results = handler.try_call_all(lambda w: w.do_something("param", 99))
+        assert results == {MockWrapperWithParameters: "Success param and 99"}
+
+    def test_try_call_all_with_parameters_all_fail(self):
+        wrappers = [FailingWrapperWithParameters, FailingWrapperWithParameters]
+        handler: WrapperHandler[MockWrapperWithParameters] = WrapperHandler.build_wrappers(wrappers, try_per_wrapper=1, retry_delay=0)
+        with pytest.raises(Exception) as exc_info:
+            handler.try_call_all(lambda w: w.do_something("param", 99))
+        assert "All wrappers failed" in str(exc_info.value)

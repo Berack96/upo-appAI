@@ -1,3 +1,4 @@
+import inspect
 import time
 import traceback
 from typing import TypeVar, Callable, Generic, Iterable, Type
@@ -45,17 +46,24 @@ class WrapperHandler(Generic[W]):
         Raises:
             Exception: If all wrappers fail after retries.
         """
+        log_info(f"{inspect.getsource(func).strip()} {inspect.getclosurevars(func).nonlocals}")
+
         iterations = 0
         while iterations < len(self.wrappers):
+            wrapper = self.wrappers[self.index]
+            wrapper_name = wrapper.__class__.__name__
+
             try:
-                wrapper = self.wrappers[self.index]
-                log_info(f"Trying wrapper: {wrapper} - function {func}")
+                log_info(f"try_call {wrapper_name}")
                 result = func(wrapper)
+                log_info(f"{wrapper_name} succeeded")
                 self.retry_count = 0
                 return result
+
             except Exception as e:
                 self.retry_count += 1
-                log_warning(f"{wrapper} failed {self.retry_count}/{self.retry_per_wrapper}: {WrapperHandler.__concise_error(e)}")
+                error = WrapperHandler.__concise_error(e)
+                log_warning(f"{wrapper_name} failed {self.retry_count}/{self.retry_per_wrapper}: {error}")
 
                 if self.retry_count >= self.retry_per_wrapper:
                     self.index = (self.index + 1) % len(self.wrappers)
@@ -64,7 +72,7 @@ class WrapperHandler(Generic[W]):
                 else:
                     time.sleep(self.retry_delay)
 
-        raise Exception(f"All wrappers failed after retries")
+        raise Exception(f"All wrappers failed, latest error: {error}")
 
     def try_call_all(self, func: Callable[[W], T]) -> dict[str, T]:
         """
@@ -78,16 +86,20 @@ class WrapperHandler(Generic[W]):
         Raises:
             Exception: If all wrappers fail.
         """
+        log_info(f"{inspect.getsource(func).strip()} {inspect.getclosurevars(func).nonlocals}")
+
         results = {}
-        log_info(f"All wrappers: {[wrapper.__class__ for wrapper in self.wrappers]} - function {func}")
         for wrapper in self.wrappers:
+            wrapper_name = wrapper.__class__.__name__
             try:
                 result = func(wrapper)
+                log_info(f"{wrapper_name} succeeded")
                 results[wrapper.__class__] = result
             except Exception as e:
-                log_warning(f"{wrapper} failed: {WrapperHandler.__concise_error(e)}")
+                error = WrapperHandler.__concise_error(e)
+                log_warning(f"{wrapper_name} failed: {error}")
         if not results:
-            raise Exception("All wrappers failed")
+            raise Exception(f"All wrappers failed, latest error: {error}")
         return results
 
     @staticmethod
