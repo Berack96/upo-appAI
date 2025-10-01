@@ -186,24 +186,6 @@ class ProviderTester:
             results["tests"]["get_products"] = f"ERROR: {error_msg}"
             results["overall_status"] = "PARTIAL"
         
-        # Test get_all_products
-        timestamp = datetime.now()
-        try:
-            all_products = wrapper.get_all_products()
-            self.formatter.print_request_info(
-                provider_name, "get_all_products()", timestamp, "✅ SUCCESS"
-            )
-            self.formatter.print_product_table(all_products, f"{provider_name} All Products")
-            results["tests"]["get_all_products"] = "SUCCESS"
-            
-        except Exception as e:
-            error_msg = str(e)
-            self.formatter.print_request_info(
-                provider_name, "get_all_products()", timestamp, "❌ ERROR", error_msg
-            )
-            results["tests"]["get_all_products"] = f"ERROR: {error_msg}"
-            results["overall_status"] = "PARTIAL"
-        
         # Test get_historical_prices
         timestamp = datetime.now()
         try:

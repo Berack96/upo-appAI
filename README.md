@@ -39,6 +39,8 @@ cp .env.example .env
 Le API Keys devono essere inserite nelle variabili opportune dopo l'uguale e ***senza*** spazi. Esse si possono ottenere tramite i loro providers (alcune sono gratuite, altre a pagamento).\
 Nel file [.env.example](.env.example) sono presenti tutte le variabili da compilare con anche il link per recuperare le chiavi, quindi, dopo aver copiato il file, basta seguire le istruzioni al suo interno.
 
+Le chiavi non sono necessarie per far partire l'applicazione, ma senza di esse alcune funzionalità non saranno disponibili o saranno limitate. Per esempio senza la chiave di NewsAPI non si potranno recuperare le ultime notizie sul mercato delle criptovalute. Ciononostante, l'applicazione usa anche degli strumenti che non richiedono chiavi API, come Yahoo Finance e GNews, che permettono di avere comunque un'analisi di base del mercato.
+
 ### **2. Ollama**
 Per utilizzare modelli AI localmente, è necessario installare Ollama, un gestore di modelli LLM che consente di eseguire modelli direttamente sul proprio hardware. Si consiglia di utilizzare Ollama con il supporto GPU per prestazioni ottimali, ma è possibile eseguirlo anche solo con la CPU.
 

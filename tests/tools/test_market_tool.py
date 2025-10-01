@@ -11,7 +11,6 @@ class TestMarketAPIsTool:
         assert market_wrapper is not None
         assert hasattr(market_wrapper, 'get_product')
         assert hasattr(market_wrapper, 'get_products')
-        assert hasattr(market_wrapper, 'get_all_products')
         assert hasattr(market_wrapper, 'get_historical_prices')
 
     def test_wrapper_capabilities(self):

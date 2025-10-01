@@ -54,17 +54,6 @@ class BinanceWrapper(BaseWrapper):
 
         return [get_product(self.currency, ticker) for ticker in tickers]
 
-    def get_all_products(self) -> list[ProductInfo]:
-        all_tickers = self.client.get_ticker()
-        products = []
-
-        for ticker in all_tickers:
-            # Filtra solo i simboli che terminano con la valuta di default
-            if ticker['symbol'].endswith(self.currency):
-                product = get_product(self.currency, ticker)
-                products.append(product)
-        return products
-
     def get_historical_prices(self, asset_id: str = "BTC", limit: int = 100) -> list[Price]:
         symbol = self.__format_symbol(asset_id)
 

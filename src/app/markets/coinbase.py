@@ -73,10 +73,6 @@ class CoinBaseWrapper(BaseWrapper):
         assets = self.client.get_products(product_ids=all_asset_ids)
         return [get_product(asset) for asset in assets.products]
 
-    def get_all_products(self) -> list[ProductInfo]:
-        assets = self.client.get_products()
-        return [get_product(asset) for asset in assets.products]
-
     def get_historical_prices(self, asset_id: str = "BTC", limit: int = 100) -> list[Price]:
         asset_id = self.__format(asset_id)
         end_time = datetime.now()

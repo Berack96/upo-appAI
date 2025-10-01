@@ -67,10 +67,6 @@ class CryptoCompareWrapper(BaseWrapper):
             assets.append(get_product(asset_data))
         return assets
 
-    def get_all_products(self) -> list[ProductInfo]:
-        # TODO serve davvero il workaroud qui? Possiamo prendere i dati da un altro endpoint intanto
-        raise NotImplementedError("get_all_products is not supported by CryptoCompare API")
-
     def get_historical_prices(self, asset_id: str, limit: int = 100) -> list[dict]:
         response = self.__request("/data/v2/histohour", params = {
             "fsym": asset_id,

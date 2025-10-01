@@ -26,14 +26,6 @@ class BaseWrapper:
         """
         raise NotImplementedError
 
-    def get_all_products(self) -> list['ProductInfo']:
-        """
-        Get product information for all available assets.
-        Returns:
-            list[ProductInfo]: A list of objects containing product information.
-        """
-        raise NotImplementedError
-
     def get_historical_prices(self, asset_id: str = "BTC", limit: int = 100) -> list['Price']:
         """
         Get historical price data for a specific asset ID.

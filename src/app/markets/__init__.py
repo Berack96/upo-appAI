@@ -12,14 +12,29 @@ __all__ = [ "MarketAPIs", "BinanceWrapper", "CoinBaseWrapper", "CryptoCompareWra
 
 class MarketAPIsTool(BaseWrapper, Toolkit):
     """
-    Classe per comporre più MarketAPI con gestione degli errori e aggregazione dei dati.
-    Usa WrapperHandler per gestire più API con logica di retry e failover.
-    Si può scegliere se aggregare i dati da tutte le fonti o usare una singola fonte tramite delle chiamate apposta.
+    Class that aggregates multiple market API wrappers and manages them using WrapperHandler.
+    This class supports retrieving product information and historical prices.
+    This class can also aggregate data from multiple sources to provide a more comprehensive view of the market.
+    The following wrappers are included in this order:
+    - BinanceWrapper
+    - YFinanceWrapper
+    - CoinBaseWrapper
+    - CryptoCompareWrapper
     """
 
     def __init__(self, currency: str = "USD"):
+        """
+        Initialize the MarketAPIsTool with multiple market API wrappers.
+        The following wrappers are included in this order:
+        - BinanceWrapper
+        - YFinanceWrapper
+        - CoinBaseWrapper
+        - CryptoCompareWrapper
+        Args:
+            currency (str): Valuta in cui restituire i prezzi. Default è "USD".
+        """
         kwargs = {"currency": currency or "USD"}
-        wrappers = [ BinanceWrapper, CoinBaseWrapper, CryptoCompareWrapper, YFinanceWrapper ]
+        wrappers = [ BinanceWrapper, YFinanceWrapper, CoinBaseWrapper, CryptoCompareWrapper ]
         self.wrappers: WrapperHandler[BaseWrapper] = WrapperHandler.build_wrappers(wrappers, kwargs=kwargs)
 
         Toolkit.__init__(
@@ -28,7 +43,6 @@ class MarketAPIsTool(BaseWrapper, Toolkit):
             tools=[
                 self.get_product,
                 self.get_products,
-                self.get_all_products,
                 self.get_historical_prices,
                 self.get_products_aggregated,
                 self.get_historical_prices_aggregated,
@@ -39,8 +53,6 @@ class MarketAPIsTool(BaseWrapper, Toolkit):
         return self.wrappers.try_call(lambda w: w.get_product(asset_id))
     def get_products(self, asset_ids: list[str]) -> list[ProductInfo]:
         return self.wrappers.try_call(lambda w: w.get_products(asset_ids))
-    def get_all_products(self) -> list[ProductInfo]:
-        return self.wrappers.try_call(lambda w: w.get_all_products())
     def get_historical_prices(self, asset_id: str = "BTC", limit: int = 100) -> list[Price]:
         return self.wrappers.try_call(lambda w: w.get_historical_prices(asset_id, limit))
 

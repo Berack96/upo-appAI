@@ -62,9 +62,6 @@ class YFinanceWrapper(BaseWrapper):
             products.append(product)
         return products
 
-    def get_all_products(self) -> list[ProductInfo]:
-        raise NotImplementedError("YFinanceWrapper does not support get_all_products due to API limitations.")
-
     def get_historical_prices(self, asset_id: str = "BTC", limit: int = 100) -> list[Price]:
         symbol = self._format_symbol(asset_id)
 
