@@ -51,10 +51,10 @@ class RedditWrapper(SocialWrapper):
 
     def __init__(self):
         client_id = os.getenv("REDDIT_API_CLIENT_ID")
-        assert client_id is not None, "REDDIT_API_CLIENT_ID environment variable is not set"
+        assert client_id, "REDDIT_API_CLIENT_ID environment variable is not set"
 
         client_secret = os.getenv("REDDIT_API_CLIENT_SECRET")
-        assert client_secret is not None, "REDDIT_API_CLIENT_SECRET environment variable is not set"
+        assert client_secret, "REDDIT_API_CLIENT_SECRET environment variable is not set"
 
         self.tool = Reddit(
             client_id=client_id,

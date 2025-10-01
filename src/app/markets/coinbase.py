@@ -49,10 +49,10 @@ class CoinBaseWrapper(BaseWrapper):
 
     def __init__(self, currency: str = "USD"):
         api_key = os.getenv("COINBASE_API_KEY")
-        assert api_key is not None, "API key is required"
+        assert api_key, "COINBASE_API_KEY environment variable not set"
 
         api_private_key = os.getenv("COINBASE_API_SECRET")
-        assert api_private_key is not None, "API private key is required"
+        assert api_private_key, "COINBASE_API_SECRET environment variable not set"
 
         self.currency = currency
         self.client: RESTClient = RESTClient(

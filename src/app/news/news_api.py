@@ -19,7 +19,7 @@ class NewsApiWrapper(NewsWrapper):
 
     def __init__(self):
         api_key = os.getenv("NEWS_API_KEY")
-        assert api_key is not None, "NEWS_API_KEY environment variable not set"
+        assert api_key, "NEWS_API_KEY environment variable not set"
 
         self.client = newsapi.NewsApiClient(api_key=api_key)
         self.category = "business" # Cryptocurrency is under business

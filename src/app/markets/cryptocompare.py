@@ -34,7 +34,7 @@ class CryptoCompareWrapper(BaseWrapper):
     """
     def __init__(self, currency:str='USD'):
         api_key = os.getenv("CRYPTOCOMPARE_API_KEY")
-        assert api_key is not None, "API key is required"
+        assert api_key, "CRYPTOCOMPARE_API_KEY environment variable not set"
 
         self.api_key = api_key
         self.currency = currency
