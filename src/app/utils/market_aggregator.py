@@ -1,5 +1,5 @@
 import statistics
-from typing import Dict, List, Any
+from typing import Dict, Any
 
 class MarketAggregator:
     """
@@ -65,6 +65,7 @@ class MarketAggregator:
                 return float(v[:-1]) * 1_000
             try:
                 return float(v)
-            except Exception:
+            except Exception as e:
+                print(f"Errore nel parsing del volume: {e}")
                 return 0.0
         return 0.0

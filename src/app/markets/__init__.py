@@ -1,57 +1,96 @@
-from app.markets.base import BaseWrapper
-from app.markets.coinbase import CoinBaseWrapper
-from app.markets.cryptocompare import CryptoCompareWrapper
+from .base import BaseWrapper, ProductInfo, Price
+from .coinbase import CoinBaseWrapper
+from .binance import BinanceWrapper
+from .cryptocompare import CryptoCompareWrapper
+from .binance_public import PublicBinanceAgent
+from app.utils.wrapper_handler import WrapperHandler
+from typing import List, Optional
+from agno.tools import Toolkit
 
-from agno.utils.log import log_warning
 
-class MarketAPIs(BaseWrapper):
+__all__ = [ "MarketAPIs", "BinanceWrapper", "CoinBaseWrapper", "CryptoCompareWrapper", "PublicBinanceAgent" ]
+
+
+class MarketAPIsTool(BaseWrapper, Toolkit):
     """
     Classe per gestire le API di mercato disponibili.
-    Permette di ottenere un'istanza della prima API disponibile in base alla priorità specificata.
+    
+    Supporta due modalità:
+    1. **Modalità standard** (default): usa il primo wrapper disponibile
+    2. **Modalità aggregazione**: aggrega dati da tutte le fonti disponibili
+    
+    L'aggregazione può essere abilitata/disabilitata dinamicamente.
     """
 
-    @staticmethod
-    def get_list_available_market_apis(currency: str = "USD") -> list[BaseWrapper]:
-        """
-        Restituisce una lista di istanze delle API di mercato disponibili.
-        La priorità è data dall'ordine delle API nella lista wrappers.
-        1. CoinBase
-        2. CryptoCompare
-
-        :param currency: Valuta di riferimento (default "USD")
-        :return: Lista di istanze delle API di mercato disponibili
-        """
-        wrapper_builders = [
-            CoinBaseWrapper,
-            CryptoCompareWrapper,
-        ]
-
-        result = []
-        for wrapper in wrapper_builders:
-            try:
-                result.append(wrapper(currency=currency))
-            except Exception as _:
-                log_warning(f"{wrapper} cannot be initialized, maybe missing API key?")
-
-        assert result, "No market API keys set in environment variables."
-        return result
-
-    def __init__(self, currency: str = "USD"):
-        """
-        Inizializza la classe con la valuta di riferimento e la priorità dei provider.
-        :param currency: Valuta di riferimento (default "USD")
-        """
+    def __init__(self, currency: str = "USD", enable_aggregation: bool = False):
         self.currency = currency
-        self.wrappers = MarketAPIs.get_list_available_market_apis(currency=currency)
+        wrappers = [ BinanceWrapper, CoinBaseWrapper, CryptoCompareWrapper ]
+        self.wrappers: WrapperHandler[BaseWrapper] = WrapperHandler.build_wrappers(wrappers)
+        
+        # Inizializza l'aggregatore solo se richiesto (lazy initialization)
+        self._aggregator = None
+        self._aggregation_enabled = enable_aggregation
+        
+        Toolkit.__init__(
+            self,
+            name="Market APIs Toolkit",
+            tools=[
+                self.get_product,
+                self.get_products,
+                self.get_all_products,
+                self.get_historical_prices,
+            ],
+        )
+    
+    def _get_aggregator(self):
+        """Lazy initialization dell'aggregatore"""
+        if self._aggregator is None:
+            from app.utils.market_data_aggregator import MarketDataAggregator
+            self._aggregator = MarketDataAggregator(self.currency)
+            self._aggregator.enable_aggregation(self._aggregation_enabled)
+        return self._aggregator
 
-    # Metodi che semplicemente chiamano il metodo corrispondente del primo wrapper disponibile
-    # TODO magari fare in modo che se il primo fallisce, prova con il secondo, ecc.
-    # oppure fare un round-robin tra i vari wrapper oppure usarli tutti e fare una media dei risultati
-    def get_product(self, asset_id):
-        return self.wrappers[0].get_product(asset_id)
-    def get_products(self, asset_ids: list):
-        return self.wrappers[0].get_products(asset_ids)
-    def get_all_products(self):
-        return self.wrappers[0].get_all_products()
-    def get_historical_prices(self, asset_id = "BTC"):
-        return self.wrappers[0].get_historical_prices(asset_id)
+    def get_product(self, asset_id: str) -> Optional[ProductInfo]:
+        """Ottieni informazioni su un prodotto specifico"""
+        if self._aggregation_enabled:
+            return self._get_aggregator().get_product(asset_id)
+        return self.wrappers.try_call(lambda w: w.get_product(asset_id))
+    
+    def get_products(self, asset_ids: List[str]) -> List[ProductInfo]:
+        """Ottieni informazioni su multiple prodotti"""
+        if self._aggregation_enabled:
+            return self._get_aggregator().get_products(asset_ids)
+        return self.wrappers.try_call(lambda w: w.get_products(asset_ids))
+    
+    def get_all_products(self) -> List[ProductInfo]:
+        """Ottieni tutti i prodotti disponibili"""
+        if self._aggregation_enabled:
+            return self._get_aggregator().get_all_products()
+        return self.wrappers.try_call(lambda w: w.get_all_products())
+    
+    def get_historical_prices(self, asset_id: str = "BTC", limit: int = 100) -> List[Price]:
+        """Ottieni dati storici dei prezzi"""
+        if self._aggregation_enabled:
+            return self._get_aggregator().get_historical_prices(asset_id, limit)
+        return self.wrappers.try_call(lambda w: w.get_historical_prices(asset_id, limit))
+    
+    # Metodi per controllare l'aggregazione
+    def enable_aggregation(self, enabled: bool = True):
+        """Abilita/disabilita la modalità aggregazione"""
+        self._aggregation_enabled = enabled
+        if self._aggregator:
+            self._aggregator.enable_aggregation(enabled)
+    
+    def is_aggregation_enabled(self) -> bool:
+        """Verifica se l'aggregazione è abilitata"""
+        return self._aggregation_enabled
+    
+    # Metodo speciale per debugging (opzionale)
+    def get_aggregated_product_with_debug(self, asset_id: str) -> dict:
+        """
+        Metodo speciale per ottenere dati aggregati con informazioni di debug.
+        Disponibile solo quando l'aggregazione è abilitata.
+        """
+        if not self._aggregation_enabled:
+            raise RuntimeError("L'aggregazione deve essere abilitata per usare questo metodo")
+        return self._get_aggregator().get_aggregated_product_with_debug(asset_id)

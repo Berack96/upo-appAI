@@ -1,19 +1,57 @@
 import os
+from enum import Enum
+from datetime import datetime, timedelta
 from coinbase.rest import RESTClient
-from app.markets.base import ProductInfo, BaseWrapper, Price
+from coinbase.rest.types.product_types import Candle, GetProductResponse, Product
+from .base import ProductInfo, BaseWrapper, Price
+
+
+def get_product(product_data: GetProductResponse | Product) -> 'ProductInfo':
+    product = ProductInfo()
+    product.id = product_data.product_id or ""
+    product.symbol = product_data.base_currency_id or ""
+    product.price = float(product_data.price) if product_data.price else 0.0
+    product.volume_24h = float(product_data.volume_24h) if product_data.volume_24h else 0.0
+    # TODO Check what status means in Coinbase
+    product.status = product_data.status or ""
+    return product
+
+def get_price(candle_data: Candle) -> 'Price':
+    price = Price()
+    price.high = float(candle_data.high) if candle_data.high else 0.0
+    price.low = float(candle_data.low) if candle_data.low else 0.0
+    price.open = float(candle_data.open) if candle_data.open else 0.0
+    price.close = float(candle_data.close) if candle_data.close else 0.0
+    price.volume = float(candle_data.volume) if candle_data.volume else 0.0
+    price.time = str(candle_data.start) if candle_data.start else ""
+    return price
+
+
+class Granularity(Enum):
+    UNKNOWN_GRANULARITY = 0
+    ONE_MINUTE = 60
+    FIVE_MINUTE = 300
+    FIFTEEN_MINUTE = 900
+    THIRTY_MINUTE = 1800
+    ONE_HOUR = 3600
+    TWO_HOUR = 7200
+    FOUR_HOUR = 14400
+    SIX_HOUR = 21600
+    ONE_DAY = 86400
 
 class CoinBaseWrapper(BaseWrapper):
     """
-    Wrapper per le API di Coinbase.
-    La documentazione delle API è disponibile qui: https://docs.cdp.coinbase.com/api-reference/advanced-trade-api/rest-api/introduction
+    Wrapper per le API di Coinbase Advanced Trade.\n
+    Implementa l'interfaccia BaseWrapper per fornire accesso unificato
+    ai dati di mercato di Coinbase tramite le API REST.\n
+    https://docs.cdp.coinbase.com/api-reference/advanced-trade-api/rest-api/introduction
     """
-    def __init__(self, api_key:str = None, api_private_key:str = None, currency: str = "USD"):
-        if api_key is None:
-            api_key = os.getenv("COINBASE_API_KEY")
+
+    def __init__(self, currency: str = "USD"):
+        api_key = os.getenv("COINBASE_API_KEY")
         assert api_key is not None, "API key is required"
 
-        if api_private_key is None:
-            api_private_key = os.getenv("COINBASE_API_SECRET")
+        api_private_key = os.getenv("COINBASE_API_SECRET")
         assert api_private_key is not None, "API private key is required"
 
         self.currency = currency
@@ -28,18 +66,27 @@ class CoinBaseWrapper(BaseWrapper):
     def get_product(self, asset_id: str) -> ProductInfo:
         asset_id = self.__format(asset_id)
         asset = self.client.get_product(asset_id)
-        return ProductInfo.from_coinbase(asset)
+        return get_product(asset)
 
     def get_products(self, asset_ids: list[str]) -> list[ProductInfo]:
         all_asset_ids = [self.__format(asset_id) for asset_id in asset_ids]
-        assets = self.client.get_products(all_asset_ids)
-        return [ProductInfo.from_coinbase(asset) for asset in assets.products]
+        assets = self.client.get_products(product_ids=all_asset_ids)
+        return [get_product(asset) for asset in assets.products]
 
     def get_all_products(self) -> list[ProductInfo]:
         assets = self.client.get_products()
-        return [ProductInfo.from_coinbase(asset) for asset in assets.products]
+        return [get_product(asset) for asset in assets.products]
 
-    def get_historical_prices(self, asset_id: str = "BTC") -> list[Price]:
+    def get_historical_prices(self, asset_id: str = "BTC", limit: int = 100) -> list[Price]:
         asset_id = self.__format(asset_id)
-        data = self.client.get_candles(product_id=asset_id)
-        return [Price.from_coinbase(candle) for candle in data.candles]
+        end_time = datetime.now()
+        start_time = end_time - timedelta(days=14)
+
+        data = self.client.get_candles(
+            product_id=asset_id,
+            granularity=Granularity.ONE_HOUR.name,
+            start=str(int(start_time.timestamp())),
+            end=str(int(end_time.timestamp())),
+            limit=limit
+        )
+        return [get_price(candle) for candle in data.candles]

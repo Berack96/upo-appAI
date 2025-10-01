@@ -1,0 +1,90 @@
+import pytest
+from app.utils.wrapper_handler import WrapperHandler
+
+class MockWrapper:
+    def do_something(self) -> str:
+        return "Success"
+
+class MockWrapper2(MockWrapper):
+    def do_something(self) -> str:
+        return "Success 2"
+
+class FailingWrapper(MockWrapper):
+    def do_something(self):
+        raise Exception("Intentional Failure")
+
+
+@pytest.mark.wrapper
+class TestWrapperHandler:
+    def test_all_wrappers_fail(self):
+        wrappers = [FailingWrapper, FailingWrapper]
+        handler: WrapperHandler[MockWrapper] = WrapperHandler.build_wrappers(wrappers, try_per_wrapper=2, retry_delay=0)
+
+        with pytest.raises(Exception) as exc_info:
+            handler.try_call(lambda w: w.do_something())
+        assert "All wrappers failed after retries" in str(exc_info.value)
+
+    def test_success_on_first_try(self):
+        wrappers = [MockWrapper, FailingWrapper]
+        handler: WrapperHandler[MockWrapper] = WrapperHandler.build_wrappers(wrappers, try_per_wrapper=2, retry_delay=0)
+
+        result = handler.try_call(lambda w: w.do_something())
+        assert result == "Success"
+        assert handler.index == 0  # Should still be on the first wrapper
+        assert handler.retry_count == 0
+
+    def test_eventual_success(self):
+        wrappers = [FailingWrapper, MockWrapper]
+        handler: WrapperHandler[MockWrapper] = WrapperHandler.build_wrappers(wrappers, try_per_wrapper=2, retry_delay=0)
+
+        result = handler.try_call(lambda w: w.do_something())
+        assert result == "Success"
+        assert handler.index == 1  # Should have switched to the second wrapper
+        assert handler.retry_count == 0
+
+    def test_partial_failures(self):
+        wrappers = [FailingWrapper, MockWrapper, FailingWrapper]
+        handler: WrapperHandler[MockWrapper] = WrapperHandler.build_wrappers(wrappers, try_per_wrapper=1, retry_delay=0)
+
+        result = handler.try_call(lambda w: w.do_something())
+        assert result == "Success"
+        assert handler.index == 1  # Should have switched to the second wrapper
+        assert handler.retry_count == 0
+
+        # Next call should still succeed on the second wrapper
+        result = handler.try_call(lambda w: w.do_something())
+        assert result == "Success"
+        assert handler.index == 1  # Should still be on the second wrapper
+        assert handler.retry_count == 0
+
+        handler.index = 2  # Manually switch to the third wrapper
+        result = handler.try_call(lambda w: w.do_something())
+        assert result == "Success"
+        assert handler.index == 1  # Should return to the second wrapper after failure
+        assert handler.retry_count == 0
+
+    def test_try_call_all_success(self):
+        wrappers = [MockWrapper, MockWrapper2]
+        handler: WrapperHandler[MockWrapper] = WrapperHandler.build_wrappers(wrappers, try_per_wrapper=1, retry_delay=0)
+        results = handler.try_call_all(lambda w: w.do_something())
+        assert results == {MockWrapper: "Success", MockWrapper2: "Success 2"}
+
+    def test_try_call_all_partial_failures(self):
+        # Only the second wrapper should succeed
+        wrappers = [FailingWrapper, MockWrapper, FailingWrapper]
+        handler: WrapperHandler[MockWrapper] = WrapperHandler.build_wrappers(wrappers, try_per_wrapper=1, retry_delay=0)
+        results = handler.try_call_all(lambda w: w.do_something())
+        assert results == {MockWrapper: "Success"}
+
+        # Only the second and fourth wrappers should succeed
+        wrappers = [FailingWrapper, MockWrapper, FailingWrapper, MockWrapper2]
+        handler: WrapperHandler[MockWrapper] = WrapperHandler.build_wrappers(wrappers, try_per_wrapper=1, retry_delay=0)
+        results = handler.try_call_all(lambda w: w.do_something())
+        assert results == {MockWrapper: "Success", MockWrapper2: "Success 2"}
+
+    def test_try_call_all_all_fail(self):
+        # Test when all wrappers fail
+        handler_all_fail: WrapperHandler[MockWrapper] = WrapperHandler.build_wrappers([FailingWrapper, FailingWrapper], try_per_wrapper=1, retry_delay=0)
+        with pytest.raises(Exception) as exc_info:
+            handler_all_fail.try_call_all(lambda w: w.do_something())
+        assert "All wrappers failed" in str(exc_info.value)
