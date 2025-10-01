@@ -5,7 +5,7 @@ from app.news import NewsApiWrapper
 
 @pytest.mark.news
 @pytest.mark.api
-@pytest.mark.skipif(not os.getenv("NEWS_API_KEY"), reason="NEWS_API_KEY not set")
+@pytest.mark.skipif(not os.getenv("NEWS_API_KEY"), reason="NEWS_API_KEY not set in environment variables")
 class TestNewsAPI:
 
     def test_news_api_initialization(self):

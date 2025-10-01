@@ -2,7 +2,6 @@ import pytest
 from app.news import NewsAPIsTool
 
 
-@pytest.mark.limited
 @pytest.mark.tools
 @pytest.mark.news
 @pytest.mark.api
