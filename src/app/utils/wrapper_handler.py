@@ -1,4 +1,5 @@
 import time
+import traceback
 from typing import TypeVar, Callable, Generic, Iterable, Type
 from agno.utils.log import log_warning, log_info
 
@@ -54,7 +55,7 @@ class WrapperHandler(Generic[W]):
                 return result
             except Exception as e:
                 self.retry_count += 1
-                log_warning(f"{wrapper} failed {self.retry_count}/{self.retry_per_wrapper}: {e}")
+                log_warning(f"{wrapper} failed {self.retry_count}/{self.retry_per_wrapper}: {WrapperHandler.__concise_error(e)}")
 
                 if self.retry_count >= self.retry_per_wrapper:
                     self.index = (self.index + 1) % len(self.wrappers)
@@ -84,7 +85,7 @@ class WrapperHandler(Generic[W]):
                 result = func(wrapper)
                 results[wrapper.__class__] = result
             except Exception as e:
-                log_warning(f"{wrapper} failed: {e}")
+                log_warning(f"{wrapper} failed: {WrapperHandler.__concise_error(e)}")
         if not results:
             raise Exception("All wrappers failed")
         return results
@@ -92,6 +93,10 @@ class WrapperHandler(Generic[W]):
     @staticmethod
     def __check(wrappers: list[W]) -> bool:
         return all(w.__class__ is type for w in wrappers)
+
+    def __concise_error(e: Exception) -> str:
+        last_frame = traceback.extract_tb(e.__traceback__)[-1]
+        return f"{e} [\"{last_frame.filename}\", line {last_frame.lineno}]"
 
     @staticmethod
     def build_wrappers(constructors: Iterable[Type[W]], try_per_wrapper: int = 3, retry_delay: int = 2) -> 'WrapperHandler[W]':
