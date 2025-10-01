@@ -1,11 +1,9 @@
-from typing import List
-
 from agno.team import Team
 from agno.utils.log import log_info
 
-from app.agents.market_agent import MarketAgent
-from app.agents.news_agent import NewsAgent
-from app.agents.social_agent import SocialAgent
+from app.news import NewsAPIsTool, NEWS_INSTRUCTIONS
+from app.social import SocialAPIsTool, SOCIAL_INSTRUCTIONS
+from app.markets import MarketAPIsTool, MARKET_INSTRUCTIONS
 from app.models import AppModels
 from app.predictor import PredictorStyle, PredictorInput, PredictorOutput, PREDICTOR_INSTRUCTIONS
 
@@ -17,12 +15,38 @@ class Pipeline:
 
     def __init__(self):
         # Inizializza gli agenti
-        self.market_agent = MarketAgent()
-        self.news_agent = NewsAgent()
-        self.social_agent = SocialAgent()
+        market_agent = AppModels.OLLAMA_QWEN_1B.get_agent(
+            instructions=MARKET_INSTRUCTIONS,
+            name="MarketAgent",
+            tools=[MarketAPIsTool()]
+        )
+        news_agent = AppModels.OLLAMA_QWEN_1B.get_agent(
+            instructions=NEWS_INSTRUCTIONS,
+            name="NewsAgent",
+            tools=[NewsAPIsTool()]
+        )
+        social_agent = AppModels.OLLAMA_QWEN_1B.get_agent(
+            instructions=SOCIAL_INSTRUCTIONS,
+            name="SocialAgent",
+            tools=[SocialAPIsTool()]
+        )
 
         # Crea il Team
-        self.team = Team(name="CryptoAnalysisTeam", members=[self.market_agent, self.news_agent, self.social_agent])
+        prompt = """
+        You are the coordinator of a team of analysts specialized in cryptocurrency market analysis.
+        Your role is to gather insights from various sources, including market data, news articles, and social media trends.
+        Based on the information provided by your team members, you will synthesize a comprehensive sentiment analysis for each cryptocurrency discussed.
+        Your analysis should consider the following aspects:
+        1. Market Trends: Evaluate the current market trends and price movements.
+        2. News Impact: Assess the impact of recent news articles on market sentiment.
+        3. Social Media Buzz: Analyze social media discussions and trends related to the cryptocurrencies.
+        Your final output should be a well-rounded sentiment analysis that can guide investment decisions.
+        """ # TODO migliorare il prompt
+        self.team = Team(
+            model = AppModels.OLLAMA_QWEN_1B.get_model(prompt),
+            name="CryptoAnalysisTeam",
+            members=[market_agent, news_agent, social_agent]
+        )
 
         # Modelli disponibili e Predictor
         self.available_models = AppModels.availables()
@@ -76,8 +100,8 @@ class Pipeline:
 
         return output
 
-    def list_providers(self) -> List[str]:
+    def list_providers(self) -> list[str]:
         return [m.name for m in self.available_models]
 
-    def list_styles(self) -> List[str]:
+    def list_styles(self) -> list[str]:
         return [s.value for s in self.styles]

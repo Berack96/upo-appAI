@@ -14,17 +14,20 @@ def pytest_configure(config:pytest.Config):
 
     markers = [
         ("slow", "marks tests as slow (deselect with '-m \"not slow\"')"),
+        ("limited", "marks tests that have limited execution due to API constraints"),
+
         ("api", "marks tests that require API access"),
         ("market", "marks tests that use market data"),
+        ("news", "marks tests that use news"),
+        ("social", "marks tests that use social media"),
+        ("wrapper", "marks tests for wrapper handler"),
+
+        ("tools", "marks tests for tools"),
+        ("aggregator", "marks tests for market data aggregator"),
+
         ("gemini", "marks tests that use Gemini model"),
         ("ollama_gpt", "marks tests that use Ollama GPT model"),
         ("ollama_qwen", "marks tests that use Ollama Qwen model"),
-        ("news", "marks tests that use news"),
-        ("social", "marks tests that use social media"),
-        ("limited", "marks tests that have limited execution due to API constraints"),
-        ("wrapper", "marks tests for wrapper handler"),
-        ("tools", "marks tests for tools"),
-        ("aggregator", "marks tests for market data aggregator"),
     ]
     for marker in markers:
         line = f"{marker[0]}: {marker[1]}"

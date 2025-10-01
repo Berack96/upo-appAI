@@ -154,7 +154,7 @@ class ProviderTester:
                 if product:
                     print(f"📦 Product: {product.symbol} (ID: {product.id})")
                     print(f"   Price: ${product.price:.2f}, Quote: {product.quote_currency}")
-                    print(f"   Status: {product.status}, Volume 24h: {product.volume_24h:,.2f}")
+                    print(f"   Volume 24h: {product.volume_24h:,.2f}")
                 else:
                     print(f"📦 Product: Nessun prodotto trovato per {symbol}")
                 
@@ -184,24 +184,6 @@ class ProviderTester:
                 provider_name, f"get_products({self.test_symbols})", timestamp, "❌ ERROR", error_msg
             )
             results["tests"]["get_products"] = f"ERROR: {error_msg}"
-            results["overall_status"] = "PARTIAL"
-        
-        # Test get_all_products
-        timestamp = datetime.now()
-        try:
-            all_products = wrapper.get_all_products()
-            self.formatter.print_request_info(
-                provider_name, "get_all_products()", timestamp, "✅ SUCCESS"
-            )
-            self.formatter.print_product_table(all_products, f"{provider_name} All Products")
-            results["tests"]["get_all_products"] = "SUCCESS"
-            
-        except Exception as e:
-            error_msg = str(e)
-            self.formatter.print_request_info(
-                provider_name, "get_all_products()", timestamp, "❌ ERROR", error_msg
-            )
-            results["tests"]["get_all_products"] = f"ERROR: {error_msg}"
             results["overall_status"] = "PARTIAL"
         
         # Test get_historical_prices

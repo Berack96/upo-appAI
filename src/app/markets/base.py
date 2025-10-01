@@ -1,4 +1,3 @@
-
 from pydantic import BaseModel
 
 class BaseWrapper:
@@ -15,7 +14,7 @@ class BaseWrapper:
         Returns:
             ProductInfo: An object containing product information.
         """
-        raise NotImplementedError
+        raise NotImplementedError("This method should be overridden by subclasses")
 
     def get_products(self, asset_ids: list[str]) -> list['ProductInfo']:
         """
@@ -25,15 +24,7 @@ class BaseWrapper:
         Returns:
             list[ProductInfo]: A list of objects containing product information.
         """
-        raise NotImplementedError
-
-    def get_all_products(self) -> list['ProductInfo']:
-        """
-        Get product information for all available assets.
-        Returns:
-            list[ProductInfo]: A list of objects containing product information.
-        """
-        raise NotImplementedError
+        raise NotImplementedError("This method should be overridden by subclasses")
 
     def get_historical_prices(self, asset_id: str = "BTC", limit: int = 100) -> list['Price']:
         """
@@ -44,7 +35,7 @@ class BaseWrapper:
         Returns:
             list[Price]: A list of Price objects.
         """
-        raise NotImplementedError
+        raise NotImplementedError("This method should be overridden by subclasses")
 
 class ProductInfo(BaseModel):
     """
@@ -55,7 +46,6 @@ class ProductInfo(BaseModel):
     symbol: str = ""
     price: float = 0.0
     volume_24h: float = 0.0
-    status: str = ""
     quote_currency: str = ""
 
 class Price(BaseModel):
@@ -68,4 +58,4 @@ class Price(BaseModel):
     open: float = 0.0
     close: float = 0.0
     volume: float = 0.0
-    time: str = ""
+    timestamp_ms: int = 0  # Timestamp in milliseconds

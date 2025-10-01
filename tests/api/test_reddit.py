@@ -1,9 +1,11 @@
+import os
 import pytest
 from praw import Reddit
 from app.social.reddit import MAX_COMMENTS, RedditWrapper
 
 @pytest.mark.social
 @pytest.mark.api
+@pytest.mark.skipif(not(os.getenv("REDDIT_API_CLIENT_ID")) or not os.getenv("REDDIT_API_CLIENT_SECRET"), reason="REDDIT_CLIENT_ID and REDDIT_API_CLIENT_SECRET not set in environment variables")
 class TestRedditWrapper:
     def test_initialization(self):
         wrapper = RedditWrapper()

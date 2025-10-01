@@ -42,6 +42,7 @@ if __name__ == "__main__":
         analyze_btn = gr.Button("🔎 Analizza")
         analyze_btn.click(fn=pipeline.interact, inputs=[user_input], outputs=output)
 
-    server, port = ("0.0.0.0", 8000)
-    log_info(f"Starting UPO AppAI on http://{server}:{port}")
+    server, port = ("0.0.0.0", 8000) # 0.0.0.0 per docker compatibility
+    server_log = "localhost" if server == "0.0.0.0" else server
+    log_info(f"Starting UPO AppAI on http://{server_log}:{port}")
     demo.launch(server_name=server, server_port=port, quiet=True)
