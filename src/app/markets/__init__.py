@@ -1,9 +1,9 @@
-from base import BaseWrapper
-from app.markets.coinbase import CoinBaseWrapper
-from app.markets.cryptocompare import CryptoCompareWrapper
-from app.markets.binance import BinanceWrapper
-from app.markets.binance_public import PublicBinanceAgent
-from app.markets.error_handler import ProviderFallback, MarketAPIError, safe_execute
+from .base import BaseWrapper
+from .coinbase import CoinBaseWrapper
+from .cryptocompare import CryptoCompareWrapper
+from .binance import BinanceWrapper
+from .binance_public import PublicBinanceAgent
+from .error_handler import ProviderFallback, MarketAPIError, safe_execute
 
 from agno.utils.log import log_warning
 import logging
