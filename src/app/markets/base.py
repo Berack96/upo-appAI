@@ -14,7 +14,7 @@ class BaseWrapper:
         Returns:
             ProductInfo: An object containing product information.
         """
-        raise NotImplementedError
+        raise NotImplementedError("This method should be overridden by subclasses")
 
     def get_products(self, asset_ids: list[str]) -> list['ProductInfo']:
         """
@@ -24,7 +24,7 @@ class BaseWrapper:
         Returns:
             list[ProductInfo]: A list of objects containing product information.
         """
-        raise NotImplementedError
+        raise NotImplementedError("This method should be overridden by subclasses")
 
     def get_historical_prices(self, asset_id: str = "BTC", limit: int = 100) -> list['Price']:
         """
@@ -35,7 +35,7 @@ class BaseWrapper:
         Returns:
             list[Price]: A list of Price objects.
         """
-        raise NotImplementedError
+        raise NotImplementedError("This method should be overridden by subclasses")
 
 class ProductInfo(BaseModel):
     """

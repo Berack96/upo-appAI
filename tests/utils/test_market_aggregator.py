@@ -40,10 +40,10 @@ class TestMarketDataAggregator:
         info = aggregated[0]
         assert info is not None
         assert info.symbol == "BTC"
-        assert info.price == pytest.approx(50000.0, rel=1e-3)
 
-        avg_weighted_volume = (50000.0 * 1000.0 + 50100.0 * 1100.0 + 49900.0 * 900.0) / (1000.0 + 1100.0 + 900.0)
-        assert info.volume_24h == pytest.approx(avg_weighted_volume, rel=1e-3)
+        avg_weighted_price = (50000.0 * 1000.0 + 50100.0 * 1100.0 + 49900.0 * 900.0) / (1000.0 + 1100.0 + 900.0)
+        assert info.price == pytest.approx(avg_weighted_price, rel=1e-3)
+        assert info.volume_24h == pytest.approx(1000.0, rel=1e-3)
         assert info.quote_currency == "USD"
 
     def test_aggregate_product_info_multiple_symbols(self):
@@ -65,16 +65,37 @@ class TestMarketDataAggregator:
         eth_info = next((p for p in aggregated if p.symbol == "ETH"), None)
 
         assert btc_info is not None
-        assert btc_info.price == pytest.approx(50050.0, rel=1e-3)
-        avg_weighted_volume_btc = (50000.0 * 1000.0 + 50100.0 * 1100.0) / (1000.0 + 1100.0)
-        assert btc_info.volume_24h == pytest.approx(avg_weighted_volume_btc, rel=1e-3)
+        avg_weighted_price_btc = (50000.0 * 1000.0 + 50100.0 * 1100.0) / (1000.0 + 1100.0)
+        assert btc_info.price == pytest.approx(avg_weighted_price_btc, rel=1e-3)
+        assert btc_info.volume_24h == pytest.approx(1050.0, rel=1e-3)
         assert btc_info.quote_currency == "USD"
 
         assert eth_info is not None
-        assert eth_info.price == pytest.approx(4025.0, rel=1e-3)
-        avg_weighted_volume_eth = (4000.0 * 2000.0 + 4050.0 * 2100.0) / (2000.0 + 2100.0)
-        assert eth_info.volume_24h == pytest.approx(avg_weighted_volume_eth, rel=1e-3)
+        avg_weighted_price_eth = (4000.0 * 2000.0 + 4050.0 * 2100.0) / (2000.0 + 2100.0)
+        assert eth_info.price == pytest.approx(avg_weighted_price_eth, rel=1e-3)
+        assert eth_info.volume_24h == pytest.approx(2050.0, rel=1e-3)
         assert eth_info.quote_currency == "USD"
+
+    def test_aggregate_product_info_with_no_data(self):
+        products = {
+            "Provider1": [],
+            "Provider2": [],
+        }
+        aggregated = aggregate_product_info(products)
+        assert len(aggregated) == 0
+
+    def test_aggregate_product_info_with_partial_data(self):
+        products = {
+            "Provider1": [self.__product("BTC", 50000.0, 1000.0, "USD")],
+            "Provider2": [],
+        }
+        aggregated = aggregate_product_info(products)
+        assert len(aggregated) == 1
+        info = aggregated[0]
+        assert info.symbol == "BTC"
+        assert info.price == pytest.approx(50000.0, rel=1e-3)
+        assert info.volume_24h == pytest.approx(1000.0, rel=1e-3)
+        assert info.quote_currency == "USD"
 
     def test_aggregate_history_prices(self):
         """Test aggregazione di prezzi storici usando aggregate_history_prices"""
