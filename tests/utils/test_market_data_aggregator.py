@@ -1,10 +1,12 @@
 import pytest
-
 from app.utils.market_data_aggregator import MarketDataAggregator
 from app.utils.aggregated_models import AggregatedProductInfo
 from app.markets.base import ProductInfo, Price
 
 
+@pytest.mark.limited
+@pytest.mark.market
+@pytest.mark.api
 class TestMarketDataAggregator:
     
     def test_initialization(self):
@@ -84,7 +86,3 @@ class TestMarketDataAggregator:
         assert len(aggregated._metadata.sources_used) > 0
         assert aggregated._metadata.aggregation_timestamp != ""
         # La confidence può essere 0.0 se ci sono fonti "unknown"
-
-
-if __name__ == "__main__":
-    pytest.main([__file__])

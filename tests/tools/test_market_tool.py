@@ -4,6 +4,8 @@ from app.agents.market_agent import MarketToolkit
 from app.markets import MarketAPIsTool
 
 @pytest.mark.limited # usa molte api calls e non voglio esaurire le chiavi api
+@pytest.mark.tools
+@pytest.mark.api
 class TestMarketAPIsTool:
     def test_wrapper_initialization(self):
         market_wrapper = MarketAPIsTool("USD")
