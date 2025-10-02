@@ -4,8 +4,8 @@ from agno.models.message import Message
 from agno.run.agent import RunOutput, RunOutputEvent
 from pydantic import BaseModel
 
-from src.app.toolkits.market_toolkit import MarketToolkit
-from src.app.markets.base import ProductInfo  # modello dati già definito nel tuo progetto
+from app.toolkits.market_toolkit import MarketToolkit
+from app.markets.base import ProductInfo  # modello dati già definito nel tuo progetto
 
 
 class MarketAgent(Agent):

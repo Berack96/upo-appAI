@@ -1,7 +1,7 @@
 import os
 import json
 from typing import List, Dict
-from src.app.pipeline import Pipeline
+from pipeline import Pipeline
 
 SAVE_DIR = os.path.join(os.path.dirname(__file__), "..", "saves")
 os.makedirs(SAVE_DIR, exist_ok=True)

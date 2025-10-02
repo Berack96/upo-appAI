@@ -6,17 +6,17 @@ e verifica la conformità all'interfaccia definita in base.py.
 """
 
 import os
-import pytest
-from unittest.mock import Mock, patch, MagicMock
-from typing import Type, List
+from unittest.mock import Mock, patch
 
+import pytest
+
+from app.markets import MarketAPIs
 # Import delle classi da testare
 from app.markets.base import BaseWrapper, ProductInfo, Price
-from app.markets.coinbase import CoinBaseWrapper
-from app.markets.cryptocompare import CryptoCompareWrapper
 from app.markets.binance import BinanceWrapper
 from app.markets.binance_public import PublicBinanceAgent
-from app.markets import MarketAPIs
+from app.markets.coinbase import CoinBaseWrapper
+from app.markets.cryptocompare import CryptoCompareWrapper
 
 
 class TestBaseWrapperInterface:

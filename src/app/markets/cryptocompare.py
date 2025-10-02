@@ -1,8 +1,8 @@
 import os
 import requests
 from typing import Optional, Dict, Any
-from .base import ProductInfo, BaseWrapper, Price
-from .error_handler import retry_on_failure, handle_api_errors, MarketAPIError
+from base import ProductInfo, BaseWrapper, Price
+from error_handler import retry_on_failure, handle_api_errors, MarketAPIError
 
 BASE_URL = "https://min-api.cryptocompare.com"
 

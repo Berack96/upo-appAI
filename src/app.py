@@ -21,7 +21,7 @@ if __name__ == "__main__":
         response = chat.send_message(message)
         history.append({"role": "user", "content": message})
         history.append({"role": "assistant", "content": response})
-        return history, history
+        return history, history, ""
 
     def save_current_chat():
         chat.save_chat("chat.json")
@@ -69,7 +69,7 @@ if __name__ == "__main__":
             load_btn = gr.Button("📂 Carica Chat")
 
         # Invio messaggio
-        msg.submit(respond, inputs=[msg, chatbot], outputs=[chatbot, chatbot])
+        msg.submit(respond, inputs=[msg, chatbot], outputs=[chatbot, chatbot, msg])
         # Reset
         clear_btn.click(reset_chat, inputs=None, outputs=[chatbot, chatbot])
         # Salvataggio
@@ -78,5 +78,5 @@ if __name__ == "__main__":
         load_btn.click(load_previous_chat, inputs=None, outputs=[chatbot, chatbot])
 
     server, port = ("127.0.0.1", 8000)
-    log_info(f"Starting UPO AppAI Chat on http://{server}:{port}")
+    log_info(f"Starting UPO AppAI Chat on http://{server}:{port}") # noqa
     demo.launch(server_name=server, server_port=port, quiet=True)

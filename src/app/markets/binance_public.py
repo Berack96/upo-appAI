@@ -8,8 +8,8 @@ con l'architettura del modulo markets.
 from typing import Optional, Dict, Any
 from datetime import datetime, timedelta
 from binance.client import Client
-from .base import BaseWrapper, ProductInfo, Price
-from .error_handler import retry_on_failure, handle_api_errors, MarketAPIError
+from base import BaseWrapper, ProductInfo, Price
+from error_handler import retry_on_failure, handle_api_errors, MarketAPIError
 
 
 class PublicBinanceAgent(BaseWrapper):
