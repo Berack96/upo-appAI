@@ -10,25 +10,33 @@ requires-python = "==3.12.*"
 # Per ogni roba ho fatto un commento per evitare di dimenticarmi cosa fa chi.
 # Inoltre ho messo una emoji per indicare se è raccomandato o meno.
 dependencies = [
-    # ✅ per i test
-    "pytest",
-    # ✅ per gestire variabili d'ambiente (generalmente API keys od opzioni)
-    "dotenv",
-    # 🟡 per fare scraping di pagine web
-    #"bs4",
-    # ✅ per fare una UI web semplice con input e output
-    "gradio",
+    "pytest", # Test
+    "dotenv", # Gestire variabili d'ambiente (generalmente API keys od opzioni)
+    "gradio", # UI web semplice con user_input e output
 
-    # ✅ per costruire agenti (ovvero modelli che possono fare più cose tramite tool) https://github.com/agno-agi/agno
+    # Per costruire agenti (ovvero modelli che possono fare più cose tramite tool) https://github.com/agno-agi/agno
     # altamente consigliata dato che ha anche tools integrati per fare scraping, calcoli e molto altro
     # oltre a questa è necessario installare anche le librerie specifiche per i modelli che si vogliono usare
     "agno",
 
-    # ✅ Modelli supportati e installati (aggiungere qui sotto quelli che si vogliono usare)
+    # Modelli supportati e installati (aggiungere qui sotto quelli che si vogliono usare)
     "google-genai",
     "ollama",
 
-    # ✅ per interagire con API di exchange di criptovalute
+    # API di exchange di criptovalute
     "coinbase-advanced-py",
     "python-binance",
+    "yfinance",
+
+    # API di notizie
+    "newsapi-python",
+    "gnews",
+    "ddgs",
+
+    # API di social media
+    "praw", # Reddit
 ]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

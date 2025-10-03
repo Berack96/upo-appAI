@@ -9,53 +9,69 @@ L'obiettivo è quello di creare un sistema di consulenza finanziaria basato su L
 
 # **Indice**
 - [Installazione](#installazione)
-  - [Ollama (Modelli Locali)](#ollama-modelli-locali)
-  - [Variabili d'Ambiente](#variabili-dambiente)
-  - [Installazione in locale con UV](#installazione-in-locale-con-uv)
-  - [Installazione con Docker](#installazione-con-docker)
+    - [1. Variabili d'Ambiente](#1-variabili-dambiente)
+    - [2. Ollama](#2-ollama)
+    - [3. Docker](#3-docker)
+    - [4. UV (solo per sviluppo locale)](#4-uv-solo-per-sviluppo-locale)
 - [Applicazione](#applicazione)
    - [Ultimo Aggiornamento](#ultimo-aggiornamento)
    - [Tests](#tests)
 
 # **Installazione**
-Per l'installazione di questo progetto si consiglia di utilizzare **Docker**. Con questo approccio si evita di dover installare manualmente tutte le dipendenze e si può eseguire il progetto in un ambiente isolato.
 
-Per lo sviluppo locale si può utilizzare **uv** che si occupa di creare un ambiente virtuale e installare tutte le dipendenze.
+L'installazione di questo progetto richiede 3 passaggi totali (+1 se si vuole sviluppare in locale) che devono essere eseguiti in sequenza. Se questi passaggi sono eseguiti correttamente, l'applicazione dovrebbe partire senza problemi. Altrimenti è molto probabile che si verifichino errori di vario tipo (moduli mancanti, chiavi API non trovate, ecc.).
 
-In ogni caso, ***prima*** di avviare l'applicazione è però necessario configurare correttamente le **API keys** e installare Ollama per l'utilizzo dei modelli locali, altrimenti il progetto, anche se installato correttamente, non riuscirà a partire.
+1. Configurare le variabili d'ambiente
+2. Installare Ollama e i modelli locali
+3. Far partire il progetto con Docker (consigliato)
+4. (Solo per sviluppo locale) Installare uv e creare l'ambiente virtuale
 
-### Ollama (Modelli Locali)
-Per utilizzare modelli AI localmente, è necessario installare Ollama:
+> [!IMPORTANT]\
+> Prima di iniziare, assicurarsi di avere clonato il repository e di essere nella cartella principale del progetto.
 
-**1. Installazione Ollama**:
-- **Linux**: `curl -fsSL https://ollama.com/install.sh | sh`
-- **macOS/Windows**: Scarica l'installer da [https://ollama.com/download/windows](https://ollama.com/download/windows)
+### **1. Variabili d'Ambiente**
 
-**2. GPU Support (Raccomandato)**:
-Per utilizzare la GPU con Ollama, assicurati di avere NVIDIA CUDA Toolkit installato:
-- **Download**: [NVIDIA CUDA Downloads](https://developer.nvidia.com/cuda-downloads?target_os=Windows&target_arch=x86_64&target_version=11&target_type=exe_local)
-- **Documentazione WSL**: [CUDA WSL User Guide](https://docs.nvidia.com/cuda/wsl-user-guide/index.html)
-
-**3. Installazione Modelli**:
-Si possono avere più modelli installati contemporaneamente. Per questo progetto si consiglia di utilizzare il modello open source `gpt-oss` poiché prestante e compatibile con tante funzionalità. Per il download: `ollama pull gpt-oss:latest`
-
-### Variabili d'Ambiente
-
-**1. Copia il file di esempio**:
+Copia il file `.env.example` in `.env` e modificalo con le tue API keys:
 ```sh
 cp .env.example .env
 ```
 
-**2. Modifica il file .env** creato con le tue API keys e il path dei modelli Ollama, inserendoli nelle variabili opportune dopo l'uguale e ***senza*** spazi.
+Le API Keys devono essere inserite nelle variabili opportune dopo l'uguale e ***senza*** spazi. Esse si possono ottenere tramite i loro providers (alcune sono gratuite, altre a pagamento).\
+Nel file [.env.example](.env.example) sono presenti tutte le variabili da compilare con anche il link per recuperare le chiavi, quindi, dopo aver copiato il file, basta seguire le istruzioni al suo interno.
 
-Le API Keys puoi ottenerle tramite i seguenti servizi (alcune sono gratuite, altre a pagamento):
-- **Google AI**: [Google AI Studio](https://makersuite.google.com/app/apikey) (gratuito con limiti)
-- **Anthropic**: [Anthropic Console](https://console.anthropic.com/)
-- **DeepSeek**: [DeepSeek Platform](https://platform.deepseek.com/)
-- **OpenAI**: [OpenAI Platform](https://platform.openai.com/api-keys)
+Le chiavi non sono necessarie per far partire l'applicazione, ma senza di esse alcune funzionalità non saranno disponibili o saranno limitate. Per esempio senza la chiave di NewsAPI non si potranno recuperare le ultime notizie sul mercato delle criptovalute. Ciononostante, l'applicazione usa anche degli strumenti che non richiedono chiavi API, come Yahoo Finance e GNews, che permettono di avere comunque un'analisi di base del mercato.
 
-## **Installazione in locale con UV**
-**1. Installazione uv**: Per prima cosa installa uv se non è già presente sul sistema:
+### **2. Ollama**
+Per utilizzare modelli AI localmente, è necessario installare Ollama, un gestore di modelli LLM che consente di eseguire modelli direttamente sul proprio hardware. Si consiglia di utilizzare Ollama con il supporto GPU per prestazioni ottimali, ma è possibile eseguirlo anche solo con la CPU.
+
+Per l'installazione scaricare Ollama dal loro [sito ufficiale](https://ollama.com/download/linux).
+
+Dopo l'installazione, si possono iniziare a scaricare i modelli desiderati tramite il comando `ollama pull <model>:<tag>`.
+
+I modelli usati dall'applicazione sono visibili in [src/app/models.py](src/app/models.py). Di seguito metto lo stesso una lista di modelli, ma potrebbe non essere aggiornata:
+- `gpt-oss:latest`
+- `qwen3:latest`
+- `qwen3:4b`
+- `qwen3:1.7b`
+
+### **3. Docker**
+Se si vuole solamente avviare il progetto, si consiglia di utilizzare [Docker](https://www.docker.com), dato che sono stati creati i files [Dockerfile](Dockerfile) e [docker-compose.yaml](docker-compose.yaml) per creare il container con tutti i file necessari e già in esecuzione.
+
+```sh
+# Configura le variabili d'ambiente
+cp .env.example .env
+nano .env  # Modifica il file
+
+# Avvia il container
+docker compose up --build -d
+```
+
+Se si sono seguiti i passaggi precedenti per la configurazione delle variabili d'ambiente, l'applicazione dovrebbe partire correttamente, dato che il file `.env` verrà automaticamente caricato nel container grazie alla configurazione in `docker-compose.yaml`.
+
+### **4. UV (solo per sviluppo locale)**
+
+Per prima cosa installa uv se non è già presente sul sistema
+
 ```sh
 # Windows (PowerShell)
 powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
@@ -64,53 +80,27 @@ powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | ie
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-**2. Ambiente e dipendenze**: uv installerà python e creerà automaticamente l'ambiente virtuale con le dipendenze corrette:
+UV installerà python e creerà automaticamente l'ambiente virtuale con le dipendenze corrette (nota che questo passaggio è opzionale, dato che uv, ogni volta che si esegue un comando, controlla se l'ambiente è attivo e se le dipendenze sono installate):
+
 ```sh
 uv sync --frozen --no-cache
 ```
 
-**3. Run**: Successivamente si può far partire il progetto tramite il comando:
+A questo punto si può far partire il progetto tramite il comando:
+
 ```sh
 uv run python src/app.py
 ```
-
-## **Installazione con Docker**
-Alternativamente, se si ha installato [Docker](https://www.docker.com), si può utilizzare il [Dockerfile](Dockerfile) e il [docker-compose.yaml](docker-compose.yaml) per creare il container con tutti i file necessari e già in esecuzione:
-
-**IMPORTANTE**: Assicurati di aver configurato il file `.env` come descritto sopra prima di avviare Docker.
-
-```sh
-docker compose up --build -d
-```
-
-Il file `.env` verrà automaticamente caricato nel container grazie alla configurazione in `docker-compose.yaml`.
 
 # **Applicazione**
 
 ***L'applicazione è attualmente in fase di sviluppo.***
 
 Usando la libreria ``gradio`` è stata creata un'interfaccia web semplice per interagire con l'agente principale. Gli agenti secondari si trovano nella cartella `src/app/agents` e sono:
-- **Market Agent**: Agente unificato che supporta multiple fonti di dati (Coinbase + CryptoCompare) con auto-configurazione
-- **News Agent**: Recupera le notizie finanziarie più recenti utilizzando.
-- **Social Agent**: Analizza i sentimenti sui social media utilizzando.
+- **Market Agent**: Agente unificato che supporta multiple fonti di dati con auto-retry e gestione degli errori.
+- **News Agent**: Recupera le notizie finanziarie più recenti sul mercato delle criptovalute.
+- **Social Agent**: Analizza i sentimenti sui social media riguardo alle criptovalute.
 - **Predictor Agent**: Utilizza i dati raccolti dagli altri agenti per fare previsioni.
-
-## Ultimo Aggiornamento
-
-### Cose non funzionanti
-- **Market Agent**: Non è un vero agente dato che non usa LLM per ragionare ma prende solo i dati
-- **market_aggregator.py**: Non è usato per ora
-- **News Agent**: Non funziona lo scraping online, per ora usa dati mock
-- **Social Agent**: Non funziona lo scraping online, per ora usa dati mock
-- **Demos**: Le demos nella cartella [demos](demos) non sono aggiornate e non funzionano per ora
-
-### ToDo
-- [X] Per lo scraping online bisogna iscriversi e recuperare le chiavi API
-- [X] **Market Agent**: [CryptoCompare](https://www.cryptocompare.com/cryptopian/api-keys)
-- [X] **Market Agent**: [Coinbase](https://www.coinbase.com/cloud/discover/api-keys)
-- [ ] **News Agent**: [CryptoPanic](https://cryptopanic.com/)
-- [ ] **Social Agent**: [post più hot da r/CryptoCurrency (Reddit)](https://www.reddit.com/)
-- [ ] Capire come `gpt-oss` parsifica la risposta e per questioni "estetiche" si può pensare di visualizzare lo stream dei token. Vedere il sorgente `src/ollama_demo.py` per risolvere il problema.
 
 ## Tests
 
@@ -119,8 +109,8 @@ Per eseguire i test, assicurati di aver configurato correttamente le variabili d
 uv run pytest -v
 
 # Oppure per test specifici
-uv run pytest -v tests/agents/test_market.py
-uv run pytest -v tests/agents/test_predictor.py
+uv run pytest -v tests/api/test_binance.py
+uv run pytest -v -k "test_news"
 
 # Oppure usando i markers
 uv run pytest -v -m api

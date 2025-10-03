@@ -1,6 +1,28 @@
 import os
 import requests
-from app.markets.base import ProductInfo, BaseWrapper, Price
+from .base import ProductInfo, BaseWrapper, Price
+
+
+def get_product(asset_data: dict) -> ProductInfo:
+    product = ProductInfo()
+    product.id = asset_data.get('FROMSYMBOL', '') + '-' + asset_data.get('TOSYMBOL', '')
+    product.symbol = asset_data.get('FROMSYMBOL', '')
+    product.price = float(asset_data.get('PRICE', 0))
+    product.volume_24h = float(asset_data.get('VOLUME24HOUR', 0))
+    assert product.price > 0, "Invalid price data received from CryptoCompare"
+    return product
+
+def get_price(price_data: dict) -> Price:
+    price = Price()
+    price.high = float(price_data.get('high', 0))
+    price.low = float(price_data.get('low', 0))
+    price.open = float(price_data.get('open', 0))
+    price.close = float(price_data.get('close', 0))
+    price.volume = float(price_data.get('volumeto', 0))
+    price.timestamp_ms = price_data.get('time', 0) * 1000
+    assert price.timestamp_ms > 0, "Invalid timestamp data received from CryptoCompare"
+    return price
+
 
 BASE_URL = "https://min-api.cryptocompare.com"
 
@@ -10,15 +32,14 @@ class CryptoCompareWrapper(BaseWrapper):
     La documentazione delle API è disponibile qui: https://developers.coindesk.com/documentation/legacy/Price/SingleSymbolPriceEndpoint
     !!ATTENZIONE!! sembra essere una API legacy e potrebbe essere deprecata in futuro.
     """
-    def __init__(self, api_key:str = None, currency:str='USD'):
-        if api_key is None:
-            api_key = os.getenv("CRYPTOCOMPARE_API_KEY")
-        assert api_key is not None, "API key is required"
+    def __init__(self, currency:str='USD'):
+        api_key = os.getenv("CRYPTOCOMPARE_API_KEY")
+        assert api_key, "CRYPTOCOMPARE_API_KEY environment variable not set"
 
         self.api_key = api_key
         self.currency = currency
 
-    def __request(self, endpoint: str, params: dict = None) -> dict:
+    def __request(self, endpoint: str, params: dict[str, str] | None = None) -> dict[str, str]:
         if params is None:
             params = {}
         params['api_key'] = self.api_key
@@ -32,7 +53,7 @@ class CryptoCompareWrapper(BaseWrapper):
             "tsyms": self.currency
         })
         data = response.get('RAW', {}).get(asset_id, {}).get(self.currency, {})
-        return ProductInfo.from_cryptocompare(data)
+        return get_product(data)
 
     def get_products(self, asset_ids: list[str]) -> list[ProductInfo]:
         response = self.__request("/data/pricemultifull", params = {
@@ -43,20 +64,16 @@ class CryptoCompareWrapper(BaseWrapper):
         data = response.get('RAW', {})
         for asset_id in asset_ids:
             asset_data = data.get(asset_id, {}).get(self.currency, {})
-            assets.append(ProductInfo.from_cryptocompare(asset_data))
+            assets.append(get_product(asset_data))
         return assets
 
-    def get_all_products(self) -> list[ProductInfo]:
-        raise NotImplementedError("CryptoCompare does not support fetching all assets")
-
-    def get_historical_prices(self, asset_id: str, day_back: int = 10) -> list[Price]:
-        assert day_back <= 30, "day_back should be less than or equal to 30"
+    def get_historical_prices(self, asset_id: str, limit: int = 100) -> list[Price]:
         response = self.__request("/data/v2/histohour", params = {
             "fsym": asset_id,
             "tsym": self.currency,
-            "limit": day_back * 24
+            "limit": limit-1 # because the API returns limit+1 items (limit + current)
         })
 
         data = response.get('Data', {}).get('Data', [])
-        prices = [Price.from_cryptocompare(price_data) for price_data in data]
+        prices = [get_price(price_data) for price_data in data]
         return prices
