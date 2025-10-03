@@ -7,7 +7,7 @@ from .binance import BinanceWrapper
 from .cryptocompare import CryptoCompareWrapper
 from .yfinance import YFinanceWrapper
 
-__all__ = [ "MarketAPIs", "BinanceWrapper", "CoinBaseWrapper", "CryptoCompareWrapper", "YFinanceWrapper" ]
+__all__ = [ "MarketAPIsTool", "BinanceWrapper", "CoinBaseWrapper", "CryptoCompareWrapper", "YFinanceWrapper", "MARKET_INSTRUCTIONS" ]
 
 
 class MarketAPIsTool(BaseWrapper, Toolkit):
