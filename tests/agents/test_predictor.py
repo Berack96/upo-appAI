@@ -4,7 +4,7 @@ from app.markets.base import ProductInfo
 from app.models import AppModels
 
 def unified_checks(model: AppModels, input):
-    llm = model.get_agent(PREDICTOR_INSTRUCTIONS, output=PredictorOutput)
+    llm = model.get_agent(PREDICTOR_INSTRUCTIONS, output=PredictorOutput) # type: ignore[arg-type]
     result = llm.run(input)
     content = result.content
 

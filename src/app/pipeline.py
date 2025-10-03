@@ -1,5 +1,5 @@
+from agno.run.agent import RunOutput
 from agno.team import Team
-from agno.utils.log import log_info
 
 from app.news import NewsAPIsTool, NEWS_INSTRUCTIONS
 from app.social import SocialAPIsTool, SOCIAL_INSTRUCTIONS
@@ -10,98 +10,139 @@ from app.predictor import PredictorStyle, PredictorInput, PredictorOutput, PREDI
 
 class Pipeline:
     """
-    Pipeline coordinata: esegue tutti gli agenti del Team, aggrega i risultati e invoca il Predictor.
+    Coordina gli agenti di servizio (Market, News, Social) e il Predictor finale.
+    Il Team è orchestrato da qwen3:latest (Ollama), mentre il Predictor è dinamico
+    e scelto dall'utente tramite i dropdown dell'interfaccia grafica.
     """
-
     def __init__(self):
         # Inizializza gli agenti
-        market_agent = AppModels.OLLAMA_QWEN_1B.get_agent(
+        self.market_agent = AppModels.OLLAMA_QWEN.get_agent(
             instructions=MARKET_INSTRUCTIONS,
             name="MarketAgent",
             tools=[MarketAPIsTool()]
         )
-        news_agent = AppModels.OLLAMA_QWEN_1B.get_agent(
+        self.news_agent = AppModels.OLLAMA_QWEN.get_agent(
             instructions=NEWS_INSTRUCTIONS,
             name="NewsAgent",
             tools=[NewsAPIsTool()]
         )
-        social_agent = AppModels.OLLAMA_QWEN_1B.get_agent(
+        self.social_agent = AppModels.OLLAMA_QWEN.get_agent(
             instructions=SOCIAL_INSTRUCTIONS,
             name="SocialAgent",
             tools=[SocialAPIsTool()]
         )
 
-        # Crea il Team
-        prompt = """
-        You are the coordinator of a team of analysts specialized in cryptocurrency market analysis.
-        Your role is to gather insights from various sources, including market data, news articles, and social media trends.
-        Based on the information provided by your team members, you will synthesize a comprehensive sentiment analysis for each cryptocurrency discussed.
-        Your analysis should consider the following aspects:
-        1. Market Trends: Evaluate the current market trends and price movements.
-        2. News Impact: Assess the impact of recent news articles on market sentiment.
-        3. Social Media Buzz: Analyze social media discussions and trends related to the cryptocurrencies.
-        Your final output should be a well-rounded sentiment analysis that can guide investment decisions.
-        """ # TODO migliorare il prompt
-        self.team = Team(
-            model = AppModels.OLLAMA_QWEN_1B.get_model(prompt),
-            name="CryptoAnalysisTeam",
-            members=[market_agent, news_agent, social_agent]
+        # === Modello di orchestrazione del Team ===
+        team_model = AppModels.OLLAMA_QWEN.get_model(
+            # TODO: migliorare le istruzioni del team
+            "Agisci come coordinatore: smista le richieste tra MarketAgent, NewsAgent e SocialAgent."
         )
 
-        # Modelli disponibili e Predictor
+        # === Team ===
+        self.team = Team(
+            name="CryptoAnalysisTeam",
+            members=[self.market_agent, self.news_agent, self.social_agent],
+            model=team_model
+        )
+
+        # === Predictor ===
         self.available_models = AppModels.availables()
-        self.predictor_model = self.available_models[0]
-        self.predictor = self.predictor_model.get_agent(PREDICTOR_INSTRUCTIONS, output=PredictorOutput) # type: ignore[arg-type]
+        self.all_styles = list(PredictorStyle)
 
-        # Stili
-        self.styles = list(PredictorStyle)
-        self.style = self.styles[0]
+        # Scelte di default
+        self.chosen_model = self.available_models[0] if self.available_models else None
+        self.style = self.all_styles[0] if self.all_styles else None
 
+        self._init_predictor() # Inizializza il predictor con il modello di default
+
+    # ======================
+    # Dropdown handlers
+    # ======================
     def choose_provider(self, index: int):
-        self.predictor_model = self.available_models[index]
-        self.predictor = self.predictor_model.get_agent(PREDICTOR_INSTRUCTIONS, output=PredictorOutput) # type: ignore[arg-type]
+        """
+        Sceglie il modello LLM da usare per il Predictor.
+        """
+        self.chosen_model = self.available_models[index]
+        self._init_predictor()
 
     def choose_style(self, index: int):
-        self.style = self.styles[index]
-
-    def interact(self, query: str) -> str:
         """
-        Esegue il Team (Market + News + Social), aggrega i risultati e invoca il Predictor.
+        Sceglie lo stile (conservativo/aggressivo) da usare per il Predictor.
         """
-        # Step 1: raccogli output del Team
-        team_results = self.team.run(query)
-        if isinstance(team_results, dict):  # alcuni Team possono restituire dict
-            pieces = [str(v) for v in team_results.values()]
-        elif isinstance(team_results, list):
-            pieces = [str(r) for r in team_results]
-        else:
-            pieces = [str(team_results)]
-        aggregated_text = "\n\n".join(pieces)
+        self.style = self.all_styles[index]
 
-        # Step 2: prepara input per Predictor
-        predictor_input = PredictorInput(
-            data=[],  # TODO: mappare meglio i dati di mercato in ProductInfo
-            style=self.style,
-            sentiment=aggregated_text
+    # ======================
+    # Helpers
+    # ======================
+    def _init_predictor(self):
+        """
+        Inizializza (o reinizializza) il Predictor in base al modello scelto.
+        """
+        if not self.chosen_model:
+            return
+        self.predictor = self.chosen_model.get_agent(
+            PREDICTOR_INSTRUCTIONS,
+            output=PredictorOutput, # type: ignore
         )
 
-        # Step 3: chiama Predictor
+    def list_providers(self) -> list[str]:
+        """
+        Restituisce la lista dei nomi dei modelli disponibili.
+        """
+        return [model.name for model in self.available_models]
+
+    def list_styles(self) -> list[str]:
+        """
+        Restituisce la lista degli stili di previsione disponibili.
+        """
+        return [style.value for style in self.all_styles]
+
+    # ======================
+    # Core interaction
+    # ======================
+    def interact(self, query: str) -> str:
+        """
+        1. Raccoglie output dai membri del Team
+        2. Aggrega output strutturati
+        3. Invoca Predictor
+        4. Restituisce la strategia finale
+        """
+        if not self.predictor or not self.style:
+            return "⚠️ Devi prima selezionare un modello e una strategia validi dagli appositi menu."
+
+        # Step 1: raccolta output dai membri del Team
+        team_outputs = self.team.run(query)
+
+        # Step 2: aggregazione output strutturati
+        all_products = []
+        sentiments = []
+
+        for agent_output in team_outputs.member_responses:
+            if isinstance(agent_output, RunOutput):
+                if "products" in agent_output.metadata:
+                    all_products.extend(agent_output.metadata["products"])
+                if "sentiment_news" in agent_output.metadata:
+                    sentiments.append(agent_output.metadata["sentiment_news"])
+                if "sentiment_social" in agent_output.metadata:
+                    sentiments.append(agent_output.metadata["sentiment_social"])
+
+        aggregated_sentiment = "\n".join(sentiments)
+
+        # Step 3: invocazione Predictor
+        predictor_input = PredictorInput(
+            data=all_products,
+            style=self.style,
+            sentiment=aggregated_sentiment
+        )
+
         result = self.predictor.run(predictor_input)
         prediction: PredictorOutput = result.content
 
-        # Step 4: formatta output finale
+        # Step 4: restituzione strategia finale
         portfolio_lines = "\n".join(
             [f"{item.asset} ({item.percentage}%): {item.motivation}" for item in prediction.portfolio]
         )
-        output = (
+        return (
             f"📊 Strategia ({self.style.value}): {prediction.strategy}\n\n"
             f"💼 Portafoglio consigliato:\n{portfolio_lines}"
         )
-
-        return output
-
-    def list_providers(self) -> list[str]:
-        return [m.name for m in self.available_models]
-
-    def list_styles(self) -> list[str]:
-        return [s.value for s in self.styles]
