@@ -3,7 +3,7 @@ from app.utils.wrapper_handler import WrapperHandler
 from app.social.base import SocialPost, SocialWrapper
 from app.social.reddit import RedditWrapper
 
-__all__ = ["SocialAPIsTool", "SOCIAL_INSTRUCTIONS", "RedditWrapper"]
+__all__ = ["SocialAPIsTool", "RedditWrapper", "SocialPost"]
 
 
 class SocialAPIsTool(SocialWrapper, Toolkit):
@@ -40,22 +40,3 @@ class SocialAPIsTool(SocialWrapper, Toolkit):
     # la modifica è banale, basta usare try_call_all invece di try_call
     def get_top_crypto_posts(self, limit: int = 5) -> list[SocialPost]:
         return self.wrapper_handler.try_call(lambda w: w.get_top_crypto_posts(limit))
-
-
-SOCIAL_INSTRUCTIONS = """
-**TASK:** You are a specialized **Social Media Sentiment Analyst**. Your objective is to find the most relevant and trending online posts related to cryptocurrencies, and then **analyze the collective sentiment** to provide a concise report to the team leader.
-
-**AVAILABLE TOOLS:**
-1.  `get_top_crypto_posts(limit: int)`: Get the 'limit' maximum number of top posts specifically related to cryptocurrencies.
-
-**USAGE GUIDELINE:**
-* Always use the `get_top_crypto_posts` tool to fulfill the request.
-* The default limit for posts should be 5 unless specified otherwise.
-* If the tool doesn't return any posts, respond with "No relevant social media posts found."
-
-**REPORTING REQUIREMENT:**
-1.  **Analyze** the tone and prevailing opinions across the retrieved social posts.
-2.  **Summarize** the overall **community sentiment** (e.g., high enthusiasm/FOMO, uncertainty, FUD/fear) based on the content.
-3.  **Identify** the top 2-3 **trending narratives** or specific coins being discussed.
-4.  **Output** a single, brief report summarizing these findings. Do not output the raw posts.
-"""

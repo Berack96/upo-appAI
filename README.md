@@ -99,6 +99,18 @@ Usando la libreria ``gradio`` è stata creata un'interfaccia web semplice per in
 - **Social Agent**: Analizza i sentimenti sui social media riguardo alle criptovalute.
 - **Predictor Agent**: Utilizza i dati raccolti dagli altri agenti per fare previsioni.
 
+## Struttura delle cartelle del Progetto
+
+```
+src               <-- Cartella principale del codice sorgente
+└── app           <-- Cartella principale dell'applicazione
+    ├── agents    <-- Agenti, modelli, prompts e simili
+    ├── markets   <-- Market data provider (Es. Binance)
+    ├── news      <-- News data provider (Es. NewsAPI)
+    ├── social    <-- Social data provider (Es. Reddit)
+    └── utils     <-- Codice di utilità generale
+```
+
 ## Tests
 
 Per eseguire i test, assicurati di aver configurato correttamente le variabili d'ambiente nel file `.env` come descritto sopra. Poi esegui il comando:
