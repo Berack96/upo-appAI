@@ -66,7 +66,7 @@ class ChatManager:
 
     # Facciamo pass-through di provider e style, così Gradio può usarli
     def choose_provider(self, index: int):
-        self.pipeline.choose_provider(index)
+        self.pipeline.choose_predictor(index)
 
     def choose_style(self, index: int):
         self.pipeline.choose_style(index)

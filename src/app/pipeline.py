@@ -1,10 +1,7 @@
 from agno.run.agent import RunOutput
-from agno.team import Team
-from app.models import AppModels
-from app.markets import MARKET_INSTRUCTIONS, MarketAPIsTool
-from app.news import NEWS_INSTRUCTIONS, NewsAPIsTool
-from app.social import SOCIAL_INSTRUCTIONS, SocialAPIsTool
-from app.predictor import PREDICTOR_INSTRUCTIONS, PredictorInput, PredictorOutput, PredictorStyle
+from app.agents import AppModels
+from app.agents.team import create_team_with
+from app.agents.predictor import PREDICTOR_INSTRUCTIONS, PredictorInput, PredictorOutput, PredictorStyle
 
 
 class Pipeline:
@@ -13,56 +10,27 @@ class Pipeline:
     Il Team è orchestrato da qwen3:latest (Ollama), mentre il Predictor è dinamico
     e scelto dall'utente tramite i dropdown dell'interfaccia grafica.
     """
+
     def __init__(self):
-        # Inizializza gli agenti
-        self.market_agent = AppModels.OLLAMA_QWEN_1B.get_agent(
-            instructions=MARKET_INSTRUCTIONS,
-            name="MarketAgent",
-            tools=[MarketAPIsTool()]
-        )
-        self.news_agent = AppModels.OLLAMA_QWEN_1B.get_agent(
-            instructions=NEWS_INSTRUCTIONS,
-            name="NewsAgent",
-            tools=[NewsAPIsTool()]
-        )
-        self.social_agent = AppModels.OLLAMA_QWEN_1B.get_agent(
-            instructions=SOCIAL_INSTRUCTIONS,
-            name="SocialAgent",
-            tools=[SocialAPIsTool()]
-        )
-
-        # === Modello di orchestrazione del Team ===
-        team_model = AppModels.OLLAMA_QWEN_1B.get_model(
-            # TODO: migliorare le istruzioni del team
-            "Agisci come coordinatore: smista le richieste tra MarketAgent, NewsAgent e SocialAgent."
-        )
-
-        # === Team ===
-        self.team = Team(
-            name="CryptoAnalysisTeam",
-            members=[self.market_agent, self.news_agent, self.social_agent],
-            model=team_model
-        )
-
-        # === Predictor ===
         self.available_models = AppModels.availables()
         self.all_styles = list(PredictorStyle)
 
-        # Scelte di default
-        self.chosen_model = self.available_models[0] if self.available_models else None
-        self.style = self.all_styles[0] if self.all_styles else None
-
-        self._init_predictor() # Inizializza il predictor con il modello di default
+        self.style = self.all_styles[0]
+        self.team = create_team_with(AppModels.OLLAMA_QWEN_1B)
+        self.choose_predictor(0)  # Modello di default
 
     # ======================
     # Dropdown handlers
     # ======================
-    def choose_provider(self, index: int):
+    def choose_predictor(self, index: int):
         """
         Sceglie il modello LLM da usare per il Predictor.
         """
-        self.chosen_model = self.available_models[index]
-        self._init_predictor()
+        model = self.available_models[index]
+        self.predictor = model.get_agent(
+            PREDICTOR_INSTRUCTIONS,
+            output=PredictorOutput, # type: ignore
+        )
 
     def choose_style(self, index: int):
         """
@@ -73,17 +41,6 @@ class Pipeline:
     # ======================
     # Helpers
     # ======================
-    def _init_predictor(self):
-        """
-        Inizializza (o reinizializza) il Predictor in base al modello scelto.
-        """
-        if not self.chosen_model:
-            return
-        self.predictor = self.chosen_model.get_agent(
-            PREDICTOR_INSTRUCTIONS,
-            output=PredictorOutput, # type: ignore
-        )
-
     def list_providers(self) -> list[str]:
         """
         Restituisce la lista dei nomi dei modelli disponibili.
@@ -106,9 +63,6 @@ class Pipeline:
         3. Invoca Predictor
         4. Restituisce la strategia finale
         """
-        if not self.predictor or not self.style:
-            return "⚠️ Devi prima selezionare un modello e una strategia validi dagli appositi menu."
-
         # Step 1: raccolta output dai membri del Team
         team_outputs = self.team.run(query)
 
