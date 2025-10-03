@@ -59,6 +59,8 @@ class NewsAPIsTool(NewsWrapper, Toolkit):
             limit (int): Maximum number of articles to retrieve from each provider.
         Returns:
             dict[str, list[Article]]: A dictionary mapping providers names to their list of Articles
+        Raises:
+            Exception: If all wrappers fail to provide results.
         """
         return self.wrapper_handler.try_call_all(lambda w: w.get_top_headlines(limit))
 
@@ -70,5 +72,7 @@ class NewsAPIsTool(NewsWrapper, Toolkit):
             limit (int): Maximum number of articles to retrieve from each provider.
         Returns:
             dict[str, list[Article]]: A dictionary mapping providers names to their list of Articles
+        Raises:
+            Exception: If all wrappers fail to provide results.
         """
         return self.wrapper_handler.try_call_all(lambda w: w.get_latest_news(query, limit))

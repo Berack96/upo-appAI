@@ -65,6 +65,8 @@ class MarketAPIsTool(BaseWrapper, Toolkit):
             asset_ids (list[str]): Lista di asset_id da cercare.
         Returns:
             list[ProductInfo]: Lista di ProductInfo aggregati.
+        Raises:
+            Exception: If all wrappers fail to provide results.
         """
         all_products = self.wrappers.try_call_all(lambda w: w.get_products(asset_ids))
         return aggregate_product_info(all_products)
@@ -78,6 +80,8 @@ class MarketAPIsTool(BaseWrapper, Toolkit):
             limit (int): Numero massimo di dati storici da restituire.
         Returns:
             list[Price]: Lista di Price aggregati.
+        Raises:
+            Exception: If all wrappers fail to provide results.
         """
         all_prices = self.wrappers.try_call_all(lambda w: w.get_historical_prices(asset_id, limit))
         return aggregate_history_prices(all_prices)

@@ -107,5 +107,4 @@ class AppModels(Enum):
             tools=tools,
             delay_between_retries=5, # seconds
             output_schema=output # se si usa uno schema di output, lo si passa qui
-            # TODO Eventuali altri parametri da mettere all'agente anche se si possono comunque assegnare dopo la creazione
         )

@@ -24,7 +24,7 @@ class NewsApiWrapper(NewsWrapper):
 
         self.client = newsapi.NewsApiClient(api_key=api_key)
         self.category = "business" # Cryptocurrency is under business
-        self.language = "en" # TODO Only English articles for now?
+        self.language = "en"
         self.max_page_size = 100
 
     def __calc_pages(self, limit: int, page_size: int) -> tuple[int, int]:
