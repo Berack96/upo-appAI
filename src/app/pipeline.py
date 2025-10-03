@@ -12,7 +12,7 @@ class Pipeline:
     """
     Coordina gli agenti di servizio (Market, News, Social) e il Predictor finale.
     Il Team è orchestrato da qwen3:latest (Ollama), mentre il Predictor è dinamico
-    e scelto dall'utente tramite i dropdown dell'interfaccia.
+    e scelto dall'utente tramite i dropdown dell'interfaccia grafica.
     """
     def __init__(self):
         # === Membri del team ===
