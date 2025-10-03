@@ -2,8 +2,8 @@ import os
 from typing import Optional
 from datetime import datetime, timedelta
 from coinbase.rest import RESTClient
-from base import ProductInfo, BaseWrapper, Price
-from error_handler import retry_on_failure, handle_api_errors, MarketAPIError, RateLimitError
+from app.markets.base import ProductInfo, BaseWrapper, Price
+from app.markets.error_handler import retry_on_failure, handle_api_errors, MarketAPIError, RateLimitError
 
 class CoinBaseWrapper(BaseWrapper):
     """

@@ -28,6 +28,7 @@ class MarketAPIs(BaseWrapper):
         :return: Lista di istanze delle API di mercato disponibili
         """
         wrapper_builders = [
+            BinanceWrapper,
             CoinBaseWrapper,
             CryptoCompareWrapper,
         ]
