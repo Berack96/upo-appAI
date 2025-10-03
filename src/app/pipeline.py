@@ -16,24 +16,24 @@ class Pipeline:
     """
     def __init__(self):
         # Inizializza gli agenti
-        self.market_agent = AppModels.OLLAMA_QWEN.get_agent(
+        self.market_agent = AppModels.OLLAMA_QWEN_1B.get_agent(
             instructions=MARKET_INSTRUCTIONS,
             name="MarketAgent",
             tools=[MarketAPIsTool()]
         )
-        self.news_agent = AppModels.OLLAMA_QWEN.get_agent(
+        self.news_agent = AppModels.OLLAMA_QWEN_1B.get_agent(
             instructions=NEWS_INSTRUCTIONS,
             name="NewsAgent",
             tools=[NewsAPIsTool()]
         )
-        self.social_agent = AppModels.OLLAMA_QWEN.get_agent(
+        self.social_agent = AppModels.OLLAMA_QWEN_1B.get_agent(
             instructions=SOCIAL_INSTRUCTIONS,
             name="SocialAgent",
             tools=[SocialAPIsTool()]
         )
 
         # === Modello di orchestrazione del Team ===
-        team_model = AppModels.OLLAMA_QWEN.get_model(
+        team_model = AppModels.OLLAMA_QWEN_1B.get_model(
             # TODO: migliorare le istruzioni del team
             "Agisci come coordinatore: smista le richieste tra MarketAgent, NewsAgent e SocialAgent."
         )
