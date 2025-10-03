@@ -1,11 +1,11 @@
 from agno.run.agent import RunOutput
 from agno.team import Team
 
-from app.agents.market_agent import MarketAgent
-from app.agents.news_agent import NewsAgent
-from app.agents.social_agent import SocialAgent
+from app.news import NewsAPIsTool, NEWS_INSTRUCTIONS
+from app.social import SocialAPIsTool, SOCIAL_INSTRUCTIONS
+from app.markets import MarketAPIsTool, MARKET_INSTRUCTIONS
 from app.models import AppModels
-from app.predictor import PredictorInput, PredictorOutput, PredictorStyle, PREDICTOR_INSTRUCTIONS
+from app.predictor import PredictorStyle, PredictorInput, PredictorOutput, PREDICTOR_INSTRUCTIONS
 
 
 class Pipeline:
@@ -15,10 +15,22 @@ class Pipeline:
     e scelto dall'utente tramite i dropdown dell'interfaccia grafica.
     """
     def __init__(self):
-        # === Membri del team ===
-        self.market_agent = MarketAgent()
-        self.news_agent = NewsAgent()
-        self.social_agent = SocialAgent()
+        # Inizializza gli agenti
+        self.market_agent = AppModels.OLLAMA_QWEN.get_agent(
+            instructions=MARKET_INSTRUCTIONS,
+            name="MarketAgent",
+            tools=[MarketAPIsTool()]
+        )
+        self.news_agent = AppModels.OLLAMA_QWEN.get_agent(
+            instructions=NEWS_INSTRUCTIONS,
+            name="NewsAgent",
+            tools=[NewsAPIsTool()]
+        )
+        self.social_agent = AppModels.OLLAMA_QWEN.get_agent(
+            instructions=SOCIAL_INSTRUCTIONS,
+            name="SocialAgent",
+            tools=[SocialAPIsTool()]
+        )
 
         # === Modello di orchestrazione del Team ===
         team_model = AppModels.OLLAMA_QWEN.get_model(

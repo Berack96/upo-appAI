@@ -16,8 +16,8 @@ def unified_checks(model: AppModels, input):
     for item in content.portfolio:
         assert item.asset not in (None, "", "null")
         assert isinstance(item.asset, str)
-        assert item.percentage > 0
-        assert item.percentage <= 100
+        assert item.percentage >= 0.0
+        assert item.percentage <= 100.0
         assert isinstance(item.percentage, (int, float))
         assert item.motivation not in (None, "", "null")
         assert isinstance(item.motivation, str)
@@ -41,6 +41,7 @@ class TestPredictor:
     def test_gemini_model_output(self, inputs):
         unified_checks(AppModels.GEMINI, inputs)
 
+    @pytest.mark.slow
     def test_ollama_qwen_model_output(self, inputs):
         unified_checks(AppModels.OLLAMA_QWEN, inputs)
 

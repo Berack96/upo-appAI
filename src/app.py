@@ -77,6 +77,7 @@ if __name__ == "__main__":
         # Caricamento
         load_btn.click(load_previous_chat, inputs=None, outputs=[chatbot, chatbot])
 
-    server, port = ("127.0.0.1", 8000)
-    log_info(f"Starting UPO AppAI Chat on http://{server}:{port}") # noqa
+    server, port = ("0.0.0.0", 8000)
+    server_log = "localhost" if server == "0.0.0.0" else server
+    log_info(f"Starting UPO AppAI Chat on http://{server_log}:{port}") # noqa
     demo.launch(server_name=server, server_port=port, quiet=True)

@@ -8,6 +8,7 @@ Questo script dimostra l'utilizzo di tutti i wrapper che implementano BaseWrappe
 - CryptoCompareWrapper (richiede API key)
 - BinanceWrapper (richiede credenziali)
 - PublicBinanceAgent (accesso pubblico)
+- YFinanceWrapper (accesso gratuito a dati azionari e crypto)
 
 Lo script effettua chiamate GET a diversi provider e visualizza i dati
 in modo strutturato con informazioni dettagliate su timestamp, stato
@@ -26,11 +27,11 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root / "src"))
 
 from dotenv import load_dotenv
-from app.markets import (
+from app.markets import ( 
     CoinBaseWrapper, 
     CryptoCompareWrapper, 
-    BinanceWrapper, 
-    PublicBinanceAgent,
+    BinanceWrapper,
+    YFinanceWrapper,
     BaseWrapper
 )
 
@@ -153,7 +154,7 @@ class ProviderTester:
                 if product:
                     print(f"📦 Product: {product.symbol} (ID: {product.id})")
                     print(f"   Price: ${product.price:.2f}, Quote: {product.quote_currency}")
-                    print(f"   Status: {product.status}, Volume 24h: {product.volume_24h:,.2f}")
+                    print(f"   Volume 24h: {product.volume_24h:,.2f}")
                 else:
                     print(f"📦 Product: Nessun prodotto trovato per {symbol}")
                 
@@ -183,24 +184,6 @@ class ProviderTester:
                 provider_name, f"get_products({self.test_symbols})", timestamp, "❌ ERROR", error_msg
             )
             results["tests"]["get_products"] = f"ERROR: {error_msg}"
-            results["overall_status"] = "PARTIAL"
-        
-        # Test get_all_products
-        timestamp = datetime.now()
-        try:
-            all_products = wrapper.get_all_products()
-            self.formatter.print_request_info(
-                provider_name, "get_all_products()", timestamp, "✅ SUCCESS"
-            )
-            self.formatter.print_product_table(all_products, f"{provider_name} All Products")
-            results["tests"]["get_all_products"] = "SUCCESS"
-            
-        except Exception as e:
-            error_msg = str(e)
-            self.formatter.print_request_info(
-                provider_name, "get_all_products()", timestamp, "❌ ERROR", error_msg
-            )
-            results["tests"]["get_all_products"] = f"ERROR: {error_msg}"
             results["overall_status"] = "PARTIAL"
         
         # Test get_historical_prices
@@ -239,13 +222,6 @@ def initialize_providers() -> Dict[str, BaseWrapper]:
     providers = {}
     env_vars = check_environment_variables()
     
-    # PublicBinanceAgent (sempre disponibile)
-    try:
-        providers["PublicBinance"] = PublicBinanceAgent()
-        print("✅ PublicBinanceAgent inizializzato con successo")
-    except Exception as e:
-        print(f"❌ Errore nell'inizializzazione di PublicBinanceAgent: {e}")
-    
     # CryptoCompareWrapper
     if env_vars["CRYPTOCOMPARE_API_KEY"]:
         try:
@@ -267,15 +243,18 @@ def initialize_providers() -> Dict[str, BaseWrapper]:
         print("⚠️ CoinBaseWrapper saltato: credenziali Coinbase non complete")
     
     # BinanceWrapper
-    if env_vars["BINANCE_API_KEY"] and env_vars["BINANCE_API_SECRET"]:
-        try:
-            providers["Binance"] = BinanceWrapper()
-            print("✅ BinanceWrapper inizializzato con successo")
-        except Exception as e:
-            print(f"❌ Errore nell'inizializzazione di BinanceWrapper: {e}")
-    else:
-        print("⚠️ BinanceWrapper saltato: credenziali Binance non complete")
+    try:
+        providers["Binance"] = BinanceWrapper()
+        print("✅ BinanceWrapper inizializzato con successo")
+    except Exception as e:
+        print(f"❌ Errore nell'inizializzazione di BinanceWrapper: {e}")
     
+    # YFinanceWrapper (sempre disponibile - dati azionari e crypto gratuiti)
+    try:
+        providers["YFinance"] = YFinanceWrapper()
+        print("✅ YFinanceWrapper inizializzato con successo")
+    except Exception as e:
+        print(f"❌ Errore nell'inizializzazione di YFinanceWrapper: {e}")
     return providers
 
 def print_summary(results: List[Dict[str, Any]]):
