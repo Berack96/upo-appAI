@@ -3,10 +3,10 @@ from enum import Enum
 from datetime import datetime, timedelta
 from coinbase.rest import RESTClient
 from coinbase.rest.types.product_types import Candle, GetProductResponse, Product
-from .base import ProductInfo, BaseWrapper, Price
+from app.markets.base import ProductInfo, BaseWrapper, Price
 
 
-def get_product(product_data: GetProductResponse | Product) -> ProductInfo:
+def extract_product(product_data: GetProductResponse | Product) -> ProductInfo:
     product = ProductInfo()
     product.id = product_data.product_id or ""
     product.symbol = product_data.base_currency_id or ""
@@ -14,7 +14,7 @@ def get_product(product_data: GetProductResponse | Product) -> ProductInfo:
     product.volume_24h = float(product_data.volume_24h) if product_data.volume_24h else 0.0
     return product
 
-def get_price(candle_data: Candle) -> Price:
+def extract_price(candle_data: Candle) -> Price:
     price = Price()
     price.high = float(candle_data.high) if candle_data.high else 0.0
     price.low = float(candle_data.low) if candle_data.low else 0.0
@@ -64,12 +64,12 @@ class CoinBaseWrapper(BaseWrapper):
     def get_product(self, asset_id: str) -> ProductInfo:
         asset_id = self.__format(asset_id)
         asset = self.client.get_product(asset_id)
-        return get_product(asset)
+        return extract_product(asset)
 
     def get_products(self, asset_ids: list[str]) -> list[ProductInfo]:
         all_asset_ids = [self.__format(asset_id) for asset_id in asset_ids]
         assets = self.client.get_products(product_ids=all_asset_ids)
-        return [get_product(asset) for asset in assets.products]
+        return [extract_product(asset) for asset in assets.products]
 
     def get_historical_prices(self, asset_id: str = "BTC", limit: int = 100) -> list[Price]:
         asset_id = self.__format(asset_id)
@@ -83,4 +83,4 @@ class CoinBaseWrapper(BaseWrapper):
             end=str(int(end_time.timestamp())),
             limit=limit
         )
-        return [get_price(candle) for candle in data.candles]
+        return [extract_price(candle) for candle in data.candles]

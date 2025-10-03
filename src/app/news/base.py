@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 
+
 class Article(BaseModel):
     source: str = ""
     time: str = ""

@@ -5,8 +5,8 @@ from agno.agent import Agent
 from agno.models.base import Model
 from agno.models.google import Gemini
 from agno.models.ollama import Ollama
-from agno.utils.log import log_warning
 from agno.tools import Toolkit
+from agno.utils.log import log_warning
 from pydantic import BaseModel
 
 

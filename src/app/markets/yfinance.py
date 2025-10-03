@@ -1,9 +1,9 @@
 import json
 from agno.tools.yfinance import YFinanceTools
-from .base import BaseWrapper, ProductInfo, Price
+from app.markets.base import BaseWrapper, ProductInfo, Price
 
 
-def create_product_info(stock_data: dict[str, str]) -> ProductInfo:
+def extract_product(stock_data: dict[str, str]) -> ProductInfo:
     """
     Converte i dati di YFinanceTools in ProductInfo.
     """
@@ -15,7 +15,7 @@ def create_product_info(stock_data: dict[str, str]) -> ProductInfo:
     product.quote_currency = product.id.split('-')[1]  # La valuta è la parte dopo il '-'
     return product
 
-def create_price_from_history(hist_data: dict[str, str]) -> Price:
+def extract_price(hist_data: dict[str, str]) -> Price:
     """
     Converte i dati storici di YFinanceTools in Price.
     """
@@ -52,7 +52,7 @@ class YFinanceWrapper(BaseWrapper):
         symbol = self._format_symbol(asset_id)
         stock_info = self.tool.get_company_info(symbol)
         stock_info = json.loads(stock_info)
-        return create_product_info(stock_info)
+        return extract_product(stock_info)
 
     def get_products(self, asset_ids: list[str]) -> list[ProductInfo]:
         products = []
@@ -75,6 +75,6 @@ class YFinanceWrapper(BaseWrapper):
         for timestamp in timestamps:
             temp = hist_data[timestamp]
             temp['Timestamp'] = timestamp
-            price = create_price_from_history(temp)
+            price = extract_price(temp)
             prices.append(price)
         return prices

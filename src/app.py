@@ -1,17 +1,12 @@
 import gradio as gr
 from agno.utils.log import log_info
 from dotenv import load_dotenv
-
 from app.chat_manager import ChatManager
 
-########################################
-# MAIN APP & GRADIO CHAT INTERFACE
-########################################
-if __name__ == "__main__":
-    # Carica variabili d’ambiente (.env)
-    load_dotenv()
 
-    # Inizializza ChatManager
+if __name__ == "__main__":
+    # Inizializzazioni
+    load_dotenv()
     chat = ChatManager()
 
     ########################################
@@ -68,16 +63,13 @@ if __name__ == "__main__":
             save_btn = gr.Button("💾 Salva Chat")
             load_btn = gr.Button("📂 Carica Chat")
 
-        # Invio messaggio
+        # Eventi e interazioni
         msg.submit(respond, inputs=[msg, chatbot], outputs=[chatbot, chatbot, msg])
-        # Reset
         clear_btn.click(reset_chat, inputs=None, outputs=[chatbot, chatbot])
-        # Salvataggio
         save_btn.click(save_current_chat, inputs=None, outputs=None)
-        # Caricamento
         load_btn.click(load_previous_chat, inputs=None, outputs=[chatbot, chatbot])
 
-    server, port = ("0.0.0.0", 8000)
+    server, port = ("0.0.0.0", 8000) # 0.0.0.0 per accesso esterno (Docker)
     server_log = "localhost" if server == "0.0.0.0" else server
     log_info(f"Starting UPO AppAI Chat on http://{server_log}:{port}") # noqa
     demo.launch(server_name=server, server_port=port, quiet=True)

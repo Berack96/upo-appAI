@@ -1,11 +1,10 @@
 from agno.run.agent import RunOutput
 from agno.team import Team
-
-from app.news import NewsAPIsTool, NEWS_INSTRUCTIONS
-from app.social import SocialAPIsTool, SOCIAL_INSTRUCTIONS
-from app.markets import MarketAPIsTool, MARKET_INSTRUCTIONS
 from app.models import AppModels
-from app.predictor import PredictorStyle, PredictorInput, PredictorOutput, PREDICTOR_INSTRUCTIONS
+from app.markets import MARKET_INSTRUCTIONS, MarketAPIsTool
+from app.news import NEWS_INSTRUCTIONS, NewsAPIsTool
+from app.social import SOCIAL_INSTRUCTIONS, SocialAPIsTool
+from app.predictor import PREDICTOR_INSTRUCTIONS, PredictorInput, PredictorOutput, PredictorStyle
 
 
 class Pipeline:

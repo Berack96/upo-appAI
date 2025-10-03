@@ -1,11 +1,12 @@
 import inspect
 import time
 import traceback
-from typing import TypeVar, Callable, Generic, Iterable, Type
-from agno.utils.log import log_warning, log_info
+from typing import Callable, Generic, Iterable, Type, TypeVar
+from agno.utils.log import log_info, log_warning
 
 W = TypeVar("W")
 T = TypeVar("T")
+
 
 class WrapperHandler(Generic[W]):
     """

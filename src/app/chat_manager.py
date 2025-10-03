@@ -1,10 +1,10 @@
-import os
 import json
-from typing import List, Dict
+import os
 from app.pipeline import Pipeline
 
 SAVE_DIR = os.path.join(os.path.dirname(__file__), "..", "saves")
 os.makedirs(SAVE_DIR, exist_ok=True)
+
 
 class ChatManager:
     """
@@ -16,7 +16,7 @@ class ChatManager:
 
     def __init__(self):
         self.pipeline = Pipeline()
-        self.history: List[Dict[str, str]] = []  # [{"role": "user"/"assistant", "content": "..."}]
+        self.history: list[dict[str, str]] = []  # [{"role": "user"/"assistant", "content": "..."}]
 
     def send_message(self, message: str) -> str:
         """
@@ -58,7 +58,7 @@ class ChatManager:
         """
         self.history = []
 
-    def get_history(self) -> List[Dict[str, str]]:
+    def get_history(self) -> list[dict[str, str]]:
         """
         Restituisce lo storico completo della chat.
         """
@@ -71,8 +71,8 @@ class ChatManager:
     def choose_style(self, index: int):
         self.pipeline.choose_style(index)
 
-    def list_providers(self) -> List[str]:
+    def list_providers(self) -> list[str]:
         return self.pipeline.list_providers()
 
-    def list_styles(self) -> List[str]:
+    def list_styles(self) -> list[str]:
         return self.pipeline.list_styles()

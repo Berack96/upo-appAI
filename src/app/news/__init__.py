@@ -1,10 +1,10 @@
 from agno.tools import Toolkit
 from app.utils.wrapper_handler import WrapperHandler
-from .base import NewsWrapper, Article
-from .news_api import NewsApiWrapper
-from .googlenews import GoogleNewsWrapper
-from .cryptopanic_api import CryptoPanicWrapper
-from .duckduckgo import DuckDuckGoWrapper
+from app.news.base import NewsWrapper, Article
+from app.news.news_api import NewsApiWrapper
+from app.news.googlenews import GoogleNewsWrapper
+from app.news.cryptopanic_api import CryptoPanicWrapper
+from app.news.duckduckgo import DuckDuckGoWrapper
 
 __all__ = ["NewsAPIsTool", "NEWS_INSTRUCTIONS", "NewsApiWrapper", "GoogleNewsWrapper", "CryptoPanicWrapper", "DuckDuckGoWrapper"]
 
@@ -42,6 +42,8 @@ class NewsAPIsTool(NewsWrapper, Toolkit):
             tools=[
                 self.get_top_headlines,
                 self.get_latest_news,
+                self.get_top_headlines_aggregated,
+                self.get_latest_news_aggregated,
             ],
         )
 

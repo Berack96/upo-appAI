@@ -1,7 +1,8 @@
 import os
 from praw import Reddit
 from praw.models import Submission, MoreComments
-from .base import SocialWrapper, SocialPost, SocialComment
+from app.social.base import SocialWrapper, SocialPost, SocialComment
+
 
 MAX_COMMENTS = 5
 # metterne altri se necessario.
@@ -21,7 +22,7 @@ SUBREDDITS = [
 ]
 
 
-def create_social_post(post: Submission) -> SocialPost:
+def extract_post(post: Submission) -> SocialPost:
     social = SocialPost()
     social.time = str(post.created)
     social.title = post.title
@@ -65,4 +66,4 @@ class RedditWrapper(SocialWrapper):
 
     def get_top_crypto_posts(self, limit: int = 5) -> list[SocialPost]:
         top_posts = self.subreddits.top(limit=limit, time_filter="week")
-        return [create_social_post(post) for post in top_posts]
+        return [extract_post(post) for post in top_posts]

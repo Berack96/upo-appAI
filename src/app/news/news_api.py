@@ -1,8 +1,9 @@
 import os
 import newsapi
-from .base import Article, NewsWrapper
+from app.news.base import Article, NewsWrapper
 
-def result_to_article(result: dict) -> Article:
+
+def extract_article(result: dict) -> Article:
     article = Article()
     article.source = result.get("source", {}).get("name", "")
     article.time = result.get("publishedAt", "")
@@ -37,7 +38,7 @@ class NewsApiWrapper(NewsWrapper):
 
         for page in range(1, pages + 1):
             headlines = self.client.get_top_headlines(q="", category=self.category, language=self.language, page_size=page_size, page=page)
-            results = [result_to_article(article) for article in headlines.get("articles", [])]
+            results = [extract_article(article) for article in headlines.get("articles", [])]
             articles.extend(results)
         return articles
 
@@ -47,7 +48,7 @@ class NewsApiWrapper(NewsWrapper):
 
         for page in range(1, pages + 1):
             everything = self.client.get_everything(q=query, language=self.language, sort_by="publishedAt", page_size=page_size, page=page)
-            results = [result_to_article(article) for article in everything.get("articles", [])]
+            results = [extract_article(article) for article in everything.get("articles", [])]
             articles.extend(results)
         return articles
 

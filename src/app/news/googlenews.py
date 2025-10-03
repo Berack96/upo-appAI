@@ -1,7 +1,8 @@
 from gnews import GNews
-from .base import Article, NewsWrapper
+from app.news.base import Article, NewsWrapper
 
-def result_to_article(result: dict) -> Article:
+
+def extract_article(result: dict) -> Article:
     article = Article()
     article.source = result.get("source", "")
     article.time = result.get("publishedAt", "")
@@ -21,7 +22,7 @@ class GoogleNewsWrapper(NewsWrapper):
 
         articles = []
         for result in results:
-            article = result_to_article(result)
+            article = extract_article(result)
             articles.append(article)
         return articles
 
@@ -31,6 +32,6 @@ class GoogleNewsWrapper(NewsWrapper):
 
         articles = []
         for result in results:
-            article = result_to_article(result)
+            article = extract_article(result)
             articles.append(article)
         return articles

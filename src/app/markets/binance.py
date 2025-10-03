@@ -1,9 +1,9 @@
 import os
-from datetime import datetime
 from binance.client import Client
-from .base import ProductInfo, BaseWrapper, Price
+from app.markets.base import ProductInfo, BaseWrapper, Price
 
-def get_product(currency: str, ticker_data: dict[str, str]) -> ProductInfo:
+
+def extract_product(currency: str, ticker_data: dict[str, str]) -> ProductInfo:
     product = ProductInfo()
     product.id = ticker_data.get('symbol')
     product.symbol = ticker_data.get('symbol', '').replace(currency, '')
@@ -12,7 +12,7 @@ def get_product(currency: str, ticker_data: dict[str, str]) -> ProductInfo:
     product.quote_currency = currency
     return product
 
-def get_price(kline_data: list) -> Price:
+def extract_price(kline_data: list) -> Price:
     price = Price()
     price.open = float(kline_data[1])
     price.high = float(kline_data[2])
@@ -50,7 +50,7 @@ class BinanceWrapper(BaseWrapper):
         ticker_24h = self.client.get_ticker(symbol=symbol)
         ticker['volume'] = ticker_24h.get('volume', 0)  # Aggiunge volume 24h ai dati del ticker
 
-        return get_product(self.currency, ticker)
+        return extract_product(self.currency, ticker)
 
     def get_products(self, asset_ids: list[str]) -> list[ProductInfo]:
         symbols = [self.__format_symbol(asset_id) for asset_id in asset_ids]
@@ -61,7 +61,7 @@ class BinanceWrapper(BaseWrapper):
         for t, t24 in zip(tickers, tickers_24h):
             t['volume'] = t24.get('volume', 0)
 
-        return [get_product(self.currency, ticker) for ticker in tickers]
+        return [extract_product(self.currency, ticker) for ticker in tickers]
 
     def get_historical_prices(self, asset_id: str = "BTC", limit: int = 100) -> list[Price]:
         symbol = self.__format_symbol(asset_id)
@@ -72,5 +72,5 @@ class BinanceWrapper(BaseWrapper):
             interval=Client.KLINE_INTERVAL_1HOUR,
             limit=limit,
         )
-        return [get_price(kline) for kline in klines]
+        return [extract_price(kline) for kline in klines]
 
