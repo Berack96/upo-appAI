@@ -24,7 +24,7 @@ class Price(BaseModel):
     volume: float = 0.0
     timestamp_ms: int = 0  # Timestamp in milliseconds
 
-class BaseWrapper:
+class MarketWrapper:
     """
     Base class for market API wrappers.
     All market API wrappers should inherit from this class and implement the methods.
@@ -50,7 +50,7 @@ class BaseWrapper:
         """
         raise NotImplementedError("This method should be overridden by subclasses")
 
-    def get_historical_prices(self, asset_id: str = "BTC", limit: int = 100) -> list[Price]:
+    def get_historical_prices(self, asset_id: str, limit: int = 100) -> list[Price]:
         """
         Get historical price data for a specific asset ID.
         Args:

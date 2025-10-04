@@ -1,6 +1,6 @@
 import json
 from agno.tools.yfinance import YFinanceTools
-from app.markets.base import BaseWrapper, ProductInfo, Price
+from app.markets.base import MarketWrapper, ProductInfo, Price
 
 
 def extract_product(stock_data: dict[str, str]) -> ProductInfo:
@@ -29,7 +29,7 @@ def extract_price(hist_data: dict[str, str]) -> Price:
     return price
 
 
-class YFinanceWrapper(BaseWrapper):
+class YFinanceWrapper(MarketWrapper):
     """
     Wrapper per YFinanceTools che fornisce dati di mercato per azioni, ETF e criptovalute.
     Implementa l'interfaccia BaseWrapper per compatibilità con il sistema esistente.
@@ -55,13 +55,13 @@ class YFinanceWrapper(BaseWrapper):
         return extract_product(stock_info)
 
     def get_products(self, asset_ids: list[str]) -> list[ProductInfo]:
-        products = []
+        products: list[ProductInfo] = []
         for asset_id in asset_ids:
             product = self.get_product(asset_id)
             products.append(product)
         return products
 
-    def get_historical_prices(self, asset_id: str = "BTC", limit: int = 100) -> list[Price]:
+    def get_historical_prices(self, asset_id: str, limit: int = 100) -> list[Price]:
         symbol = self._format_symbol(asset_id)
 
         days = limit // 24 + 1  # Arrotonda per eccesso
@@ -71,7 +71,7 @@ class YFinanceWrapper(BaseWrapper):
         # Il formato dei dati è {timestamp: {Open: x, High: y, Low: z, Close: w, Volume: v}}
         timestamps = sorted(hist_data.keys())[-limit:]
 
-        prices = []
+        prices: list[Price] = []
         for timestamp in timestamps:
             temp = hist_data[timestamp]
             temp['Timestamp'] = timestamp

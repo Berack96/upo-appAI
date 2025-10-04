@@ -1,18 +1,19 @@
 import os
-from binance.client import Client
-from app.markets.base import ProductInfo, BaseWrapper, Price
+from typing import Any
+from binance.client import Client # type: ignore
+from app.markets.base import ProductInfo, MarketWrapper, Price
 
 
-def extract_product(currency: str, ticker_data: dict[str, str]) -> ProductInfo:
+def extract_product(currency: str, ticker_data: dict[str, Any]) -> ProductInfo:
     product = ProductInfo()
-    product.id = ticker_data.get('symbol')
+    product.id = ticker_data.get('symbol', '')
     product.symbol = ticker_data.get('symbol', '').replace(currency, '')
     product.price = float(ticker_data.get('price', 0))
     product.volume_24h = float(ticker_data.get('volume', 0))
     product.quote_currency = currency
     return product
 
-def extract_price(kline_data: list) -> Price:
+def extract_price(kline_data: list[Any]) -> Price:
     price = Price()
     price.open = float(kline_data[1])
     price.high = float(kline_data[2])
@@ -22,7 +23,7 @@ def extract_price(kline_data: list) -> Price:
     price.timestamp_ms = kline_data[0]
     return price
 
-class BinanceWrapper(BaseWrapper):
+class BinanceWrapper(MarketWrapper):
     """
     Wrapper per le API autenticate di Binance.\n
     Implementa l'interfaccia BaseWrapper per fornire accesso unificato
@@ -46,31 +47,22 @@ class BinanceWrapper(BaseWrapper):
     def get_product(self, asset_id: str) -> ProductInfo:
         symbol = self.__format_symbol(asset_id)
 
-        ticker = self.client.get_symbol_ticker(symbol=symbol)
-        ticker_24h = self.client.get_ticker(symbol=symbol)
-        ticker['volume'] = ticker_24h.get('volume', 0)  # Aggiunge volume 24h ai dati del ticker
+        ticker: dict[str, Any] = self.client.get_symbol_ticker(symbol=symbol) # type: ignore
+        ticker_24h: dict[str, Any] = self.client.get_ticker(symbol=symbol) # type: ignore
+        ticker['volume'] = ticker_24h.get('volume', 0)
 
         return extract_product(self.currency, ticker)
 
     def get_products(self, asset_ids: list[str]) -> list[ProductInfo]:
-        symbols = [self.__format_symbol(asset_id) for asset_id in asset_ids]
-        symbols_str = f"[\"{'","'.join(symbols)}\"]"
+        return [ self.get_product(asset_id) for asset_id in asset_ids ]
 
-        tickers = self.client.get_symbol_ticker(symbols=symbols_str)
-        tickers_24h = self.client.get_ticker(symbols=symbols_str) # un po brutale, ma va bene così
-        for t, t24 in zip(tickers, tickers_24h):
-            t['volume'] = t24.get('volume', 0)
-
-        return [extract_product(self.currency, ticker) for ticker in tickers]
-
-    def get_historical_prices(self, asset_id: str = "BTC", limit: int = 100) -> list[Price]:
+    def get_historical_prices(self, asset_id: str, limit: int = 100) -> list[Price]:
         symbol = self.__format_symbol(asset_id)
 
         # Ottiene candele orarie degli ultimi 30 giorni
-        klines = self.client.get_historical_klines(
+        klines: list[list[Any]] = self.client.get_historical_klines( # type: ignore
             symbol=symbol,
             interval=Client.KLINE_INTERVAL_1HOUR,
             limit=limit,
         )
         return [extract_price(kline) for kline in klines]
-

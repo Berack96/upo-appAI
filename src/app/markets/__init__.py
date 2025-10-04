@@ -1,5 +1,5 @@
 from agno.tools import Toolkit
-from app.markets.base import BaseWrapper, Price, ProductInfo
+from app.markets.base import MarketWrapper, Price, ProductInfo
 from app.markets.binance import BinanceWrapper
 from app.markets.coinbase import CoinBaseWrapper
 from app.markets.cryptocompare import CryptoCompareWrapper
@@ -10,7 +10,7 @@ from app.utils.wrapper_handler import WrapperHandler
 __all__ = [ "MarketAPIsTool", "BinanceWrapper", "CoinBaseWrapper", "CryptoCompareWrapper", "YFinanceWrapper", "ProductInfo", "Price" ]
 
 
-class MarketAPIsTool(BaseWrapper, Toolkit):
+class MarketAPIsTool(MarketWrapper, Toolkit):
     """
     Class that aggregates multiple market API wrappers and manages them using WrapperHandler.
     This class supports retrieving product information and historical prices.
@@ -34,10 +34,10 @@ class MarketAPIsTool(BaseWrapper, Toolkit):
             currency (str): Valuta in cui restituire i prezzi. Default è "USD".
         """
         kwargs = {"currency": currency or "USD"}
-        wrappers = [ BinanceWrapper, YFinanceWrapper, CoinBaseWrapper, CryptoCompareWrapper ]
-        self.wrappers: WrapperHandler[BaseWrapper] = WrapperHandler.build_wrappers(wrappers, kwargs=kwargs)
+        wrappers: list[type[MarketWrapper]] = [BinanceWrapper, YFinanceWrapper, CoinBaseWrapper, CryptoCompareWrapper]
+        self.wrappers = WrapperHandler.build_wrappers(wrappers, kwargs=kwargs)
 
-        Toolkit.__init__(
+        Toolkit.__init__( # type: ignore
             self,
             name="Market APIs Toolkit",
             tools=[
@@ -53,7 +53,7 @@ class MarketAPIsTool(BaseWrapper, Toolkit):
         return self.wrappers.try_call(lambda w: w.get_product(asset_id))
     def get_products(self, asset_ids: list[str]) -> list[ProductInfo]:
         return self.wrappers.try_call(lambda w: w.get_products(asset_ids))
-    def get_historical_prices(self, asset_id: str = "BTC", limit: int = 100) -> list[Price]:
+    def get_historical_prices(self, asset_id: str, limit: int = 100) -> list[Price]:
         return self.wrappers.try_call(lambda w: w.get_historical_prices(asset_id, limit))
 
 

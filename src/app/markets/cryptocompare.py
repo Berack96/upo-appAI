@@ -1,9 +1,10 @@
 import os
+from typing import Any
 import requests
-from app.markets.base import ProductInfo, BaseWrapper, Price
+from app.markets.base import ProductInfo, MarketWrapper, Price
 
 
-def extract_product(asset_data: dict) -> ProductInfo:
+def extract_product(asset_data: dict[str, Any]) -> ProductInfo:
     product = ProductInfo()
     product.id = asset_data.get('FROMSYMBOL', '') + '-' + asset_data.get('TOSYMBOL', '')
     product.symbol = asset_data.get('FROMSYMBOL', '')
@@ -12,7 +13,7 @@ def extract_product(asset_data: dict) -> ProductInfo:
     assert product.price > 0, "Invalid price data received from CryptoCompare"
     return product
 
-def extract_price(price_data: dict) -> Price:
+def extract_price(price_data: dict[str, Any]) -> Price:
     price = Price()
     price.high = float(price_data.get('high', 0))
     price.low = float(price_data.get('low', 0))
@@ -26,7 +27,7 @@ def extract_price(price_data: dict) -> Price:
 
 BASE_URL = "https://min-api.cryptocompare.com"
 
-class CryptoCompareWrapper(BaseWrapper):
+class CryptoCompareWrapper(MarketWrapper):
     """
     Wrapper per le API pubbliche di CryptoCompare.
     La documentazione delle API è disponibile qui: https://developers.coindesk.com/documentation/legacy/Price/SingleSymbolPriceEndpoint
@@ -39,7 +40,7 @@ class CryptoCompareWrapper(BaseWrapper):
         self.api_key = api_key
         self.currency = currency
 
-    def __request(self, endpoint: str, params: dict[str, str] | None = None) -> dict[str, str]:
+    def __request(self, endpoint: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         if params is None:
             params = {}
         params['api_key'] = self.api_key
@@ -60,7 +61,7 @@ class CryptoCompareWrapper(BaseWrapper):
             "fsyms": ",".join(asset_ids),
             "tsyms": self.currency
         })
-        assets = []
+        assets: list[ProductInfo] = []
         data = response.get('RAW', {})
         for asset_id in asset_ids:
             asset_data = data.get(asset_id, {}).get(self.currency, {})

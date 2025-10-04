@@ -1,9 +1,9 @@
 import os
 from enum import Enum
 from datetime import datetime, timedelta
-from coinbase.rest import RESTClient
-from coinbase.rest.types.product_types import Candle, GetProductResponse, Product
-from app.markets.base import ProductInfo, BaseWrapper, Price
+from coinbase.rest import RESTClient # type: ignore
+from coinbase.rest.types.product_types import Candle, GetProductResponse, Product # type: ignore
+from app.markets.base import ProductInfo, MarketWrapper, Price
 
 
 def extract_product(product_data: GetProductResponse | Product) -> ProductInfo:
@@ -37,7 +37,7 @@ class Granularity(Enum):
     SIX_HOUR = 21600
     ONE_DAY = 86400
 
-class CoinBaseWrapper(BaseWrapper):
+class CoinBaseWrapper(MarketWrapper):
     """
     Wrapper per le API di Coinbase Advanced Trade.\n
     Implementa l'interfaccia BaseWrapper per fornire accesso unificato
@@ -63,24 +63,26 @@ class CoinBaseWrapper(BaseWrapper):
 
     def get_product(self, asset_id: str) -> ProductInfo:
         asset_id = self.__format(asset_id)
-        asset = self.client.get_product(asset_id)
+        asset = self.client.get_product(asset_id) # type: ignore
         return extract_product(asset)
 
     def get_products(self, asset_ids: list[str]) -> list[ProductInfo]:
         all_asset_ids = [self.__format(asset_id) for asset_id in asset_ids]
-        assets = self.client.get_products(product_ids=all_asset_ids)
+        assets = self.client.get_products(product_ids=all_asset_ids) # type: ignore
+        assert assets.products is not None, "No products data received from Coinbase"
         return [extract_product(asset) for asset in assets.products]
 
-    def get_historical_prices(self, asset_id: str = "BTC", limit: int = 100) -> list[Price]:
+    def get_historical_prices(self, asset_id: str, limit: int = 100) -> list[Price]:
         asset_id = self.__format(asset_id)
         end_time = datetime.now()
         start_time = end_time - timedelta(days=14)
 
-        data = self.client.get_candles(
+        data = self.client.get_candles( # type: ignore
             product_id=asset_id,
             granularity=Granularity.ONE_HOUR.name,
             start=str(int(start_time.timestamp())),
             end=str(int(end_time.timestamp())),
             limit=limit
         )
+        assert data.candles is not None, "No candles data received from Coinbase"
         return [extract_price(candle) for candle in data.candles]
