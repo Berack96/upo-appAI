@@ -6,7 +6,7 @@ from agno.models.base import Model
 from agno.models.google import Gemini
 from agno.models.ollama import Ollama
 from agno.tools import Toolkit
-from agno.utils.log import log_warning
+from agno.utils.log import log_warning #type: ignore
 from pydantic import BaseModel
 
 
@@ -36,7 +36,7 @@ class AppModels(Enum):
             log_warning(f"Ollama is not running or not reachable {result}")
             return []
 
-        availables = []
+        availables: list[AppModels] = []
         result = result.text
         for model in [model for model in AppModels if model.name.startswith("OLLAMA")]:
             if model.value in result:
@@ -106,5 +106,5 @@ class AppModels(Enum):
             retries=2,
             tools=tools,
             delay_between_retries=5, # seconds
-            output_schema=output # se si usa uno schema di output, lo si passa qui
+            output_schema=output.__class__ if output else None # se si usa uno schema di output, lo si passa qui
         )

@@ -1,7 +1,6 @@
 from agno.team import Team
-from pydantic import BaseModel, Field
 from app.agents import AppModels
-from app.markets import MarketAPIsTool, ProductInfo
+from app.markets import MarketAPIsTool
 from app.news import NewsAPIsTool
 from app.social import SocialAPIsTool
 
