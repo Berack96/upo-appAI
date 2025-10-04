@@ -1,9 +1,10 @@
 import json
+from typing import Any
 from agno.tools.duckduckgo import DuckDuckGoTools
 from app.news.base import Article, NewsWrapper
 
 
-def extract_article(result: dict) -> Article:
+def extract_article(result: dict[str, Any]) -> Article:
     article = Article()
     article.source = result.get("source", "")
     article.time = result.get("date", "")

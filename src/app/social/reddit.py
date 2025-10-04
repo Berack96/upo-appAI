@@ -1,6 +1,6 @@
 import os
-from praw import Reddit
-from praw.models import Submission, MoreComments
+from praw import Reddit # type: ignore
+from praw.models import Submission, MoreComments # type: ignore
 from app.social.base import SocialWrapper, SocialPost, SocialComment
 
 
@@ -28,7 +28,7 @@ def extract_post(post: Submission) -> SocialPost:
     social.title = post.title
     social.description = post.selftext
 
-    for i, top_comment in enumerate(post.comments):
+    for i, top_comment in enumerate(post.comments.list()):
         if i >= MAX_COMMENTS:
             break
         if isinstance(top_comment, MoreComments): #skip MoreComments objects

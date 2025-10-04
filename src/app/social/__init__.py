@@ -25,10 +25,10 @@ class SocialAPIsTool(SocialWrapper, Toolkit):
         - RedditWrapper.
         """
 
-        wrappers = [RedditWrapper]
-        self.wrapper_handler: WrapperHandler[SocialWrapper] = WrapperHandler.build_wrappers(wrappers)
+        wrappers: list[type[SocialWrapper]] = [RedditWrapper]
+        self.wrapper_handler = WrapperHandler.build_wrappers(wrappers)
 
-        Toolkit.__init__(
+        Toolkit.__init__( # type: ignore
             self,
             name="Socials Toolkit",
             tools=[

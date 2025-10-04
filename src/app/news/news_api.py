@@ -1,9 +1,10 @@
 import os
-import newsapi
+from typing import Any
+import newsapi # type: ignore
 from app.news.base import Article, NewsWrapper
 
 
-def extract_article(result: dict) -> Article:
+def extract_article(result: dict[str, Any]) -> Article:
     article = Article()
     article.source = result.get("source", {}).get("name", "")
     article.time = result.get("publishedAt", "")
@@ -34,21 +35,20 @@ class NewsApiWrapper(NewsWrapper):
 
     def get_top_headlines(self, limit: int = 100) -> list[Article]:
         pages, page_size = self.__calc_pages(limit, self.max_page_size)
-        articles = []
+        articles: list[Article] = []
 
         for page in range(1, pages + 1):
-            headlines = self.client.get_top_headlines(q="", category=self.category, language=self.language, page_size=page_size, page=page)
-            results = [extract_article(article) for article in headlines.get("articles", [])]
+            headlines: dict[str, Any] = self.client.get_top_headlines(q="", category=self.category, language=self.language, page_size=page_size, page=page) # type: ignore
+            results = [extract_article(article) for article in headlines.get("articles", [])] # type: ignore
             articles.extend(results)
         return articles
 
     def get_latest_news(self, query: str, limit: int = 100) -> list[Article]:
         pages, page_size = self.__calc_pages(limit, self.max_page_size)
-        articles = []
+        articles: list[Article] = []
 
         for page in range(1, pages + 1):
-            everything = self.client.get_everything(q=query, language=self.language, sort_by="publishedAt", page_size=page_size, page=page)
-            results = [extract_article(article) for article in everything.get("articles", [])]
+            everything: dict[str, Any] = self.client.get_everything(q=query, language=self.language, sort_by="publishedAt", page_size=page_size, page=page) # type: ignore
+            results = [extract_article(article) for article in everything.get("articles", [])] # type: ignore
             articles.extend(results)
         return articles
-

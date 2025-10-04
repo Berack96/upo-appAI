@@ -33,10 +33,10 @@ class NewsAPIsTool(NewsWrapper, Toolkit):
         - NewsApiWrapper.
         - CryptoPanicWrapper.
         """
-        wrappers = [GoogleNewsWrapper, DuckDuckGoWrapper, NewsApiWrapper, CryptoPanicWrapper]
-        self.wrapper_handler: WrapperHandler[NewsWrapper] = WrapperHandler.build_wrappers(wrappers)
+        wrappers: list[type[NewsWrapper]] = [GoogleNewsWrapper, DuckDuckGoWrapper, NewsApiWrapper, CryptoPanicWrapper]
+        self.wrapper_handler = WrapperHandler.build_wrappers(wrappers)
 
-        Toolkit.__init__(
+        Toolkit.__init__( # type: ignore
             self,
             name="News APIs Toolkit",
             tools=[
