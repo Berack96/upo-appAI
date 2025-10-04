@@ -19,7 +19,7 @@ def aggregate_history_prices(prices: dict[str, list[Price]]) -> list[Price]:
             timestamped_prices.setdefault(time, []).append(price)
 
     # Ora aggregiamo i prezzi per ogni ora
-    aggregated_prices = []
+    aggregated_prices: list[Price] = []
     for time, price_list in timestamped_prices.items():
         price = Price()
         price.timestamp_ms = time
@@ -47,8 +47,7 @@ def aggregate_product_info(products: dict[str, list[ProductInfo]]) -> list[Produ
             symbols_infos.setdefault(product.symbol, []).append(product)
 
     # Aggregazione per ogni symbol
-    sources = list(products.keys())
-    aggregated_products = []
+    aggregated_products: list[ProductInfo] = []
     for symbol, product_list in symbols_infos.items():
         product = ProductInfo()
 
@@ -65,27 +64,3 @@ def aggregate_product_info(products: dict[str, list[ProductInfo]]) -> list[Produ
         aggregated_products.append(product)
     return aggregated_products
 
-def _calculate_confidence(products: list[ProductInfo], sources: list[str]) -> float:
-    """Calcola un punteggio di confidenza 0-1"""
-    if not products:
-        return 0.0
-
-    score = 1.0
-
-    # Riduci score se pochi dati
-    if len(products) < 2:
-        score *= 0.7
-
-    # Riduci score se prezzi troppo diversi
-    prices = [p.price for p in products if p.price > 0]
-    if len(prices) > 1:
-        price_std = (max(prices) - min(prices)) / statistics.mean(prices)
-        if price_std > 0.05:  # >5% variazione
-            score *= 0.8
-
-    # Riduci score se fonti sconosciute
-    unknown_sources = sum(1 for s in sources if s == "unknown")
-    if unknown_sources > 0:
-        score *= (1 - unknown_sources / len(sources))
-
-    return max(0.0, min(1.0, score))

@@ -1,8 +1,8 @@
 import inspect
 import time
 import traceback
-from typing import Callable, Generic, Iterable, Type, TypeVar
-from agno.utils.log import log_info, log_warning
+from typing import Any, Callable, Generic, TypeVar
+from agno.utils.log import log_info, log_warning #type: ignore
 
 W = TypeVar("W")
 T = TypeVar("T")
@@ -50,6 +50,7 @@ class WrapperHandler(Generic[W]):
         log_info(f"{inspect.getsource(func).strip()} {inspect.getclosurevars(func).nonlocals}")
 
         iterations = 0
+        error = ""
         while iterations < len(self.wrappers):
             wrapper = self.wrappers[self.index]
             wrapper_name = wrapper.__class__.__name__
@@ -89,13 +90,14 @@ class WrapperHandler(Generic[W]):
         """
         log_info(f"{inspect.getsource(func).strip()} {inspect.getclosurevars(func).nonlocals}")
 
-        results = {}
+        results: dict[str, T] = {}
+        error = ""
         for wrapper in self.wrappers:
             wrapper_name = wrapper.__class__.__name__
             try:
                 result = func(wrapper)
                 log_info(f"{wrapper_name} succeeded")
-                results[wrapper.__class__] = result
+                results[wrapper_name] = result
             except Exception as e:
                 error = WrapperHandler.__concise_error(e)
                 log_warning(f"{wrapper_name} failed: {error}")
@@ -104,7 +106,7 @@ class WrapperHandler(Generic[W]):
         return results
 
     @staticmethod
-    def __check(wrappers: list[W]) -> bool:
+    def __check(wrappers: list[Any]) -> bool:
         return all(w.__class__ is type for w in wrappers)
 
     @staticmethod
@@ -113,13 +115,13 @@ class WrapperHandler(Generic[W]):
         return f"{e} [\"{last_frame.filename}\", line {last_frame.lineno}]"
 
     @staticmethod
-    def build_wrappers(constructors: Iterable[Type[W]], try_per_wrapper: int = 3, retry_delay: int = 2, kwargs: dict | None = None) -> 'WrapperHandler[W]':
+    def build_wrappers(constructors: list[type[W]], try_per_wrapper: int = 3, retry_delay: int = 2, kwargs: dict[str, Any] | None = None) -> 'WrapperHandler[W]':
         """
         Builds a WrapperHandler instance with the given wrapper constructors.
         It attempts to initialize each wrapper and logs a warning if any cannot be initialized.
         Only successfully initialized wrappers are included in the handler.
         Args:
-            constructors (Iterable[Type[W]]): An iterable of wrapper classes to instantiate. e.g. [WrapperA, WrapperB]
+            constructors (list[type[W]]): An iterable of wrapper classes to instantiate. e.g. [WrapperA, WrapperB]
             try_per_wrapper (int): Number of retries per wrapper before switching to the next.
             retry_delay (int): Delay in seconds between retries.
             kwargs (dict | None): Optional dictionary with keyword arguments common to all wrappers.
@@ -130,7 +132,7 @@ class WrapperHandler(Generic[W]):
         """
         assert WrapperHandler.__check(constructors), f"All constructors must be classes. Received: {constructors}"
 
-        result = []
+        result: list[W] = []
         for wrapper_class in constructors:
             try:
                 wrapper = wrapper_class(**(kwargs or {}))
