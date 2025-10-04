@@ -1,5 +1,5 @@
 from agno.tools import Toolkit
-from app.utils.wrapper_handler import WrapperHandler
+from app.utils import WrapperHandler
 from app.news.base import NewsWrapper, Article
 from app.news.news_api import NewsApiWrapper
 from app.news.googlenews import GoogleNewsWrapper

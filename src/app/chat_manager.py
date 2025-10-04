@@ -1,6 +1,6 @@
 import json
 import os
-from app.pipeline import Pipeline
+from app import Pipeline
 
 SAVE_DIR = os.path.join(os.path.dirname(__file__), "..", "saves")
 os.makedirs(SAVE_DIR, exist_ok=True)

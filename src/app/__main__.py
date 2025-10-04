@@ -1,7 +1,7 @@
 import gradio as gr
 from agno.utils.log import log_info #type: ignore
 from dotenv import load_dotenv
-from app.chat_manager import ChatManager
+from app import ChatManager
 
 
 if __name__ == "__main__":
