@@ -1,8 +1,8 @@
 from agno.run.agent import RunOutput
-from app.agents import AppModels
+from app.agents.models import AppModels
 from app.agents.team import create_team_with
 from app.agents.predictor import PREDICTOR_INSTRUCTIONS, PredictorInput, PredictorOutput, PredictorStyle
-from app.markets.base import ProductInfo
+from app.base.markets import ProductInfo
 
 
 class Pipeline:

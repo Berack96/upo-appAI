@@ -1,7 +1,7 @@
 import os
 from typing import Any
 import requests
-from app.markets.base import ProductInfo, MarketWrapper, Price
+from app.base.markets import ProductInfo, MarketWrapper, Price
 
 
 def extract_product(asset_data: dict[str, Any]) -> ProductInfo:

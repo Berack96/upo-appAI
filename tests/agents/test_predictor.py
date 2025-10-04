@@ -1,7 +1,7 @@
 import pytest
 from app.agents import AppModels
 from app.agents.predictor import PREDICTOR_INSTRUCTIONS, PredictorInput, PredictorOutput, PredictorStyle
-from app.markets.base import ProductInfo
+from app.base.markets import ProductInfo
 
 def unified_checks(model: AppModels, input):
     llm = model.get_agent(PREDICTOR_INSTRUCTIONS, output=PredictorOutput) # type: ignore[arg-type]

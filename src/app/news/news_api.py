@@ -1,7 +1,7 @@
 import os
 from typing import Any
 import newsapi # type: ignore
-from app.news.base import Article, NewsWrapper
+from app.base.news import Article, NewsWrapper
 
 
 def extract_article(result: dict[str, Any]) -> Article:

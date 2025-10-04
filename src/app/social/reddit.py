@@ -1,7 +1,7 @@
 import os
 from praw import Reddit # type: ignore
 from praw.models import Submission, MoreComments # type: ignore
-from app.social.base import SocialWrapper, SocialPost, SocialComment
+from app.base.social import SocialWrapper, SocialPost, SocialComment
 
 
 MAX_COMMENTS = 5

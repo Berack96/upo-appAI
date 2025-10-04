@@ -1,5 +1,5 @@
 import pytest
-from app.markets.base import ProductInfo, Price
+from app.base.markets import ProductInfo, Price
 from app.utils.market_aggregation import aggregate_history_prices, aggregate_product_info
 
 

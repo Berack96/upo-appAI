@@ -1,5 +1,5 @@
 from agno.tools import Toolkit
-from app.markets.base import MarketWrapper, Price, ProductInfo
+from app.base.markets import MarketWrapper, Price, ProductInfo
 from app.markets.binance import BinanceWrapper
 from app.markets.coinbase import CoinBaseWrapper
 from app.markets.cryptocompare import CryptoCompareWrapper

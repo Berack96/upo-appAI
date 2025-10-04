@@ -1,19 +1,23 @@
 import gradio as gr
-from agno.utils.log import log_info #type: ignore
 from dotenv import load_dotenv
-from app import ChatManager
+from agno.utils.log import log_info #type: ignore
+from app.utils import ChatManager
+from app.agents import Pipeline
 
 
 if __name__ == "__main__":
     # Inizializzazioni
     load_dotenv()
+    pipeline = Pipeline()
     chat = ChatManager()
 
     ########################################
     # Funzioni Gradio
     ########################################
     def respond(message: str, history: list[dict[str, str]]) -> tuple[list[dict[str, str]], list[dict[str, str]], str]:
-        response = chat.send_message(message)
+        chat.send_message(message)
+        response = pipeline.interact(message)
+        chat.receive_message(response)
         history.append({"role": "user", "content": message})
         history.append({"role": "assistant", "content": response})
         return history, history, ""
@@ -42,18 +46,18 @@ if __name__ == "__main__":
         # Dropdown provider e stile
         with gr.Row():
             provider = gr.Dropdown(
-                choices=chat.list_providers(),
+                choices=pipeline.list_providers(),
                 type="index",
                 label="Modello da usare"
             )
-            provider.change(fn=chat.choose_provider, inputs=provider, outputs=None)
+            provider.change(fn=pipeline.choose_predictor, inputs=provider, outputs=None)
 
             style = gr.Dropdown(
-                choices=chat.list_styles(),
+                choices=pipeline.list_styles(),
                 type="index",
                 label="Stile di investimento"
             )
-            style.change(fn=chat.choose_style, inputs=style, outputs=None)
+            style.change(fn=pipeline.choose_style, inputs=style, outputs=None)
 
         chatbot = gr.Chatbot(label="Conversazione", height=500, type="messages")
         msg = gr.Textbox(label="Scrivi la tua richiesta", placeholder="Es: Quali sono le crypto interessanti oggi?")
