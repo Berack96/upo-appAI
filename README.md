@@ -9,13 +9,13 @@ L'obiettivo è quello di creare un sistema di consulenza finanziaria basato su L
 
 # **Indice**
 - [Installazione](#installazione)
-    - [1. Variabili d'Ambiente](#1-variabili-dambiente)
-    - [2. Ollama](#2-ollama)
-    - [3. Docker](#3-docker)
-    - [4. UV (solo per sviluppo locale)](#4-uv-solo-per-sviluppo-locale)
+  - [1. Variabili d'Ambiente](#1-variabili-dambiente)
+  - [2. Ollama](#2-ollama)
+  - [3. Docker](#3-docker)
+  - [4. UV (solo per sviluppo locale)](#4-uv-solo-per-sviluppo-locale)
 - [Applicazione](#applicazione)
-   - [Ultimo Aggiornamento](#ultimo-aggiornamento)
-   - [Tests](#tests)
+  - [Struttura del codice del Progetto](#struttura-del-codice-del-progetto)
+  - [Tests](#tests)
 
 # **Installazione**
 
@@ -99,16 +99,18 @@ Usando la libreria ``gradio`` è stata creata un'interfaccia web semplice per in
 - **Social Agent**: Analizza i sentimenti sui social media riguardo alle criptovalute.
 - **Predictor Agent**: Utilizza i dati raccolti dagli altri agenti per fare previsioni.
 
-## Struttura delle cartelle del Progetto
+## Struttura del codice del Progetto
 
 ```
-src               <-- Cartella principale del codice sorgente
-└── app           <-- Cartella principale dell'applicazione
-    ├── agents    <-- Agenti, modelli, prompts e simili
-    ├── markets   <-- Market data provider (Es. Binance)
-    ├── news      <-- News data provider (Es. NewsAPI)
-    ├── social    <-- Social data provider (Es. Reddit)
-    └── utils     <-- Codice di utilità generale
+src
+└── app
+    ├── __main__.py
+    ├── agents       <-- Agenti, modelli, prompts e simili
+    ├── base         <-- Classi base per le API
+    ├── markets      <-- Market data provider (Es. Binance)
+    ├── news         <-- News data provider (Es. NewsAPI)
+    ├── social       <-- Social data provider (Es. Reddit)
+    └── utils        <-- Codice di utilità generale
 ```
 
 ## Tests
