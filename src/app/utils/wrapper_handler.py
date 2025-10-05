@@ -34,7 +34,6 @@ class WrapperHandler(Generic[WrapperType]):
         self.retry_per_wrapper = try_per_wrapper
         self.retry_delay = retry_delay
         self.index = 0
-        self.retry_count = 0
 
     def try_call(self, func: Callable[[WrapperType], OutputType]) -> OutputType:
         """
@@ -48,34 +47,7 @@ class WrapperHandler(Generic[WrapperType]):
         Raises:
             Exception: If all wrappers fail after retries.
         """
-        log_info(f"{inspect.getsource(func).strip()} {inspect.getclosurevars(func).nonlocals}")
-
-        iterations = 0
-        error = "No error"
-        while iterations < len(self.wrappers):
-            wrapper = self.wrappers[self.index]
-            wrapper_name = wrapper.__class__.__name__
-
-            try:
-                log_info(f"try_call {wrapper_name}")
-                result = func(wrapper)
-                log_info(f"{wrapper_name} succeeded")
-                self.retry_count = 0
-                return result
-
-            except Exception as e:
-                self.retry_count += 1
-                error = WrapperHandler.__concise_error(e)
-                log_warning(f"{wrapper_name} failed {self.retry_count}/{self.retry_per_wrapper}: {error}")
-
-                if self.retry_count >= self.retry_per_wrapper:
-                    self.index = (self.index + 1) % len(self.wrappers)
-                    self.retry_count = 0
-                    iterations += 1
-                else:
-                    time.sleep(self.retry_delay)
-
-        raise Exception(f"All wrappers failed, latest error: {error}")
+        return self.__try_call(func, try_all=False).popitem()[1]
 
     def try_call_all(self, func: Callable[[WrapperType], OutputType]) -> dict[str, OutputType]:
         """
@@ -89,21 +61,53 @@ class WrapperHandler(Generic[WrapperType]):
         Raises:
             Exception: If all wrappers fail.
         """
-        log_info(f"{inspect.getsource(func).strip()} {inspect.getclosurevars(func).nonlocals}")
+        return self.__try_call(func, try_all=True)
 
+    def __try_call(self, func: Callable[[WrapperType], OutputType], try_all: bool) -> dict[str, OutputType]:
+        """
+        Internal method to handle the logic of trying to call a function on wrappers.
+        It can either stop at the first success or try all wrappers.
+        Args:
+            func (Callable[[W], T]): A function that takes a wrapper and returns a result.
+            try_all (bool): If True, tries all wrappers and collects results; if False, stops at the first success.
+        Returns:
+            dict[str, T]: A dictionary mapping wrapper class names to results.
+        Raises:
+            Exception: If all wrappers fail after retries.
+        """
+
+        log_info(f"{inspect.getsource(func).strip()} {inspect.getclosurevars(func).nonlocals}")
         results: dict[str, OutputType] = {}
-        error = "No error"
-        for wrapper in self.wrappers:
+        starting_index = self.index
+
+        for i in range(starting_index, len(self.wrappers) + starting_index):
+            self.index = i % len(self.wrappers)
+            wrapper = self.wrappers[self.index]
             wrapper_name = wrapper.__class__.__name__
-            try:
-                result = func(wrapper)
-                log_info(f"{wrapper_name} succeeded")
-                results[wrapper_name] = result
-            except Exception as e:
-                error = WrapperHandler.__concise_error(e)
-                log_warning(f"{wrapper_name} failed: {error}")
+
+            if not try_all:
+                log_info(f"try_call {wrapper_name}")
+
+            for try_count in range(1, self.retry_per_wrapper + 1):
+                try:
+                    result = func(wrapper)
+                    log_info(f"{wrapper_name} succeeded")
+                    results[wrapper_name] = result
+                    break
+
+                except Exception as e:
+                    error = WrapperHandler.__concise_error(e)
+                    log_warning(f"{wrapper_name} failed {try_count}/{self.retry_per_wrapper}: {error}")
+                    time.sleep(self.retry_delay)
+
+            if not try_all and results:
+                return results
+
         if not results:
+            error = locals().get("error", "Unknown error")
             raise Exception(f"All wrappers failed, latest error: {error}")
+
+        self.index = starting_index
         return results
 
     @staticmethod

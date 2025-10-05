@@ -63,7 +63,6 @@ class TestWrapperHandler:
         result = handler.try_call(lambda w: w.do_something())
         assert result == "Success"
         assert handler.index == 0  # Should still be on the first wrapper
-        assert handler.retry_count == 0
 
     def test_eventual_success(self):
         wrappers: list[type[MockWrapper]] = [FailingWrapper, MockWrapper]
@@ -72,7 +71,6 @@ class TestWrapperHandler:
         result = handler.try_call(lambda w: w.do_something())
         assert result == "Success"
         assert handler.index == 1  # Should have switched to the second wrapper
-        assert handler.retry_count == 0
 
     def test_partial_failures(self):
         wrappers: list[type[MockWrapper]] = [FailingWrapper, MockWrapper, FailingWrapper]
@@ -81,19 +79,16 @@ class TestWrapperHandler:
         result = handler.try_call(lambda w: w.do_something())
         assert result == "Success"
         assert handler.index == 1  # Should have switched to the second wrapper
-        assert handler.retry_count == 0
 
         # Next call should still succeed on the second wrapper
         result = handler.try_call(lambda w: w.do_something())
         assert result == "Success"
         assert handler.index == 1  # Should still be on the second wrapper
-        assert handler.retry_count == 0
 
         handler.index = 2  # Manually switch to the third wrapper
         result = handler.try_call(lambda w: w.do_something())
         assert result == "Success"
         assert handler.index == 1  # Should return to the second wrapper after failure
-        assert handler.retry_count == 0
 
     def test_try_call_all_success(self):
         wrappers: list[type[MockWrapper]] = [MockWrapper, MockWrapper2]
@@ -128,7 +123,6 @@ class TestWrapperHandler:
         result = handler.try_call(lambda w: w.do_something("test", 42))
         assert result == "Success test and 42"
         assert handler.index == 1  # Should have switched to the second wrapper
-        assert handler.retry_count == 0
 
     def test_wrappers_with_parameters_all_fail(self):
         wrappers: list[type[MockWrapperWithParameters]] = [FailingWrapperWithParameters, FailingWrapperWithParameters]
