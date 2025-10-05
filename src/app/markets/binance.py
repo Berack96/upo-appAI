@@ -31,11 +31,18 @@ class BinanceWrapper(MarketWrapper):
     https://binance-docs.github.io/apidocs/spot/en/
     """
 
-    def __init__(self, currency: str = "USDT"):
+    def __init__(self, currency: str = "USD"):
+        """
+        Inizializza il wrapper di Binance con le credenziali API e la valuta di riferimento (default "USD").
+        La valuta poi viene cambiata in una stablecoin Tether, come USDT, dato che Binance non
+        supporta le valute fiat direttamente per le criptovalute.
+        Args:
+            currency (str): Valuta in cui restituire i prezzi. Default è "USD".
+        """
         api_key = os.getenv("BINANCE_API_KEY")
         api_secret = os.getenv("BINANCE_API_SECRET")
 
-        self.currency = currency
+        self.currency = f"{currency}T"
         self.client = Client(api_key=api_key, api_secret=api_secret)
 
     def __format_symbol(self, asset_id: str) -> str:
