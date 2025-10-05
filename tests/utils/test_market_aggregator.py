@@ -41,8 +41,8 @@ class TestMarketDataAggregator:
         assert info.symbol == "BTC"
 
         avg_weighted_price = (50000.0 * 1000.0 + 50100.0 * 1100.0 + 49900.0 * 900.0) / (1000.0 + 1100.0 + 900.0)
-        assert info.price == pytest.approx(avg_weighted_price, rel=1e-3)
-        assert info.volume_24h == pytest.approx(1000.0, rel=1e-3)
+        assert info.price == pytest.approx(avg_weighted_price, rel=1e-3) # type: ignore
+        assert info.volume_24h == pytest.approx(1000.0, rel=1e-3) # type: ignore
         assert info.quote_currency == "USD"
 
     def test_aggregate_product_info_multiple_symbols(self):
@@ -65,18 +65,18 @@ class TestMarketDataAggregator:
 
         assert btc_info is not None
         avg_weighted_price_btc = (50000.0 * 1000.0 + 50100.0 * 1100.0) / (1000.0 + 1100.0)
-        assert btc_info.price == pytest.approx(avg_weighted_price_btc, rel=1e-3)
-        assert btc_info.volume_24h == pytest.approx(1050.0, rel=1e-3)
+        assert btc_info.price == pytest.approx(avg_weighted_price_btc, rel=1e-3) # type: ignore
+        assert btc_info.volume_24h == pytest.approx(1050.0, rel=1e-3) # type: ignore
         assert btc_info.quote_currency == "USD"
 
         assert eth_info is not None
         avg_weighted_price_eth = (4000.0 * 2000.0 + 4050.0 * 2100.0) / (2000.0 + 2100.0)
-        assert eth_info.price == pytest.approx(avg_weighted_price_eth, rel=1e-3)
-        assert eth_info.volume_24h == pytest.approx(2050.0, rel=1e-3)
+        assert eth_info.price == pytest.approx(avg_weighted_price_eth, rel=1e-3) # type: ignore
+        assert eth_info.volume_24h == pytest.approx(2050.0, rel=1e-3) # type: ignore
         assert eth_info.quote_currency == "USD"
 
     def test_aggregate_product_info_with_no_data(self):
-        products = {
+        products: dict[str, list[ProductInfo]] = {
             "Provider1": [],
             "Provider2": [],
         }
@@ -84,7 +84,7 @@ class TestMarketDataAggregator:
         assert len(aggregated) == 0
 
     def test_aggregate_product_info_with_partial_data(self):
-        products = {
+        products: dict[str, list[ProductInfo]] = {
             "Provider1": [self.__product("BTC", 50000.0, 1000.0, "USD")],
             "Provider2": [],
         }
@@ -92,8 +92,8 @@ class TestMarketDataAggregator:
         assert len(aggregated) == 1
         info = aggregated[0]
         assert info.symbol == "BTC"
-        assert info.price == pytest.approx(50000.0, rel=1e-3)
-        assert info.volume_24h == pytest.approx(1000.0, rel=1e-3)
+        assert info.price == pytest.approx(50000.0, rel=1e-3) # type: ignore
+        assert info.volume_24h == pytest.approx(1000.0, rel=1e-3) # type: ignore
         assert info.quote_currency == "USD"
 
     def test_aggregate_history_prices(self):
@@ -113,8 +113,8 @@ class TestMarketDataAggregator:
         aggregated = aggregate_history_prices(prices)
         assert len(aggregated) == 2
         assert aggregated[0].timestamp_ms == 1685577600000
-        assert aggregated[0].high == pytest.approx(50050.0, rel=1e-3)
-        assert aggregated[0].low == pytest.approx(49550.0, rel=1e-3)
+        assert aggregated[0].high == pytest.approx(50050.0, rel=1e-3) # type: ignore
+        assert aggregated[0].low == pytest.approx(49550.0, rel=1e-3) # type: ignore
         assert aggregated[1].timestamp_ms == 1685581200000
-        assert aggregated[1].high == pytest.approx(50250.0, rel=1e-3)
-        assert aggregated[1].low == pytest.approx(49850.0, rel=1e-3)
+        assert aggregated[1].high == pytest.approx(50250.0, rel=1e-3) # type: ignore
+        assert aggregated[1].low == pytest.approx(49850.0, rel=1e-3) # type: ignore

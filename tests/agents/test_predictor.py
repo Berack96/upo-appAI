@@ -3,9 +3,9 @@ from app.agents import AppModels
 from app.agents.predictor import PREDICTOR_INSTRUCTIONS, PredictorInput, PredictorOutput, PredictorStyle
 from app.base.markets import ProductInfo
 
-def unified_checks(model: AppModels, input):
-    llm = model.get_agent(PREDICTOR_INSTRUCTIONS, output=PredictorOutput) # type: ignore[arg-type]
-    result = llm.run(input)
+def unified_checks(model: AppModels, input: PredictorInput) -> None:
+    llm = model.get_agent(PREDICTOR_INSTRUCTIONS, output_schema=PredictorOutput) # type: ignore[arg-type]
+    result = llm.run(input) # type: ignore
     content = result.content
 
     assert isinstance(content, PredictorOutput)
@@ -27,9 +27,8 @@ def unified_checks(model: AppModels, input):
 
 class TestPredictor:
 
-    @pytest.fixture(scope="class")
-    def inputs(self):
-        data = []
+    def inputs(self) -> PredictorInput:
+        data: list[ProductInfo] = []
         for symbol, price in [("BTC", 60000.00), ("ETH", 3500.00), ("SOL", 150.00)]:
             product_info = ProductInfo()
             product_info.symbol = symbol
@@ -38,13 +37,24 @@ class TestPredictor:
 
         return PredictorInput(data=data, style=PredictorStyle.AGGRESSIVE, sentiment="positivo")
 
-    def test_gemini_model_output(self, inputs):
+    def test_gemini_model_output(self):
+        inputs = self.inputs()
         unified_checks(AppModels.GEMINI, inputs)
 
+    def test_ollama_qwen_1b_model_output(self):
+        inputs = self.inputs()
+        unified_checks(AppModels.OLLAMA_QWEN_1B, inputs)
+
+    def test_ollama_qwen_4b_model_output(self):
+        inputs = self.inputs()
+        unified_checks(AppModels.OLLAMA_QWEN_4B, inputs)
+
     @pytest.mark.slow
-    def test_ollama_qwen_model_output(self, inputs):
+    def test_ollama_qwen_latest_model_output(self):
+        inputs = self.inputs()
         unified_checks(AppModels.OLLAMA_QWEN, inputs)
 
     @pytest.mark.slow
-    def test_ollama_gpt_oss_model_output(self, inputs):
+    def test_ollama_gpt_oss_model_output(self):
+        inputs = self.inputs()
         unified_checks(AppModels.OLLAMA_GPT, inputs)
