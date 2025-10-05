@@ -10,17 +10,19 @@ def extract_product(currency: str, ticker_data: dict[str, Any]) -> ProductInfo:
     product.symbol = ticker_data.get('symbol', '').replace(currency, '')
     product.price = float(ticker_data.get('price', 0))
     product.volume_24h = float(ticker_data.get('volume', 0))
-    product.quote_currency = currency
+    product.currency = currency
     return product
 
 def extract_price(kline_data: list[Any]) -> Price:
+    timestamp = kline_data[0]
+
     price = Price()
     price.open = float(kline_data[1])
     price.high = float(kline_data[2])
     price.low = float(kline_data[3])
     price.close = float(kline_data[4])
     price.volume = float(kline_data[5])
-    price.timestamp_ms = kline_data[0]
+    price.set_timestamp(timestamp_ms=timestamp)
     return price
 
 class BinanceWrapper(MarketWrapper):

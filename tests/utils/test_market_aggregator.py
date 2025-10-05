@@ -1,4 +1,5 @@
 import pytest
+from datetime import datetime
 from app.base.markets import ProductInfo, Price
 from app.utils.market_aggregation import aggregate_history_prices, aggregate_product_info
 
@@ -13,12 +14,12 @@ class TestMarketDataAggregator:
         prod.symbol=symbol
         prod.price=price
         prod.volume_24h=volume
-        prod.quote_currency=currency
+        prod.currency=currency
         return prod
 
-    def __price(self, timestamp_ms: int, high: float, low: float, open: float, close: float, volume: float) -> Price:
+    def __price(self, timestamp_s: int, high: float, low: float, open: float, close: float, volume: float) -> Price:
         price = Price()
-        price.timestamp_ms = timestamp_ms
+        price.set_timestamp(timestamp_s=timestamp_s)
         price.high = high
         price.low = low
         price.open = open
@@ -43,7 +44,7 @@ class TestMarketDataAggregator:
         avg_weighted_price = (50000.0 * 1000.0 + 50100.0 * 1100.0 + 49900.0 * 900.0) / (1000.0 + 1100.0 + 900.0)
         assert info.price == pytest.approx(avg_weighted_price, rel=1e-3) # type: ignore
         assert info.volume_24h == pytest.approx(1000.0, rel=1e-3) # type: ignore
-        assert info.quote_currency == "USD"
+        assert info.currency == "USD"
 
     def test_aggregate_product_info_multiple_symbols(self):
         products = {
@@ -67,13 +68,13 @@ class TestMarketDataAggregator:
         avg_weighted_price_btc = (50000.0 * 1000.0 + 50100.0 * 1100.0) / (1000.0 + 1100.0)
         assert btc_info.price == pytest.approx(avg_weighted_price_btc, rel=1e-3) # type: ignore
         assert btc_info.volume_24h == pytest.approx(1050.0, rel=1e-3) # type: ignore
-        assert btc_info.quote_currency == "USD"
+        assert btc_info.currency == "USD"
 
         assert eth_info is not None
         avg_weighted_price_eth = (4000.0 * 2000.0 + 4050.0 * 2100.0) / (2000.0 + 2100.0)
         assert eth_info.price == pytest.approx(avg_weighted_price_eth, rel=1e-3) # type: ignore
         assert eth_info.volume_24h == pytest.approx(2050.0, rel=1e-3) # type: ignore
-        assert eth_info.quote_currency == "USD"
+        assert eth_info.currency == "USD"
 
     def test_aggregate_product_info_with_no_data(self):
         products: dict[str, list[ProductInfo]] = {
@@ -94,27 +95,36 @@ class TestMarketDataAggregator:
         assert info.symbol == "BTC"
         assert info.price == pytest.approx(50000.0, rel=1e-3) # type: ignore
         assert info.volume_24h == pytest.approx(1000.0, rel=1e-3) # type: ignore
-        assert info.quote_currency == "USD"
+        assert info.currency == "USD"
 
     def test_aggregate_history_prices(self):
         """Test aggregazione di prezzi storici usando aggregate_history_prices"""
+        timestamp_now = datetime.now()
+        timestamp_1h_ago = int(timestamp_now.replace(hour=timestamp_now.hour - 1).timestamp())
+        timestamp_2h_ago = int(timestamp_now.replace(hour=timestamp_now.hour - 2).timestamp())
 
         prices = {
             "Provider1": [
-                self.__price(1685577600000, 50000.0, 49500.0, 49600.0, 49900.0, 150.0),
-                self.__price(1685581200000, 50200.0, 49800.0, 50000.0, 50100.0, 200.0),
+                self.__price(timestamp_1h_ago, 50000.0, 49500.0, 49600.0, 49900.0, 150.0),
+                self.__price(timestamp_2h_ago, 50200.0, 49800.0, 50000.0, 50100.0, 200.0),
             ],
             "Provider2": [
-                self.__price(1685577600000, 50100.0, 49600.0, 49700.0, 50000.0, 180.0),
-                self.__price(1685581200000, 50300.0, 49900.0, 50100.0, 50200.0, 220.0),
+                self.__price(timestamp_1h_ago, 50100.0, 49600.0, 49700.0, 50000.0, 180.0),
+                self.__price(timestamp_2h_ago, 50300.0, 49900.0, 50100.0, 50200.0, 220.0),
             ],
         }
 
+        price = Price()
+        price.set_timestamp(timestamp_s=timestamp_1h_ago)
+        timestamp_1h_ago = price.timestamp
+        price.set_timestamp(timestamp_s=timestamp_2h_ago)
+        timestamp_2h_ago = price.timestamp
+
         aggregated = aggregate_history_prices(prices)
         assert len(aggregated) == 2
-        assert aggregated[0].timestamp_ms == 1685577600000
+        assert aggregated[0].timestamp == timestamp_1h_ago
         assert aggregated[0].high == pytest.approx(50050.0, rel=1e-3) # type: ignore
         assert aggregated[0].low == pytest.approx(49550.0, rel=1e-3) # type: ignore
-        assert aggregated[1].timestamp_ms == 1685581200000
+        assert aggregated[1].timestamp == timestamp_2h_ago
         assert aggregated[1].high == pytest.approx(50250.0, rel=1e-3) # type: ignore
         assert aggregated[1].low == pytest.approx(49850.0, rel=1e-3) # type: ignore

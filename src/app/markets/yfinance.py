@@ -12,20 +12,22 @@ def extract_product(stock_data: dict[str, str]) -> ProductInfo:
     product.symbol = product.id.split('-')[0]  # Rimuovi il suffisso della valuta per le crypto
     product.price = float(stock_data.get('Current Stock Price', f"0.0 USD").split(" ")[0]) # prende solo il numero
     product.volume_24h = 0.0 # YFinance non fornisce il volume 24h direttamente
-    product.quote_currency = product.id.split('-')[1]  # La valuta è la parte dopo il '-'
+    product.currency = product.id.split('-')[1]  # La valuta è la parte dopo il '-'
     return product
 
 def extract_price(hist_data: dict[str, str]) -> Price:
     """
     Converte i dati storici di YFinanceTools in Price.
     """
+    timestamp = int(hist_data.get('Timestamp', '0'))
+
     price = Price()
     price.high = float(hist_data.get('High', 0.0))
     price.low = float(hist_data.get('Low', 0.0))
     price.open = float(hist_data.get('Open', 0.0))
     price.close = float(hist_data.get('Close', 0.0))
     price.volume = float(hist_data.get('Volume', 0.0))
-    price.timestamp_ms = int(hist_data.get('Timestamp', '0'))
+    price.set_timestamp(timestamp_ms=timestamp)
     return price
 
 

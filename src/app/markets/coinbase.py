@@ -15,13 +15,15 @@ def extract_product(product_data: GetProductResponse | Product) -> ProductInfo:
     return product
 
 def extract_price(candle_data: Candle) -> Price:
+    timestamp = int(candle_data.start) if candle_data.start else 0
+
     price = Price()
     price.high = float(candle_data.high) if candle_data.high else 0.0
     price.low = float(candle_data.low) if candle_data.low else 0.0
     price.open = float(candle_data.open) if candle_data.open else 0.0
     price.close = float(candle_data.close) if candle_data.close else 0.0
     price.volume = float(candle_data.volume) if candle_data.volume else 0.0
-    price.timestamp_ms = int(candle_data.start) * 1000 if candle_data.start else 0
+    price.set_timestamp(timestamp_s=timestamp)
     return price
 
 

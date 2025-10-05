@@ -14,14 +14,15 @@ def extract_product(asset_data: dict[str, Any]) -> ProductInfo:
     return product
 
 def extract_price(price_data: dict[str, Any]) -> Price:
+    timestamp = price_data.get('time', 0)
+
     price = Price()
     price.high = float(price_data.get('high', 0))
     price.low = float(price_data.get('low', 0))
     price.open = float(price_data.get('open', 0))
     price.close = float(price_data.get('close', 0))
     price.volume = float(price_data.get('volumeto', 0))
-    price.timestamp_ms = price_data.get('time', 0) * 1000
-    assert price.timestamp_ms > 0, "Invalid timestamp data received from CryptoCompare"
+    price.set_timestamp(timestamp_s=timestamp)
     return price
 
 

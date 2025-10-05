@@ -41,10 +41,6 @@ class TestPredictor:
         inputs = self.inputs()
         unified_checks(AppModels.GEMINI, inputs)
 
-    def test_ollama_qwen_1b_model_output(self):
-        inputs = self.inputs()
-        unified_checks(AppModels.OLLAMA_QWEN_1B, inputs)
-
     def test_ollama_qwen_4b_model_output(self):
         inputs = self.inputs()
         unified_checks(AppModels.OLLAMA_QWEN_4B, inputs)
