@@ -30,7 +30,7 @@ class Pipeline:
         model = self.available_models[index]
         self.predictor = model.get_agent(
             PREDICTOR_INSTRUCTIONS,
-            output=PredictorOutput, # type: ignore
+            output_schema=PredictorOutput,
         )
 
     def choose_style(self, index: int):

@@ -90,7 +90,7 @@ class AppModels(Enum):
 
         raise ValueError(f"Modello non supportato: {self}")
 
-    def get_agent(self, instructions: str, name: str = "", output: BaseModel | None = None, tools: list[Toolkit] = []) -> Agent:
+    def get_agent(self, instructions: str, name: str = "", output_schema: type[BaseModel] | None = None, tools: list[Toolkit] = []) -> Agent:
         """
         Costruisce un agente con il modello e le istruzioni specificate.
         Args:
@@ -106,5 +106,5 @@ class AppModels(Enum):
             retries=2,
             tools=tools,
             delay_between_retries=5, # seconds
-            output_schema=output.__class__ if output else None # se si usa uno schema di output, lo si passa qui
+            output_schema=output_schema
         )
