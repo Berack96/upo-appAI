@@ -51,7 +51,7 @@ class WrapperHandler(Generic[WrapperType]):
         log_info(f"{inspect.getsource(func).strip()} {inspect.getclosurevars(func).nonlocals}")
 
         iterations = 0
-        error = ""
+        error = "No error"
         while iterations < len(self.wrappers):
             wrapper = self.wrappers[self.index]
             wrapper_name = wrapper.__class__.__name__
@@ -92,7 +92,7 @@ class WrapperHandler(Generic[WrapperType]):
         log_info(f"{inspect.getsource(func).strip()} {inspect.getclosurevars(func).nonlocals}")
 
         results: dict[str, OutputType] = {}
-        error = ""
+        error = "No error"
         for wrapper in self.wrappers:
             wrapper_name = wrapper.__class__.__name__
             try:
