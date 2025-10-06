@@ -14,7 +14,7 @@ try:
         instructions="Use tables to display data.",
         markdown=True,
     )
-    result = reasoning_agent.run("Scrivi una poesia su un gatto. Sii breve.")
+    result = reasoning_agent.run("Scrivi una poesia su un gatto. Sii breve.") # type: ignore
     print(result.content)
 except Exception as e:
     print(f"Si è verificato un errore: {e}")

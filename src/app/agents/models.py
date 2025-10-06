@@ -1,5 +1,5 @@
 import os
-import requests
+import ollama
 from enum import Enum
 from agno.agent import Agent
 from agno.models.base import Model
@@ -30,18 +30,14 @@ class AppModels(Enum):
         Controlla quali provider di modelli LLM locali sono disponibili.
         Ritorna una lista di provider disponibili.
         """
-        ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
-        result = requests.get(f"{ollama_host}/api/tags")
-        if result.status_code != 200:
-            log_warning(f"Ollama is not running or not reachable {result}")
+        try:
+            models_list = ollama.list()
+            availables = [model['model'] for model in models_list['models']]
+            app_models = [model for model in AppModels if model.name.startswith("OLLAMA")]
+            return [model for model in app_models if model.value in availables]
+        except Exception as e:
+            log_warning(f"Ollama is not running or not reachable: {e}")
             return []
-
-        availables: list[AppModels] = []
-        result = result.text
-        for model in [model for model in AppModels if model.name.startswith("OLLAMA")]:
-            if model.value in result:
-                availables.append(model)
-        return availables
 
     @staticmethod
     def availables_online() -> list['AppModels']:

@@ -29,7 +29,6 @@ def create_team_with(models: AppModels, coordinator: AppModels | None = None) ->
         members=[market_agent, news_agent, social_agent],
     )
 
-# TODO: migliorare le istruzioni del team
 COORDINATOR_INSTRUCTIONS = """
 You are the expert coordinator of a financial analysis team specializing in cryptocurrencies.
 

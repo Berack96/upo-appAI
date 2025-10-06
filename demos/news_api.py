@@ -9,6 +9,8 @@ from app.news import NewsApiWrapper
 
 def main():
     api = NewsApiWrapper()
+    articles = api.get_latest_news(query="bitcoin", limit=5)
+    assert len(articles) > 0
     print("ok")
 
 if __name__ == "__main__":
