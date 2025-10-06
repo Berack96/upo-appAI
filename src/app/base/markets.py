@@ -28,9 +28,12 @@ class Price(BaseModel):
 
     def set_timestamp(self, timestamp_ms: int | None = None, timestamp_s: int | None = None) -> None:
         """
-        Imposta il timestamp in millisecondi.
+        Imposta il timestamp a partire da millisecondi o secondi.
+        IL timestamp viene salvato come stringa formattata 'YYYY-MM-DD HH:MM'.
         Args:
-            timestamp (int | datetime): Il timestamp in millisecondi o come oggetto datetime.
+            timestamp_ms: Timestamp in millisecondi.
+            timestamp_s: Timestamp in secondi.
+        Raises:
         """
         if timestamp_ms is not None:
             timestamp = timestamp_ms // 1000

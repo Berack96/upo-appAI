@@ -35,11 +35,12 @@ class BinanceWrapper(MarketWrapper):
 
     def __init__(self, currency: str = "USD"):
         """
-        Inizializza il wrapper di Binance con le credenziali API e la valuta di riferimento (default "USD").
-        La valuta poi viene cambiata in una stablecoin Tether, come USDT, dato che Binance non
-        supporta le valute fiat direttamente per le criptovalute.
-        Args:
-            currency (str): Valuta in cui restituire i prezzi. Default è "USD".
+        Inizializza il wrapper di Binance con le credenziali API e la valuta di riferimento.
+        Se viene fornita una valuta fiat come "USD", questa viene automaticamente convertita in una stablecoin Tether ("USDT") per compatibilità con Binance,  
+        poiché Binance non supporta direttamente le valute fiat per il trading di criptovalute.
+        Tutti i prezzi e volumi restituiti saranno quindi denominati nella stablecoin (ad esempio, "USDT") e non nella valuta fiat originale.  
+        Args:  
+            currency (str): Valuta in cui restituire i prezzi. Se "USD" viene fornito, verrà utilizzato "USDT". Default è "USD".  
         """
         api_key = os.getenv("BINANCE_API_KEY")
         api_secret = os.getenv("BINANCE_API_SECRET")

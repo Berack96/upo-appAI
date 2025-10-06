@@ -90,13 +90,14 @@ class AppModels(Enum):
 
         raise ValueError(f"Modello non supportato: {self}")
 
-    def get_agent(self, instructions: str, name: str = "", output_schema: type[BaseModel] | None = None, tools: list[Toolkit] = []) -> Agent:
+    def get_agent(self, instructions: str, name: str = "", output_schema: type[BaseModel] | None = None, tools: list[Toolkit] | None = None) -> Agent:
         """
         Costruisce un agente con il modello e le istruzioni specificate.
         Args:
             instructions: istruzioni da passare al modello (system prompt)
             name: nome dell'agente (opzionale)
             output: schema di output opzionale (Pydantic BaseModel)
+            tools: lista opzionale di strumenti (tools) da fornire all'agente
         Returns:
              Un'istanza di Agent.
         """
