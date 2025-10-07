@@ -102,6 +102,8 @@ Usando la libreria ``gradio`` è stata creata un'interfaccia web semplice per in
 - **Social Agent**: Analizza i sentimenti sui social media riguardo alle criptovalute.
 - **Predictor Agent**: Utilizza i dati raccolti dagli altri agenti per fare previsioni.
 
+Si può accedere all'interfaccia anche tramite un Bot di Telegram se si inserisce la chiave ottenuta da [BotFather](https://core.telegram.org/bots/features#creating-a-new-bot).
+
 ## Tests
 
 Per eseguire i test, assicurati di aver configurato correttamente le variabili d'ambiente nel file `.env` come descritto sopra. Poi esegui il comando:

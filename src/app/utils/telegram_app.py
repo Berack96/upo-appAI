@@ -34,8 +34,8 @@ class ConfigsRun:
     strategy: PredictorStyle
 
     def __init__(self):
-        self.model_team = AppModels.OLLAMA_QWEN_1B
-        self.model_output = AppModels.OLLAMA_QWEN_1B
+        self.model_team = BotFunctions.app_models[0]
+        self.model_output = BotFunctions.app_models[0]
         self.strategy = PredictorStyle.CONSERVATIVE
 
 
