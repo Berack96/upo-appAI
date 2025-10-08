@@ -1,8 +1,10 @@
 import json
-from .base import Article, NewsWrapper
+from typing import Any
 from agno.tools.duckduckgo import DuckDuckGoTools
+from app.base.news import Article, NewsWrapper
 
-def create_article(result: dict) -> Article:
+
+def extract_article(result: dict[str, Any]) -> Article:
     article = Article()
     article.source = result.get("source", "")
     article.time = result.get("date", "")
@@ -23,10 +25,10 @@ class DuckDuckGoWrapper(NewsWrapper):
     def get_top_headlines(self, limit: int = 100) -> list[Article]:
         results = self.tool.duckduckgo_news(self.query, max_results=limit)
         json_results = json.loads(results)
-        return [create_article(result) for result in json_results]
+        return [extract_article(result) for result in json_results]
 
     def get_latest_news(self, query: str, limit: int = 100) -> list[Article]:
         results = self.tool.duckduckgo_news(query or self.query, max_results=limit)
         json_results = json.loads(results)
-        return [create_article(result) for result in json_results]
+        return [extract_article(result) for result in json_results]
 

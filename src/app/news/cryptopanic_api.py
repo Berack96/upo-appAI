@@ -1,7 +1,9 @@
 import os
+from typing import Any
 import requests
 from enum import Enum
-from .base import NewsWrapper, Article
+from app.base.news import NewsWrapper, Article
+
 
 class CryptoPanicFilter(Enum):
     RISING = "rising"
@@ -18,8 +20,8 @@ class CryptoPanicKind(Enum):
     MEDIA = "media"
     ALL = "all"
 
-def get_articles(response: dict) -> list[Article]:
-    articles = []
+def extract_articles(response: dict[str, Any]) -> list[Article]:
+    articles: list[Article] = []
     if 'results' in response:
         for item in response['results']:
             article = Article()
@@ -51,7 +53,7 @@ class CryptoPanicWrapper(NewsWrapper):
         self.kind = CryptoPanicKind.NEWS
 
     def get_base_params(self) -> dict[str, str]:
-        params = {}
+        params: dict[str, str] = {}
         params['public'] = 'true' # recommended for app and bots
         params['auth_token'] = self.api_key
         params['kind'] = self.kind.value
@@ -73,5 +75,5 @@ class CryptoPanicWrapper(NewsWrapper):
         assert response.status_code == 200, f"Error fetching data: {response}"
 
         json_response = response.json()
-        articles = get_articles(json_response)
+        articles = extract_articles(json_response)
         return articles[:limit]

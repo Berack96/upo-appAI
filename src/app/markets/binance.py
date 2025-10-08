@@ -1,28 +1,31 @@
 import os
-from datetime import datetime
-from binance.client import Client
-from .base import ProductInfo, BaseWrapper, Price
+from typing import Any
+from binance.client import Client # type: ignore
+from app.base.markets import ProductInfo, MarketWrapper, Price
 
-def get_product(currency: str, ticker_data: dict[str, str]) -> ProductInfo:
+
+def extract_product(currency: str, ticker_data: dict[str, Any]) -> ProductInfo:
     product = ProductInfo()
-    product.id = ticker_data.get('symbol')
+    product.id = ticker_data.get('symbol', '')
     product.symbol = ticker_data.get('symbol', '').replace(currency, '')
     product.price = float(ticker_data.get('price', 0))
     product.volume_24h = float(ticker_data.get('volume', 0))
-    product.quote_currency = currency
+    product.currency = currency
     return product
 
-def get_price(kline_data: list) -> Price:
+def extract_price(kline_data: list[Any]) -> Price:
+    timestamp = kline_data[0]
+
     price = Price()
     price.open = float(kline_data[1])
     price.high = float(kline_data[2])
     price.low = float(kline_data[3])
     price.close = float(kline_data[4])
     price.volume = float(kline_data[5])
-    price.timestamp_ms = kline_data[0]
+    price.set_timestamp(timestamp_ms=timestamp)
     return price
 
-class BinanceWrapper(BaseWrapper):
+class BinanceWrapper(MarketWrapper):
     """
     Wrapper per le API autenticate di Binance.\n
     Implementa l'interfaccia BaseWrapper per fornire accesso unificato
@@ -30,11 +33,19 @@ class BinanceWrapper(BaseWrapper):
     https://binance-docs.github.io/apidocs/spot/en/
     """
 
-    def __init__(self, currency: str = "USDT"):
+    def __init__(self, currency: str = "USD"):
+        """
+        Inizializza il wrapper di Binance con le credenziali API e la valuta di riferimento.
+        Se viene fornita una valuta fiat come "USD", questa viene automaticamente convertita in una stablecoin Tether ("USDT") per compatibilità con Binance,  
+        poiché Binance non supporta direttamente le valute fiat per il trading di criptovalute.
+        Tutti i prezzi e volumi restituiti saranno quindi denominati nella stablecoin (ad esempio, "USDT") e non nella valuta fiat originale.  
+        Args:  
+            currency (str): Valuta in cui restituire i prezzi. Se "USD" viene fornito, verrà utilizzato "USDT". Default è "USD".  
+        """
         api_key = os.getenv("BINANCE_API_KEY")
         api_secret = os.getenv("BINANCE_API_SECRET")
 
-        self.currency = currency
+        self.currency = f"{currency}T"
         self.client = Client(api_key=api_key, api_secret=api_secret)
 
     def __format_symbol(self, asset_id: str) -> str:
@@ -46,31 +57,22 @@ class BinanceWrapper(BaseWrapper):
     def get_product(self, asset_id: str) -> ProductInfo:
         symbol = self.__format_symbol(asset_id)
 
-        ticker = self.client.get_symbol_ticker(symbol=symbol)
-        ticker_24h = self.client.get_ticker(symbol=symbol)
-        ticker['volume'] = ticker_24h.get('volume', 0)  # Aggiunge volume 24h ai dati del ticker
+        ticker: dict[str, Any] = self.client.get_symbol_ticker(symbol=symbol) # type: ignore
+        ticker_24h: dict[str, Any] = self.client.get_ticker(symbol=symbol) # type: ignore
+        ticker['volume'] = ticker_24h.get('volume', 0)
 
-        return get_product(self.currency, ticker)
+        return extract_product(self.currency, ticker)
 
     def get_products(self, asset_ids: list[str]) -> list[ProductInfo]:
-        symbols = [self.__format_symbol(asset_id) for asset_id in asset_ids]
-        symbols_str = f"[\"{'","'.join(symbols)}\"]"
+        return [ self.get_product(asset_id) for asset_id in asset_ids ]
 
-        tickers = self.client.get_symbol_ticker(symbols=symbols_str)
-        tickers_24h = self.client.get_ticker(symbols=symbols_str) # un po brutale, ma va bene così
-        for t, t24 in zip(tickers, tickers_24h):
-            t['volume'] = t24.get('volume', 0)
-
-        return [get_product(self.currency, ticker) for ticker in tickers]
-
-    def get_historical_prices(self, asset_id: str = "BTC", limit: int = 100) -> list[Price]:
+    def get_historical_prices(self, asset_id: str, limit: int = 100) -> list[Price]:
         symbol = self.__format_symbol(asset_id)
 
         # Ottiene candele orarie degli ultimi 30 giorni
-        klines = self.client.get_historical_klines(
+        klines: list[list[Any]] = self.client.get_historical_klines( # type: ignore
             symbol=symbol,
             interval=Client.KLINE_INTERVAL_1HOUR,
             limit=limit,
         )
-        return [get_price(kline) for kline in klines]
-
+        return [extract_price(kline) for kline in klines]

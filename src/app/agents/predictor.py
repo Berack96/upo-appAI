@@ -1,6 +1,6 @@
 from enum import Enum
 from pydantic import BaseModel, Field
-from app.markets.base import ProductInfo
+from app.base.markets import ProductInfo
 
 
 class PredictorStyle(Enum):
@@ -20,6 +20,7 @@ class ItemPortfolio(BaseModel):
 class PredictorOutput(BaseModel):
     strategy: str = Field(..., description="Concise operational strategy in Italian")
     portfolio: list[ItemPortfolio] = Field(..., description="List of portfolio items with allocations")
+
 
 PREDICTOR_INSTRUCTIONS = """
 You are an **Allocation Algorithm (Crypto-Algo)** specialized in analyzing market data and sentiment to generate an investment strategy and a target portfolio.

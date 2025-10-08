@@ -1,28 +1,27 @@
 import statistics
-from app.markets.base import ProductInfo, Price
+from app.base.markets import ProductInfo, Price
 
 
 def aggregate_history_prices(prices: dict[str, list[Price]]) -> list[Price]:
     """
-    Aggrega i prezzi storici per symbol calcolando la media oraria.
+    Aggrega i prezzi storici per symbol calcolando la media.
     Args:
         prices (dict[str, list[Price]]): Mappa provider -> lista di Price
     Returns:
-        list[Price]: Lista di Price aggregati per ora
+        list[Price]: Lista di Price aggregati per timestamp
     """
 
-    # Costruiamo una mappa timestamp_h -> lista di Price
-    timestamped_prices: dict[int, list[Price]] = {}
+    # Costruiamo una mappa timestamp -> lista di Price
+    timestamped_prices: dict[str, list[Price]] = {}
     for _, price_list in prices.items():
         for price in price_list:
-            time = price.timestamp_ms - (price.timestamp_ms % 3600000)  # arrotonda all'ora (non dovrebbe essere necessario)
-            timestamped_prices.setdefault(time, []).append(price)
+            timestamped_prices.setdefault(price.timestamp, []).append(price)
 
-    # Ora aggregiamo i prezzi per ogni ora
-    aggregated_prices = []
+    # Ora aggregiamo i prezzi per ogni timestamp
+    aggregated_prices: list[Price] = []
     for time, price_list in timestamped_prices.items():
         price = Price()
-        price.timestamp_ms = time
+        price.timestamp = time
         price.high = statistics.mean([p.high for p in price_list])
         price.low = statistics.mean([p.low for p in price_list])
         price.open = statistics.mean([p.open for p in price_list])
@@ -47,14 +46,13 @@ def aggregate_product_info(products: dict[str, list[ProductInfo]]) -> list[Produ
             symbols_infos.setdefault(product.symbol, []).append(product)
 
     # Aggregazione per ogni symbol
-    sources = list(products.keys())
-    aggregated_products = []
+    aggregated_products: list[ProductInfo] = []
     for symbol, product_list in symbols_infos.items():
         product = ProductInfo()
 
         product.id = f"{symbol}_AGGREGATED"
         product.symbol = symbol
-        product.quote_currency = next(p.quote_currency for p in product_list if p.quote_currency)
+        product.currency = next(p.currency for p in product_list if p.currency)
 
         volume_sum = sum(p.volume_24h for p in product_list)
         product.volume_24h = volume_sum / len(product_list) if product_list else 0.0
@@ -65,27 +63,3 @@ def aggregate_product_info(products: dict[str, list[ProductInfo]]) -> list[Produ
         aggregated_products.append(product)
     return aggregated_products
 
-def _calculate_confidence(products: list[ProductInfo], sources: list[str]) -> float:
-    """Calcola un punteggio di confidenza 0-1"""
-    if not products:
-        return 0.0
-
-    score = 1.0
-
-    # Riduci score se pochi dati
-    if len(products) < 2:
-        score *= 0.7
-
-    # Riduci score se prezzi troppo diversi
-    prices = [p.price for p in products if p.price > 0]
-    if len(prices) > 1:
-        price_std = (max(prices) - min(prices)) / statistics.mean(prices)
-        if price_std > 0.05:  # >5% variazione
-            score *= 0.8
-
-    # Riduci score se fonti sconosciute
-    unknown_sources = sum(1 for s in sources if s == "unknown")
-    if unknown_sources > 0:
-        score *= (1 - unknown_sources / len(sources))
-
-    return max(0.0, min(1.0, score))

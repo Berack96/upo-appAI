@@ -33,7 +33,7 @@ def pytest_configure(config:pytest.Config):
         line = f"{marker[0]}: {marker[1]}"
         config.addinivalue_line("markers", line)
 
-def pytest_collection_modifyitems(config, items):
+def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item]) -> None:
     """Modifica automaticamente degli item di test rimovendoli"""
     # Rimuovo i test "limited" e "slow" se non richiesti esplicitamente
     mark_to_remove = ['limited', 'slow']
