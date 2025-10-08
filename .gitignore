@@ -173,8 +173,8 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
-# chroma db
-./chroma_db/
-
 # VS Code
 .vscode/
+
+# Gradio
+.gradio/
