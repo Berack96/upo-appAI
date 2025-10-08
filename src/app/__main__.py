@@ -3,12 +3,17 @@ from dotenv import load_dotenv
 from agno.utils.log import log_info #type: ignore
 from app.utils import ChatManager
 from app.agents import Pipeline
+from app.utils.telegram_app import BotFunctions
 
 
-if __name__ == "__main__":
-    # Inizializzazioni
-    load_dotenv()
-    pipeline = Pipeline()
+# Disabilita TUTTI i log di livello inferiore a WARNING
+# La maggior parte arrivano da httpx
+import logging
+logging.getLogger().setLevel(logging.WARNING)
+
+
+
+def gradio_app(pipeline: Pipeline, server: str = "0.0.0.0", port: int = 8000) -> str:
     chat = ChatManager()
 
     ########################################
@@ -73,7 +78,18 @@ if __name__ == "__main__":
         save_btn.click(save_current_chat, inputs=None, outputs=None)
         load_btn.click(load_previous_chat, inputs=None, outputs=[chatbot, chatbot])
 
-    server, port = ("0.0.0.0", 8000) # 0.0.0.0 per accesso esterno (Docker)
-    server_log = "localhost" if server == "0.0.0.0" else server
-    log_info(f"Starting UPO AppAI Chat on http://{server_log}:{port}") # noqa
-    demo.launch(server_name=server, server_port=port, quiet=True)
+    _app, local, share = demo.launch(server_name=server, server_port=port, quiet=True, prevent_thread_lock=True)
+    log_info(f"UPO AppAI Chat is running on {local} and {share}")
+    return share
+
+
+
+if __name__ == "__main__":
+    load_dotenv()  # Carica le variabili d'ambiente dal file .env
+
+    pipeline = Pipeline()
+    url = gradio_app(pipeline)
+
+    telegram = BotFunctions.create_bot(pipeline, url)
+    telegram.run_polling()
+
