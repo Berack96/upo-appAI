@@ -1,9 +1,10 @@
 import os
+from typing import Any
 import requests
-from .base import ProductInfo, BaseWrapper, Price
+from app.base.markets import ProductInfo, MarketWrapper, Price
 
 
-def get_product(asset_data: dict) -> ProductInfo:
+def extract_product(asset_data: dict[str, Any]) -> ProductInfo:
     product = ProductInfo()
     product.id = asset_data.get('FROMSYMBOL', '') + '-' + asset_data.get('TOSYMBOL', '')
     product.symbol = asset_data.get('FROMSYMBOL', '')
@@ -12,21 +13,22 @@ def get_product(asset_data: dict) -> ProductInfo:
     assert product.price > 0, "Invalid price data received from CryptoCompare"
     return product
 
-def get_price(price_data: dict) -> Price:
+def extract_price(price_data: dict[str, Any]) -> Price:
+    timestamp = price_data.get('time', 0)
+
     price = Price()
     price.high = float(price_data.get('high', 0))
     price.low = float(price_data.get('low', 0))
     price.open = float(price_data.get('open', 0))
     price.close = float(price_data.get('close', 0))
     price.volume = float(price_data.get('volumeto', 0))
-    price.timestamp_ms = price_data.get('time', 0) * 1000
-    assert price.timestamp_ms > 0, "Invalid timestamp data received from CryptoCompare"
+    price.set_timestamp(timestamp_s=timestamp)
     return price
 
 
 BASE_URL = "https://min-api.cryptocompare.com"
 
-class CryptoCompareWrapper(BaseWrapper):
+class CryptoCompareWrapper(MarketWrapper):
     """
     Wrapper per le API pubbliche di CryptoCompare.
     La documentazione delle API è disponibile qui: https://developers.coindesk.com/documentation/legacy/Price/SingleSymbolPriceEndpoint
@@ -39,7 +41,7 @@ class CryptoCompareWrapper(BaseWrapper):
         self.api_key = api_key
         self.currency = currency
 
-    def __request(self, endpoint: str, params: dict[str, str] | None = None) -> dict[str, str]:
+    def __request(self, endpoint: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
         if params is None:
             params = {}
         params['api_key'] = self.api_key
@@ -53,18 +55,18 @@ class CryptoCompareWrapper(BaseWrapper):
             "tsyms": self.currency
         })
         data = response.get('RAW', {}).get(asset_id, {}).get(self.currency, {})
-        return get_product(data)
+        return extract_product(data)
 
     def get_products(self, asset_ids: list[str]) -> list[ProductInfo]:
         response = self.__request("/data/pricemultifull", params = {
             "fsyms": ",".join(asset_ids),
             "tsyms": self.currency
         })
-        assets = []
+        assets: list[ProductInfo] = []
         data = response.get('RAW', {})
         for asset_id in asset_ids:
             asset_data = data.get(asset_id, {}).get(self.currency, {})
-            assets.append(get_product(asset_data))
+            assets.append(extract_product(asset_data))
         return assets
 
     def get_historical_prices(self, asset_id: str, limit: int = 100) -> list[Price]:
@@ -75,5 +77,5 @@ class CryptoCompareWrapper(BaseWrapper):
         })
 
         data = response.get('Data', {}).get('Data', [])
-        prices = [get_price(price_data) for price_data in data]
+        prices = [extract_price(price_data) for price_data in data]
         return prices

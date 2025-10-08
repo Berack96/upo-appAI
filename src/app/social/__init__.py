@@ -1,9 +1,9 @@
 from agno.tools import Toolkit
-from app.utils.wrapper_handler import WrapperHandler
-from .base import SocialPost, SocialWrapper
-from .reddit import RedditWrapper
+from app.utils import WrapperHandler
+from app.base.social import SocialPost, SocialWrapper
+from app.social.reddit import RedditWrapper
 
-__all__ = ["SocialAPIsTool", "SOCIAL_INSTRUCTIONS", "RedditWrapper"]
+__all__ = ["SocialAPIsTool", "RedditWrapper", "SocialPost"]
 
 
 class SocialAPIsTool(SocialWrapper, Toolkit):
@@ -25,37 +25,29 @@ class SocialAPIsTool(SocialWrapper, Toolkit):
         - RedditWrapper.
         """
 
-        wrappers = [RedditWrapper]
-        self.wrapper_handler: WrapperHandler[SocialWrapper] = WrapperHandler.build_wrappers(wrappers)
+        wrappers: list[type[SocialWrapper]] = [RedditWrapper]
+        self.wrapper_handler = WrapperHandler.build_wrappers(wrappers)
 
-        Toolkit.__init__(
+        Toolkit.__init__( # type: ignore
             self,
             name="Socials Toolkit",
             tools=[
                 self.get_top_crypto_posts,
+                self.get_top_crypto_posts_aggregated,
             ],
         )
 
-    # TODO Pensare se ha senso restituire i post da TUTTI i wrapper o solo dal primo che funziona
-    # la modifica è banale, basta usare try_call_all invece di try_call
     def get_top_crypto_posts(self, limit: int = 5) -> list[SocialPost]:
         return self.wrapper_handler.try_call(lambda w: w.get_top_crypto_posts(limit))
 
-
-SOCIAL_INSTRUCTIONS = """
-**TASK:** You are a specialized **Social Media Sentiment Analyst**. Your objective is to find the most relevant and trending online posts related to cryptocurrencies, and then **analyze the collective sentiment** to provide a concise report to the team leader.
-
-**AVAILABLE TOOLS:**
-1.  `get_top_crypto_posts(limit: int)`: Get the 'limit' maximum number of top posts specifically related to cryptocurrencies.
-
-**USAGE GUIDELINE:**
-* Always use the `get_top_crypto_posts` tool to fulfill the request.
-* The default limit for posts should be 5 unless specified otherwise.
-* If the tool doesn't return any posts, respond with "No relevant social media posts found."
-
-**REPORTING REQUIREMENT:**
-1.  **Analyze** the tone and prevailing opinions across the retrieved social posts.
-2.  **Summarize** the overall **community sentiment** (e.g., high enthusiasm/FOMO, uncertainty, FUD/fear) based on the content.
-3.  **Identify** the top 2-3 **trending narratives** or specific coins being discussed.
-4.  **Output** a single, brief report summarizing these findings. Do not output the raw posts.
-"""
+    def get_top_crypto_posts_aggregated(self, limit_per_wrapper: int = 5) -> dict[str, list[SocialPost]]:
+        """
+        Calls get_top_crypto_posts on all wrappers/providers and returns a dictionary mapping their names to their posts.
+        Args:
+            limit_per_wrapper (int): Maximum number of posts to retrieve from each provider.
+        Returns:
+            dict[str, list[SocialPost]]: A dictionary where keys are wrapper names and values are lists of SocialPost objects.
+        Raises:
+            Exception: If all wrappers fail to provide results.
+        """
+        return self.wrapper_handler.try_call_all(lambda w: w.get_top_crypto_posts(limit_per_wrapper))

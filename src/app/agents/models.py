@@ -1,12 +1,12 @@
 import os
-import requests
+import ollama
 from enum import Enum
 from agno.agent import Agent
 from agno.models.base import Model
 from agno.models.google import Gemini
 from agno.models.ollama import Ollama
-from agno.utils.log import log_warning
 from agno.tools import Toolkit
+from agno.utils.log import log_warning #type: ignore
 from pydantic import BaseModel
 
 
@@ -30,18 +30,14 @@ class AppModels(Enum):
         Controlla quali provider di modelli LLM locali sono disponibili.
         Ritorna una lista di provider disponibili.
         """
-        ollama_host = os.getenv("OLLAMA_HOST", "http://localhost:11434")
-        result = requests.get(f"{ollama_host}/api/tags")
-        if result.status_code != 200:
-            log_warning(f"Ollama is not running or not reachable {result}")
+        try:
+            models_list = ollama.list()
+            availables = [model['model'] for model in models_list['models']]
+            app_models = [model for model in AppModels if model.name.startswith("OLLAMA")]
+            return [model for model in app_models if model.value in availables]
+        except Exception as e:
+            log_warning(f"Ollama is not running or not reachable: {e}")
             return []
-
-        availables = []
-        result = result.text
-        for model in [model for model in AppModels if model.name.startswith("OLLAMA")]:
-            if model.value in result:
-                availables.append(model)
-        return availables
 
     @staticmethod
     def availables_online() -> list['AppModels']:
@@ -90,13 +86,14 @@ class AppModels(Enum):
 
         raise ValueError(f"Modello non supportato: {self}")
 
-    def get_agent(self, instructions: str, name: str = "", output: BaseModel | None = None, tools: list[Toolkit] = []) -> Agent:
+    def get_agent(self, instructions: str, name: str = "", output_schema: type[BaseModel] | None = None, tools: list[Toolkit] | None = None) -> Agent:
         """
         Costruisce un agente con il modello e le istruzioni specificate.
         Args:
             instructions: istruzioni da passare al modello (system prompt)
             name: nome dell'agente (opzionale)
             output: schema di output opzionale (Pydantic BaseModel)
+            tools: lista opzionale di strumenti (tools) da fornire all'agente
         Returns:
              Un'istanza di Agent.
         """
@@ -106,6 +103,5 @@ class AppModels(Enum):
             retries=2,
             tools=tools,
             delay_between_retries=5, # seconds
-            output_schema=output # se si usa uno schema di output, lo si passa qui
-            # TODO Eventuali altri parametri da mettere all'agente anche se si possono comunque assegnare dopo la creazione
+            output_schema=output_schema
         )

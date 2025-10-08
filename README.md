@@ -9,13 +9,13 @@ L'obiettivo è quello di creare un sistema di consulenza finanziaria basato su L
 
 # **Indice**
 - [Installazione](#installazione)
-    - [1. Variabili d'Ambiente](#1-variabili-dambiente)
-    - [2. Ollama](#2-ollama)
-    - [3. Docker](#3-docker)
-    - [4. UV (solo per sviluppo locale)](#4-uv-solo-per-sviluppo-locale)
+  - [1. Variabili d'Ambiente](#1-variabili-dambiente)
+  - [2. Ollama](#2-ollama)
+  - [3. Docker](#3-docker)
+  - [4. UV (solo per sviluppo locale)](#4-uv-solo-per-sviluppo-locale)
 - [Applicazione](#applicazione)
-   - [Ultimo Aggiornamento](#ultimo-aggiornamento)
-   - [Tests](#tests)
+  - [Struttura del codice del Progetto](#struttura-del-codice-del-progetto)
+  - [Tests](#tests)
 
 # **Installazione**
 
@@ -31,9 +31,10 @@ L'installazione di questo progetto richiede 3 passaggi totali (+1 se si vuole sv
 
 ### **1. Variabili d'Ambiente**
 
-Copia il file `.env.example` in `.env` e modificalo con le tue API keys:
+Copia il file `.env.example` in `.env` e successivamente modificalo con le tue API keys:
 ```sh
 cp .env.example .env
+nano .env  # esempio di modifica del file
 ```
 
 Le API Keys devono essere inserite nelle variabili opportune dopo l'uguale e ***senza*** spazi. Esse si possono ottenere tramite i loro providers (alcune sono gratuite, altre a pagamento).\
@@ -58,11 +59,6 @@ I modelli usati dall'applicazione sono visibili in [src/app/models.py](src/app/m
 Se si vuole solamente avviare il progetto, si consiglia di utilizzare [Docker](https://www.docker.com), dato che sono stati creati i files [Dockerfile](Dockerfile) e [docker-compose.yaml](docker-compose.yaml) per creare il container con tutti i file necessari e già in esecuzione.
 
 ```sh
-# Configura le variabili d'ambiente
-cp .env.example .env
-nano .env  # Modifica il file
-
-# Avvia il container
 docker compose up --build -d
 ```
 
@@ -80,16 +76,17 @@ powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | ie
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-UV installerà python e creerà automaticamente l'ambiente virtuale con le dipendenze corrette (nota che questo passaggio è opzionale, dato che uv, ogni volta che si esegue un comando, controlla se l'ambiente è attivo e se le dipendenze sono installate):
+Dopodiché bisogna creare un ambiente virtuale per lo sviluppo locale e impostare PYTHONPATH. Questo passaggio è necessario per far sì che Python riesca a trovare tutti i moduli del progetto e ad installare tutte le dipendenze. Fortunatamente uv semplifica molto questo processo:
 
 ```sh
-uv sync --frozen --no-cache
+uv venv
+uv pip install -e .
 ```
 
-A questo punto si può far partire il progetto tramite il comando:
+A questo punto si può già modificare il codice e, quando necessario, far partire il progetto tramite il comando:
 
 ```sh
-uv run python src/app.py
+uv run python src/app
 ```
 
 # **Applicazione**
@@ -103,6 +100,20 @@ Usando la libreria ``gradio`` è stata creata un'interfaccia web semplice per in
 - **Predictor Agent**: Utilizza i dati raccolti dagli altri agenti per fare previsioni.
 
 Si può accedere all'interfaccia anche tramite un Bot di Telegram se si inserisce la chiave ottenuta da [BotFather](https://core.telegram.org/bots/features#creating-a-new-bot).
+
+## Struttura del codice del Progetto
+
+```
+src
+└── app
+    ├── __main__.py
+    ├── agents       <-- Agenti, modelli, prompts e simili
+    ├── base         <-- Classi base per le API
+    ├── markets      <-- Market data provider (Es. Binance)
+    ├── news         <-- News data provider (Es. NewsAPI)
+    ├── social       <-- Social data provider (Es. Reddit)
+    └── utils        <-- Codice di utilità generale
+```
 
 ## Tests
 

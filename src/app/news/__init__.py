@@ -1,12 +1,12 @@
 from agno.tools import Toolkit
-from app.utils.wrapper_handler import WrapperHandler
-from .base import NewsWrapper, Article
-from .news_api import NewsApiWrapper
-from .googlenews import GoogleNewsWrapper
-from .cryptopanic_api import CryptoPanicWrapper
-from .duckduckgo import DuckDuckGoWrapper
+from app.utils import WrapperHandler
+from app.base.news import NewsWrapper, Article
+from app.news.news_api import NewsApiWrapper
+from app.news.googlenews import GoogleNewsWrapper
+from app.news.cryptopanic_api import CryptoPanicWrapper
+from app.news.duckduckgo import DuckDuckGoWrapper
 
-__all__ = ["NewsAPIsTool", "NEWS_INSTRUCTIONS", "NewsApiWrapper", "GoogleNewsWrapper", "CryptoPanicWrapper", "DuckDuckGoWrapper"]
+__all__ = ["NewsAPIsTool", "NewsApiWrapper", "GoogleNewsWrapper", "CryptoPanicWrapper", "DuckDuckGoWrapper", "Article"]
 
 
 class NewsAPIsTool(NewsWrapper, Toolkit):
@@ -33,15 +33,17 @@ class NewsAPIsTool(NewsWrapper, Toolkit):
         - NewsApiWrapper.
         - CryptoPanicWrapper.
         """
-        wrappers = [GoogleNewsWrapper, DuckDuckGoWrapper, NewsApiWrapper, CryptoPanicWrapper]
-        self.wrapper_handler: WrapperHandler[NewsWrapper] = WrapperHandler.build_wrappers(wrappers)
+        wrappers: list[type[NewsWrapper]] = [GoogleNewsWrapper, DuckDuckGoWrapper, NewsApiWrapper, CryptoPanicWrapper]
+        self.wrapper_handler = WrapperHandler.build_wrappers(wrappers)
 
-        Toolkit.__init__(
+        Toolkit.__init__( # type: ignore
             self,
             name="News APIs Toolkit",
             tools=[
                 self.get_top_headlines,
                 self.get_latest_news,
+                self.get_top_headlines_aggregated,
+                self.get_latest_news_aggregated,
             ],
         )
 
@@ -57,6 +59,8 @@ class NewsAPIsTool(NewsWrapper, Toolkit):
             limit (int): Maximum number of articles to retrieve from each provider.
         Returns:
             dict[str, list[Article]]: A dictionary mapping providers names to their list of Articles
+        Raises:
+            Exception: If all wrappers fail to provide results.
         """
         return self.wrapper_handler.try_call_all(lambda w: w.get_top_headlines(limit))
 
@@ -68,27 +72,7 @@ class NewsAPIsTool(NewsWrapper, Toolkit):
             limit (int): Maximum number of articles to retrieve from each provider.
         Returns:
             dict[str, list[Article]]: A dictionary mapping providers names to their list of Articles
+        Raises:
+            Exception: If all wrappers fail to provide results.
         """
         return self.wrapper_handler.try_call_all(lambda w: w.get_latest_news(query, limit))
-
-
-NEWS_INSTRUCTIONS = """
-**TASK:** You are a specialized **Crypto News Analyst**. Your goal is to fetch the latest news or top headlines related to cryptocurrencies, and then **analyze the sentiment** of the content to provide a concise report to the team leader. Prioritize 'crypto' or specific cryptocurrency names (e.g., 'Bitcoin', 'Ethereum') in your searches.
-
-**AVAILABLE TOOLS:**
-1.  `get_latest_news(query: str, limit: int)`: Get the 'limit' most recent news articles for a specific 'query'.
-2.  `get_top_headlines(limit: int)`: Get the 'limit' top global news headlines.
-3.  `get_latest_news_aggregated(query: str, limit: int)`: Get aggregated latest news articles for a specific 'query'.
-4.  `get_top_headlines_aggregated(limit: int)`: Get aggregated top global news headlines.
-
-**USAGE GUIDELINE:**
-* Always use `get_latest_news` with a relevant crypto-related query first.
-* The default limit for news items should be 5 unless specified otherwise.
-* If the tool doesn't return any articles, respond with "No relevant news articles found."
-
-**REPORTING REQUIREMENT:**
-1.  **Analyze** the tone and key themes of the retrieved articles.
-2.  **Summarize** the overall **market sentiment** (e.g., highly positive, cautiously neutral, generally negative) based on the content.
-3.  **Identify** the top 2-3 **main topics** discussed (e.g., new regulation, price surge, institutional adoption).
-4.  **Output** a single, brief report summarizing these findings. Do not output the raw articles.
-"""
