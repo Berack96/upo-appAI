@@ -1,5 +1,5 @@
 from agno.tools import Toolkit
-from app.utils import WrapperHandler
+from app.api.wrapper_handler import WrapperHandler
 from app.api.base.social import SocialPost, SocialWrapper
 from app.api.social.reddit import RedditWrapper
 
@@ -26,7 +26,7 @@ class SocialAPIsTool(SocialWrapper, Toolkit):
         """
 
         wrappers: list[type[SocialWrapper]] = [RedditWrapper]
-        self.wrapper_handler = WrapperHandler.build_wrappers(wrappers)
+        self.handler = WrapperHandler.build_wrappers(wrappers)
 
         Toolkit.__init__( # type: ignore
             self,
@@ -38,7 +38,7 @@ class SocialAPIsTool(SocialWrapper, Toolkit):
         )
 
     def get_top_crypto_posts(self, limit: int = 5) -> list[SocialPost]:
-        return self.wrapper_handler.try_call(lambda w: w.get_top_crypto_posts(limit))
+        return self.handler.try_call(lambda w: w.get_top_crypto_posts(limit))
 
     def get_top_crypto_posts_aggregated(self, limit_per_wrapper: int = 5) -> dict[str, list[SocialPost]]:
         """
@@ -50,4 +50,4 @@ class SocialAPIsTool(SocialWrapper, Toolkit):
         Raises:
             Exception: If all wrappers fail to provide results.
         """
-        return self.wrapper_handler.try_call_all(lambda w: w.get_top_crypto_posts(limit_per_wrapper))
+        return self.handler.try_call_all(lambda w: w.get_top_crypto_posts(limit_per_wrapper))

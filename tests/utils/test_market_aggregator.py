@@ -1,7 +1,6 @@
 import pytest
 from datetime import datetime
-from app.api.base.markets import ProductInfo, Price
-from app.utils.market_aggregation import aggregate_history_prices, aggregate_product_info
+from app.api.base.markets import ProductInfo, Price, aggregate_history_prices, aggregate_product_info
 
 
 @pytest.mark.aggregator
