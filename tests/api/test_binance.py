@@ -51,3 +51,18 @@ class TestBinance:
             assert entry.close > 0
             assert entry.high > 0
             assert entry.timestamp != ''
+
+    def test_binance_fiat_conversion(self):
+        market = BinanceWrapper(currency="USD")
+        assert market.currency == "USDT"
+        product = market.get_product("BTC")
+        assert product is not None
+        assert product.symbol == "BTC"
+        assert product.price > 0
+
+        market = BinanceWrapper(currency="EUR")
+        assert market.currency == "EUR"
+        product = market.get_product("BTC")
+        assert product is not None
+        assert product.symbol == "BTC"
+        assert product.price > 0
