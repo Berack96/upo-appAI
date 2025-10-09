@@ -30,7 +30,15 @@ logging.config.dictConfig({
     }
 })
 
-
+# Modifichiamo i logger di agno
+import agno.utils.log # type: ignore
+agno_logger_names = ["agno", "agno-team", "agno-workflow"]
+for logger_name in agno_logger_names:
+    logger = logging.getLogger(logger_name)
+    logger.handlers.clear()
+    # Imposta la propagazione su True affinché i log passino al logger root
+    # e usino i tuoi handler configurati nel logger root.
+    logger.propagate = True
 
 # IMPORTARE LIBRERIE DA QUI IN POI
 from app.utils import ChatManager, BotFunctions
@@ -48,4 +56,3 @@ if __name__ == "__main__":
 
     telegram = BotFunctions.create_bot(share_url)
     telegram.run_polling()
-
