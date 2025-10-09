@@ -2,10 +2,10 @@ import io
 import os
 import json
 import httpx
+import logging
 import warnings
 from enum import Enum
 from typing import Any
-from agno.utils.log import log_info  # type: ignore
 from markdown_pdf import MarkdownPdf, Section
 from telegram import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message, Update, User
 from telegram.constants import ChatAction
@@ -15,6 +15,7 @@ from app.agents.pipeline import Pipeline
 
 # per per_message di ConversationHandler che rompe sempre qualunque input tu metta
 warnings.filterwarnings("ignore")
+logging = logging.getLogger(__name__)
 
 
 # Lo stato cambia in base al valore di ritorno delle funzioni async
@@ -70,7 +71,7 @@ class BotFunctions:
         if miniapp_url: BotFunctions.update_miniapp_url(miniapp_url, token)
         app = Application.builder().token(token).build()
 
-        conv_handler = ConversationHandler(
+        app.add_handler(ConversationHandler(
             per_message=False, # capire a cosa serve perchè da un warning quando parte il server
             entry_points=[CommandHandler('start', BotFunctions.__start)],
             states={
@@ -86,11 +87,7 @@ class BotFunctions:
                 ]
             },
             fallbacks=[CommandHandler('start', BotFunctions.__start)],
-        )
-
-        app.add_handler(conv_handler)
-
-        log_info("Telegram bot application created successfully.")
+        ))
         return app
 
     ########################################
@@ -154,7 +151,7 @@ class BotFunctions:
             })}
             httpx.post(endpoint, data=payload)
         except httpx.HTTPError as e:
-            log_info(f"Failed to update mini app URL: {e}")
+            logging.info(f"Failed to update mini app URL: {e}")
 
     #########################################
     # Funzioni async per i comandi e messaggi
@@ -162,7 +159,7 @@ class BotFunctions:
     @staticmethod
     async def __start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         message, user = await BotFunctions.handle_message(update)
-        log_info(f"@{user.username} started the conversation.")
+        logging.info(f"@{user.username} started the conversation.")
         await BotFunctions.start_message(user, message)
         return CONFIGS
 
@@ -187,7 +184,7 @@ class BotFunctions:
     @staticmethod
     async def __select_config(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         query, user = await BotFunctions.handle_callbackquery(update)
-        log_info(f"@{user.username} --> {query.data}")
+        logging.info(f"@{user.username} --> {query.data}")
 
         req = BotFunctions.users_req[user]
 
@@ -209,16 +206,16 @@ class BotFunctions:
         confs = BotFunctions.users_req[user]
         confs.user_query = message.text or ""
 
-        log_info(f"@{user.username} started the team with [{confs.model_team}, {confs.model_output}, {confs.strategy}]")
+        logging.info(f"@{user.username} started the team with [{confs.model_team}, {confs.model_output}, {confs.strategy}]")
         await BotFunctions.__run_team(update, confs)
 
-        log_info(f"@{user.username} team finished.")
+        logging.info(f"@{user.username} team finished.")
         return ConversationHandler.END
 
     @staticmethod
     async def __cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         query, user = await BotFunctions.handle_callbackquery(update)
-        log_info(f"@{user.username} canceled the conversation.")
+        logging.info(f"@{user.username} canceled the conversation.")
         if user in BotFunctions.users_req:
             del BotFunctions.users_req[user]
         await query.edit_message_text("Conversation canceled. Use /start to begin again.")
@@ -246,12 +243,12 @@ class BotFunctions:
         # Remove user query and bot message
         await bot.delete_message(chat_id=chat_id, message_id=update.message.id)
 
-        # Start TEAM
-        # TODO migliorare messaggi di attesa
+        # TODO settare correttamente i modelli
         pipeline = Pipeline()
-        pipeline.choose_predictor(Pipeline.available_models.index(confs.model_team))
+        #pipeline.choose_predictor(Pipeline.available_models.index(confs.model_team))
         pipeline.choose_style(Pipeline.all_styles.index(confs.strategy))
 
+        # TODO migliorare messaggi di attesa
         await bot.send_chat_action(chat_id=chat_id, action=ChatAction.TYPING)
         report_content = pipeline.interact(confs.user_query)
         await msg.delete()
