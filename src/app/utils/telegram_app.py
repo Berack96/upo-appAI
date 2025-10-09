@@ -1,14 +1,21 @@
+import io
 import os
 import json
 import httpx
+import warnings
 from enum import Enum
 from typing import Any
 from agno.utils.log import log_info  # type: ignore
+from markdown_pdf import MarkdownPdf, Section
 from telegram import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message, Update, User
 from telegram.constants import ChatAction
 from telegram.ext import Application, CallbackQueryHandler, CommandHandler, ContextTypes, ConversationHandler, ExtBot, JobQueue, MessageHandler, filters
 from app.agents import AppModels, PredictorStyle
 from app.agents.pipeline import Pipeline
+
+# per per_message di ConversationHandler che rompe sempre qualunque input tu metta
+warnings.filterwarnings("ignore")
+
 
 # Lo stato cambia in base al valore di ritorno delle funzioni async
 # END state è già definito in telegram.ext.ConversationHandler
@@ -32,9 +39,9 @@ class ConfigsChat(Enum):
 
 class ConfigsRun:
     def __init__(self):
-        self.model_team = BotFunctions.pipeline.available_models[0]
-        self.model_output = BotFunctions.pipeline.available_models[0]
-        self.strategy = BotFunctions.pipeline.all_styles[0]
+        self.model_team = Pipeline.available_models[0]
+        self.model_output = Pipeline.available_models[0]
+        self.strategy = Pipeline.all_styles[0]
         self.user_query = ""
 
 
@@ -43,11 +50,10 @@ class BotFunctions:
 
     # In theory this is already thread-safe if run with CPython
     users_req: dict[User, ConfigsRun]
-    pipeline: Pipeline
 
     # che incubo di typing
     @staticmethod
-    def create_bot(pipeline: Pipeline, miniapp_url: str | None = None) -> Application[ExtBot[None], ContextTypes.DEFAULT_TYPE, dict[str, Any], dict[str, Any], dict[str, Any], JobQueue[ContextTypes.DEFAULT_TYPE]]:
+    def create_bot(miniapp_url: str | None = None) -> Application[ExtBot[None], ContextTypes.DEFAULT_TYPE, dict[str, Any], dict[str, Any], dict[str, Any], JobQueue[ContextTypes.DEFAULT_TYPE]]:
         """
         Create a Telegram bot application instance.
         Assumes the TELEGRAM_BOT_TOKEN environment variable is set.
@@ -57,7 +63,6 @@ class BotFunctions:
             AssertionError: If the TELEGRAM_BOT_TOKEN environment variable is not set.
         """
         BotFunctions.users_req = {}
-        BotFunctions.pipeline = pipeline
 
         token = os.getenv("TELEGRAM_BOT_TOKEN", '')
         assert token, "TELEGRAM_BOT_TOKEN environment variable not set"
@@ -118,7 +123,7 @@ class BotFunctions:
     async def handle_configs(update: Update, state: ConfigsChat, msg: str | None = None) -> int:
         query, _ = await BotFunctions.handle_callbackquery(update)
 
-        models = [(m.name, f"__select_config:{state}:{m.name}") for m in BotFunctions.pipeline.available_models]
+        models = [(m.name, f"__select_config:{state}:{m.name}") for m in Pipeline.available_models]
         inline_btns = [[InlineKeyboardButton(name, callback_data=callback_data)] for name, callback_data in models]
 
         await query.edit_message_text(msg or state.value, reply_markup=InlineKeyboardMarkup(inline_btns))
@@ -142,7 +147,7 @@ class BotFunctions:
             endpoint = f"https://api.telegram.org/bot{token}/setChatMenuButton"
             payload = {"menu_button": json.dumps({
                 "type": "web_app",
-                "text": "Apri Mini App", # Il testo che appare sul pulsante
+                "text": "MiniApp",
                 "web_app": {
                     "url": url
                 }
@@ -173,7 +178,7 @@ class BotFunctions:
     async def __strategy(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         query, _ = await BotFunctions.handle_callbackquery(update)
 
-        strategies = [(s.name, f"__select_config:{ConfigsChat.STRATEGY}:{s.name}") for s in BotFunctions.pipeline.all_styles]
+        strategies = [(s.name, f"__select_config:{ConfigsChat.STRATEGY}:{s.name}") for s in Pipeline.all_styles]
         inline_btns = [[InlineKeyboardButton(name, callback_data=callback_data)] for name, callback_data in strategies]
 
         await query.edit_message_text("Select a strategy", reply_markup=InlineKeyboardMarkup(inline_btns))
@@ -227,37 +232,35 @@ class BotFunctions:
         msg_id = update.message.message_id - 1
         chat_id = update.message.chat_id
 
-        configs = [
+        configs_str = [
             'Running with configurations:   ',
             f'Team:      {confs.model_team.name}',
             f'Output:    {confs.model_output.name}',
             f'Strategy:  {confs.strategy.name}',
             f'Query:     "{confs.user_query}"'
         ]
-        full_message = f"""```\n{'\n'.join(configs)}\n```\n\n"""
+        full_message = f"""```\n{'\n'.join(configs_str)}\n```\n\n"""
         msg = await bot.edit_message_text(chat_id=chat_id, message_id=msg_id, text=full_message, parse_mode='MarkdownV2')
         if isinstance(msg, bool): return
 
         # Remove user query and bot message
         await bot.delete_message(chat_id=chat_id, message_id=update.message.id)
 
-        # TODO fare il run effettivo del team
-        # Simulate a long-running task
-        n_simulations = 3
-        import asyncio
+        # Start TEAM
+        # TODO migliorare messaggi di attesa
+        pipeline = Pipeline()
+        pipeline.choose_predictor(Pipeline.available_models.index(confs.model_team))
+        pipeline.choose_style(Pipeline.all_styles.index(confs.strategy))
+
         await bot.send_chat_action(chat_id=chat_id, action=ChatAction.TYPING)
-        for i in range(n_simulations):
-            await msg.edit_text(f"{full_message}Working {i+1}/{n_simulations}", parse_mode='MarkdownV2')
-            await asyncio.sleep(2)
+        report_content = pipeline.interact(confs.user_query)
         await msg.delete()
 
         # attach report file to the message
-        import io
-        from markdown_pdf import MarkdownPdf, Section
-        report_content = f"# Report\n\nThis is a sample report generated by the team."
         pdf = MarkdownPdf(toc_level=2, optimize=True)
         pdf.add_section(Section(report_content, toc=False))
 
+        # TODO vedere se ha senso dare il pdf o solo il messaggio
         document = io.BytesIO()
         pdf.save_bytes(document)
         document.seek(0)

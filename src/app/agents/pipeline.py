@@ -12,11 +12,12 @@ class Pipeline:
     e scelto dall'utente tramite i dropdown dell'interfaccia grafica.
     """
 
-    def __init__(self):
-        self.available_models = AppModels.availables()
-        self.all_styles = list(PredictorStyle)
+    # Variabili statiche
+    available_models = AppModels.availables()
+    all_styles = list(PredictorStyle)
 
-        self.style = self.all_styles[0]
+    def __init__(self):
+        self.style = Pipeline.all_styles[0]
         self.team = create_team_with(AppModels.OLLAMA_QWEN_1B)
         self.choose_predictor(0)  # Modello di default
 
@@ -27,7 +28,7 @@ class Pipeline:
         """
         Sceglie il modello LLM da usare per il Predictor.
         """
-        model = self.available_models[index]
+        model = Pipeline.available_models[index]
         self.predictor = model.get_agent(
             PREDICTOR_INSTRUCTIONS,
             output_schema=PredictorOutput,
@@ -37,7 +38,7 @@ class Pipeline:
         """
         Sceglie lo stile (conservativo/aggressivo) da usare per il Predictor.
         """
-        self.style = self.all_styles[index]
+        self.style = Pipeline.all_styles[index]
 
     # ======================
     # Helpers
@@ -46,13 +47,13 @@ class Pipeline:
         """
         Restituisce la lista dei nomi dei modelli disponibili.
         """
-        return [model.name for model in self.available_models]
+        return [model.name for model in Pipeline.available_models]
 
     def list_styles(self) -> list[str]:
         """
         Restituisce la lista degli stili di previsione disponibili.
         """
-        return [style.value for style in self.all_styles]
+        return [style.value for style in Pipeline.all_styles]
 
     # ======================
     # Core interaction
