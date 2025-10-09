@@ -1,6 +1,6 @@
 import os
 import pytest
-from app.news import CryptoPanicWrapper
+from app.api.news import CryptoPanicWrapper
 
 
 @pytest.mark.limited

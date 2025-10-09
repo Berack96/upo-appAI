@@ -1,7 +1,7 @@
 import os
 from typing import Any
 from binance.client import Client # type: ignore
-from app.base.markets import ProductInfo, MarketWrapper, Price
+from app.api.base.markets import ProductInfo, MarketWrapper, Price
 
 
 def extract_product(currency: str, ticker_data: dict[str, Any]) -> ProductInfo:

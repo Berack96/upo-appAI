@@ -1,9 +1,9 @@
 from agno.tools import Toolkit
-from app.base.markets import MarketWrapper, Price, ProductInfo
-from app.markets.binance import BinanceWrapper
-from app.markets.coinbase import CoinBaseWrapper
-from app.markets.cryptocompare import CryptoCompareWrapper
-from app.markets.yfinance import YFinanceWrapper
+from app.api.base.markets import MarketWrapper, Price, ProductInfo
+from app.api.markets.binance import BinanceWrapper
+from app.api.markets.coinbase import CoinBaseWrapper
+from app.api.markets.cryptocompare import CryptoCompareWrapper
+from app.api.markets.yfinance import YFinanceWrapper
 from app.utils import aggregate_history_prices, aggregate_product_info, WrapperHandler
 
 __all__ = [ "MarketAPIsTool", "BinanceWrapper", "CoinBaseWrapper", "CryptoCompareWrapper", "YFinanceWrapper", "ProductInfo", "Price" ]

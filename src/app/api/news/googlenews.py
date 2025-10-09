@@ -1,6 +1,6 @@
 from typing import Any
 from gnews import GNews # type: ignore
-from app.base.news import Article, NewsWrapper
+from app.api.base.news import Article, NewsWrapper
 
 
 def extract_article(result: dict[str, Any]) -> Article:

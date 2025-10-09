@@ -1,5 +1,5 @@
 import statistics
-from app.base.markets import ProductInfo, Price
+from app.api.base.markets import ProductInfo, Price
 
 
 def aggregate_history_prices(prices: dict[str, list[Price]]) -> list[Price]:

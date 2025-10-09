@@ -1,10 +1,10 @@
 from agno.tools import Toolkit
 from app.utils import WrapperHandler
-from app.base.news import NewsWrapper, Article
-from app.news.news_api import NewsApiWrapper
-from app.news.googlenews import GoogleNewsWrapper
-from app.news.cryptopanic_api import CryptoPanicWrapper
-from app.news.duckduckgo import DuckDuckGoWrapper
+from app.api.base.news import NewsWrapper, Article
+from app.api.news.news_api import NewsApiWrapper
+from app.api.news.googlenews import GoogleNewsWrapper
+from app.api.news.cryptopanic_api import CryptoPanicWrapper
+from app.api.news.duckduckgo import DuckDuckGoWrapper
 
 __all__ = ["NewsAPIsTool", "NewsApiWrapper", "GoogleNewsWrapper", "CryptoPanicWrapper", "DuckDuckGoWrapper", "Article"]
 

@@ -1,5 +1,5 @@
 import pytest
-from app.markets import MarketAPIsTool
+from app.api.markets import MarketAPIsTool
 
 
 @pytest.mark.tools

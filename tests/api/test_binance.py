@@ -1,5 +1,5 @@
 import pytest
-from app.markets.binance import BinanceWrapper
+from app.api.markets.binance import BinanceWrapper
 
 @pytest.mark.market
 @pytest.mark.api
