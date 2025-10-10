@@ -35,6 +35,7 @@ dependencies = [
 
     # API di social media
     "praw", # Reddit
+    "docker", # Necessario per usare Rettiwt per X
 ]
 
 [tool.pytest.ini_options]

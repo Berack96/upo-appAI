@@ -1,11 +1,11 @@
 '''
-THIS CURRENTLY DOES NOT WORK AS INTENDED DUE TO THE FACT THAT THE TWEETS AREN'T IN CHRONOLOGICAL ORDER
 Usiamo l'API rettiwt per ottenere dati da X aggirando i limiti dell'API free
 Questo potrebbe portare al ban dell'account anche se improbabile, non usare l'account personale
 Per farlo funzionare è necessario installare npm in un container docker ed installarlo con npm install -g rettiwt-api dopo essersi connessi al docker
 https://www.npmjs.com/package/rettiwt-api
 '''
 
+import os
 import docker
 import json
 from .base import SocialWrapper, SocialPost, SocialComment
@@ -24,16 +24,7 @@ class XWrapper(SocialWrapper):
             'BTC_Archive',
             'elonmusk'
         ]
-        self.api_key = "ADD_API_KEY"
-        '''
-        Per ottenere questa API è necessario seguire i seguenti passaggi:
-        - Installare l'estensione su chrome X Auth Helper
-        - Dargli il permesso di girare in incognito
-        - Andare in incognito ed entrare sul proprio account X
-        - Aprire l'estensione e fare "get key"
-        - Chiudere chrome
-        DOvrebbe funzionare per 5 anni o finchè non si si fa il log out, in ogni caso si può ricreare
-        '''
+        self.api_key = os.getenv("X_API_KEY")
         # Connection to the docker deamon
         self.client = docker.from_env()
         # Connect with the relative container
@@ -41,7 +32,7 @@ class XWrapper(SocialWrapper):
         self.social_posts: list[SocialPost] = []
     def get_top_crypto_posts(self, limit = 5) -> list[SocialPost]: #-> list[SocialPost]:
         '''
-        Get the top crypto tweets from X, the limit is reffered to the number of tweets for each user
+        Otteniamo i post più recenti da X, il limite si applica al numero di post per ogni utente nella lista interna
         '''
         social_posts: list[SocialPost] = []
         for user in self.users:
