@@ -1,5 +1,5 @@
 import pytest
-from app.news import GoogleNewsWrapper
+from app.api.news import GoogleNewsWrapper
 
 
 @pytest.mark.news

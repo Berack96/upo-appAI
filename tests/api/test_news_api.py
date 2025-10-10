@@ -1,6 +1,6 @@
 import os
 import pytest
-from app.news import NewsApiWrapper
+from app.api.news import NewsApiWrapper
 
 
 @pytest.mark.news

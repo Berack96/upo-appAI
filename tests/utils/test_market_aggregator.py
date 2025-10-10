@@ -1,7 +1,6 @@
 import pytest
 from datetime import datetime
-from app.base.markets import ProductInfo, Price
-from app.utils.market_aggregation import aggregate_history_prices, aggregate_product_info
+from app.api.base.markets import ProductInfo, Price
 
 
 @pytest.mark.aggregator
@@ -34,7 +33,7 @@ class TestMarketDataAggregator:
             "Provider3": [self.__product("BTC", 49900.0, 900.0, "USD")],
         }
 
-        aggregated = aggregate_product_info(products)
+        aggregated = ProductInfo.aggregate(products)
         assert len(aggregated) == 1
 
         info = aggregated[0]
@@ -58,7 +57,7 @@ class TestMarketDataAggregator:
             ],
         }
 
-        aggregated = aggregate_product_info(products)
+        aggregated = ProductInfo.aggregate(products)
         assert len(aggregated) == 2
 
         btc_info = next((p for p in aggregated if p.symbol == "BTC"), None)
@@ -81,7 +80,7 @@ class TestMarketDataAggregator:
             "Provider1": [],
             "Provider2": [],
         }
-        aggregated = aggregate_product_info(products)
+        aggregated = ProductInfo.aggregate(products)
         assert len(aggregated) == 0
 
     def test_aggregate_product_info_with_partial_data(self):
@@ -89,7 +88,7 @@ class TestMarketDataAggregator:
             "Provider1": [self.__product("BTC", 50000.0, 1000.0, "USD")],
             "Provider2": [],
         }
-        aggregated = aggregate_product_info(products)
+        aggregated = ProductInfo.aggregate(products)
         assert len(aggregated) == 1
         info = aggregated[0]
         assert info.symbol == "BTC"
@@ -120,7 +119,7 @@ class TestMarketDataAggregator:
         price.set_timestamp(timestamp_s=timestamp_2h_ago)
         timestamp_2h_ago = price.timestamp
 
-        aggregated = aggregate_history_prices(prices)
+        aggregated = Price.aggregate(prices)
         assert len(aggregated) == 2
         assert aggregated[0].timestamp == timestamp_1h_ago
         assert aggregated[0].high == pytest.approx(50050.0, rel=1e-3) # type: ignore

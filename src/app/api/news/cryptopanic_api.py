@@ -2,7 +2,7 @@ import os
 from typing import Any
 import requests
 from enum import Enum
-from app.base.news import NewsWrapper, Article
+from app.api.base.news import NewsWrapper, Article
 
 
 class CryptoPanicFilter(Enum):

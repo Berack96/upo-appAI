@@ -1,6 +1,6 @@
 import os
 import pytest
-from app.social.reddit import MAX_COMMENTS, RedditWrapper
+from app.api.social.reddit import MAX_COMMENTS, RedditWrapper
 
 @pytest.mark.social
 @pytest.mark.api

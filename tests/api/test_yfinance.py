@@ -1,5 +1,5 @@
 import pytest
-from app.markets import YFinanceWrapper
+from app.api.markets import YFinanceWrapper
 
 @pytest.mark.market
 @pytest.mark.api

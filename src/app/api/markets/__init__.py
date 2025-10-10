@@ -1,10 +1,10 @@
 from agno.tools import Toolkit
-from app.base.markets import MarketWrapper, Price, ProductInfo
-from app.markets.binance import BinanceWrapper
-from app.markets.coinbase import CoinBaseWrapper
-from app.markets.cryptocompare import CryptoCompareWrapper
-from app.markets.yfinance import YFinanceWrapper
-from app.utils import aggregate_history_prices, aggregate_product_info, WrapperHandler
+from app.api.wrapper_handler import WrapperHandler
+from app.api.base.markets import MarketWrapper, Price, ProductInfo
+from app.api.markets.binance import BinanceWrapper
+from app.api.markets.coinbase import CoinBaseWrapper
+from app.api.markets.cryptocompare import CryptoCompareWrapper
+from app.api.markets.yfinance import YFinanceWrapper
 
 __all__ = [ "MarketAPIsTool", "BinanceWrapper", "CoinBaseWrapper", "CryptoCompareWrapper", "YFinanceWrapper", "ProductInfo", "Price" ]
 
@@ -34,7 +34,7 @@ class MarketAPIsTool(MarketWrapper, Toolkit):
         """
         kwargs = {"currency": currency or "USD"}
         wrappers: list[type[MarketWrapper]] = [BinanceWrapper, YFinanceWrapper, CoinBaseWrapper, CryptoCompareWrapper]
-        self.wrappers = WrapperHandler.build_wrappers(wrappers, kwargs=kwargs)
+        self.handler = WrapperHandler.build_wrappers(wrappers, kwargs=kwargs)
 
         Toolkit.__init__( # type: ignore
             self,
@@ -49,11 +49,11 @@ class MarketAPIsTool(MarketWrapper, Toolkit):
         )
 
     def get_product(self, asset_id: str) -> ProductInfo:
-        return self.wrappers.try_call(lambda w: w.get_product(asset_id))
+        return self.handler.try_call(lambda w: w.get_product(asset_id))
     def get_products(self, asset_ids: list[str]) -> list[ProductInfo]:
-        return self.wrappers.try_call(lambda w: w.get_products(asset_ids))
+        return self.handler.try_call(lambda w: w.get_products(asset_ids))
     def get_historical_prices(self, asset_id: str, limit: int = 100) -> list[Price]:
-        return self.wrappers.try_call(lambda w: w.get_historical_prices(asset_id, limit))
+        return self.handler.try_call(lambda w: w.get_historical_prices(asset_id, limit))
 
 
     def get_products_aggregated(self, asset_ids: list[str]) -> list[ProductInfo]:
@@ -67,8 +67,8 @@ class MarketAPIsTool(MarketWrapper, Toolkit):
         Raises:
             Exception: If all wrappers fail to provide results.
         """
-        all_products = self.wrappers.try_call_all(lambda w: w.get_products(asset_ids))
-        return aggregate_product_info(all_products)
+        all_products = self.handler.try_call_all(lambda w: w.get_products(asset_ids))
+        return ProductInfo.aggregate(all_products)
 
     def get_historical_prices_aggregated(self, asset_id: str = "BTC", limit: int = 100) -> list[Price]:
         """
@@ -82,5 +82,5 @@ class MarketAPIsTool(MarketWrapper, Toolkit):
         Raises:
             Exception: If all wrappers fail to provide results.
         """
-        all_prices = self.wrappers.try_call_all(lambda w: w.get_historical_prices(asset_id, limit))
-        return aggregate_history_prices(all_prices)
+        all_prices = self.handler.try_call_all(lambda w: w.get_historical_prices(asset_id, limit))
+        return Price.aggregate(all_prices)

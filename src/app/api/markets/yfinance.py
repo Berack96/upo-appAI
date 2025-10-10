@@ -1,6 +1,6 @@
 import json
 from agno.tools.yfinance import YFinanceTools
-from app.base.markets import MarketWrapper, ProductInfo, Price
+from app.api.base.markets import MarketWrapper, ProductInfo, Price
 
 
 def extract_product(stock_data: dict[str, str]) -> ProductInfo:

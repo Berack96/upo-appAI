@@ -1,5 +1,5 @@
 import pytest
-from app.utils.wrapper_handler import WrapperHandler
+from app.api.wrapper_handler import WrapperHandler
 
 class MockWrapper:
     def do_something(self) -> str:

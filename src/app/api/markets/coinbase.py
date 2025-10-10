@@ -3,7 +3,7 @@ from enum import Enum
 from datetime import datetime, timedelta
 from coinbase.rest import RESTClient # type: ignore
 from coinbase.rest.types.product_types import Candle, GetProductResponse, Product # type: ignore
-from app.base.markets import ProductInfo, MarketWrapper, Price
+from app.api.base.markets import ProductInfo, MarketWrapper, Price
 
 
 def extract_product(product_data: GetProductResponse | Product) -> ProductInfo:

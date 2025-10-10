@@ -1,5 +1,18 @@
 import pytest
-from app.markets.binance import BinanceWrapper
+import asyncio
+from app.api.markets.binance import BinanceWrapper
+
+# fix warning about no event loop
+@pytest.fixture(scope="session", autouse=True)
+def event_loop():
+    """
+    Ensure there is an event loop for the duration of the tests.
+    """
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    yield loop
+    loop.close()
+
 
 @pytest.mark.market
 @pytest.mark.api
@@ -51,3 +64,18 @@ class TestBinance:
             assert entry.close > 0
             assert entry.high > 0
             assert entry.timestamp != ''
+
+    def test_binance_fiat_conversion(self):
+        market = BinanceWrapper(currency="USD")
+        assert market.currency == "USDT"
+        product = market.get_product("BTC")
+        assert product is not None
+        assert product.symbol == "BTC"
+        assert product.price > 0
+
+        market = BinanceWrapper(currency="EUR")
+        assert market.currency == "EUR"
+        product = market.get_product("BTC")
+        assert product is not None
+        assert product.symbol == "BTC"
+        assert product.price > 0
