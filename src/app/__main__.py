@@ -54,5 +54,9 @@ if __name__ == "__main__":
     _app, local_url, share_url = gradio.launch(server_name=server, server_port=port, quiet=True, prevent_thread_lock=True, share=share)
     logging.info(f"UPO AppAI Chat is running on {local_url} and {share_url}")
 
-    telegram = BotFunctions.create_bot(share_url)
-    telegram.run_polling()
+    try:
+        telegram = BotFunctions.create_bot(share_url)
+        telegram.run_polling()
+    except Exception as _:
+        logging.warning("Telegram bot could not be started. Continuing without it.")
+        gradio.queue().block_thread() # Keep the Gradio interface running
