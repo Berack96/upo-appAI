@@ -1,33 +1,88 @@
-from agno.team import Team
+import asyncio
+import logging
+from typing import Callable, Self
+from agno.run.agent import RunOutputEvent
+from agno.team import Team, TeamRunEvent, TeamRunOutputEvent
+from agno.tools.reasoning import ReasoningTools
 from app.agents import AppModels
 from app.markets import MarketAPIsTool
 from app.news import NewsAPIsTool
 from app.social import SocialAPIsTool
 
+logging = logging.getLogger("AppTeam")
 
-def create_team_with(models: AppModels, coordinator: AppModels | None = None) -> Team:
-    market_agent = models.get_agent(
-        instructions=MARKET_INSTRUCTIONS,
-        name="MarketAgent",
-        tools=[MarketAPIsTool()]
-    )
-    news_agent = models.get_agent(
-        instructions=NEWS_INSTRUCTIONS,
-        name="NewsAgent",
-        tools=[NewsAPIsTool()]
-    )
-    social_agent = models.get_agent(
-        instructions=SOCIAL_INSTRUCTIONS,
-        name="SocialAgent",
-        tools=[SocialAPIsTool()]
-    )
 
-    coordinator = coordinator or models
-    return Team(
-        model=coordinator.get_model(COORDINATOR_INSTRUCTIONS),
-        name="CryptoAnalysisTeam",
-        members=[market_agent, news_agent, social_agent],
-    )
+class AllTools:
+    __instance: Self
+
+    def __new__(cls) -> Self:
+        if not hasattr(cls, "__instance"):
+            cls.__instance = super(AllTools, cls).__new__(cls)
+        return cls.__instance
+
+    # TODO scegliere un modo migliore per inizializzare gli strumenti
+    # TODO magari usare un config file o una classe apposta per i configs
+    def __init__(self):
+        self.market = MarketAPIsTool("EUR")
+        self.news = NewsAPIsTool()
+        self.social = SocialAPIsTool()
+
+
+class AppTeam:
+    def __init__(self, team_models: AppModels, coordinator: AppModels | None = None):
+        self.team_models = team_models
+        self.coordinator = coordinator or team_models
+        self.listeners: dict[str, Callable[[RunOutputEvent | TeamRunOutputEvent], None]] = {}
+
+    def add_listener(self, event: str, listener: Callable[[RunOutputEvent | TeamRunOutputEvent], None]) -> None:
+        self.listeners[event] = listener
+
+    def run_team(self, query: str) -> str:
+        return asyncio.run(self.run_team_async(query))
+
+    async def run_team_async(self, query: str) -> str:
+        logging.info(f"Running team q='{query}'")
+        team = AppTeam.create_team_with(self.team_models, self.coordinator)
+        result = "No output from team"
+
+        async for run_event in team.arun(query, stream=True, stream_intermediate_steps=True): # type: ignore
+            if run_event.event in self.listeners:
+                self.listeners[run_event.event](run_event)
+            if run_event.event in [TeamRunEvent.run_completed]:
+                if isinstance(run_event.content, str):
+                    result = run_event.content
+                    thinking = result.rfind("</think>")
+                    if thinking != -1: result = result[thinking:]
+
+        logging.info(f"Team finished")
+        return result
+
+    @staticmethod
+    def create_team_with(models: AppModels, coordinator: AppModels) -> Team:
+        tools = AllTools()
+
+        market_agent = models.get_agent(
+            instructions=MARKET_INSTRUCTIONS,
+            name="MarketAgent",
+            tools=[tools.market]
+        )
+        news_agent = models.get_agent(
+            instructions=NEWS_INSTRUCTIONS,
+            name="NewsAgent",
+            tools=[tools.news]
+        )
+        social_agent = models.get_agent(
+            instructions=SOCIAL_INSTRUCTIONS,
+            name="SocialAgent",
+            tools=[tools.social]
+        )
+
+        return Team(
+            model=coordinator.get_model(COORDINATOR_INSTRUCTIONS),
+            name="CryptoAnalysisTeam",
+            members=[market_agent, news_agent, social_agent],
+            tools=[ReasoningTools()]
+        )
 
 COORDINATOR_INSTRUCTIONS = """
 You are the expert coordinator of a financial analysis team specializing in cryptocurrencies.
