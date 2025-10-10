@@ -1,6 +1,6 @@
 from agno.tools import Toolkit
 from app.api.wrapper_handler import WrapperHandler
-from app.api.base.markets import MarketWrapper, Price, ProductInfo, aggregate_history_prices, aggregate_product_info
+from app.api.base.markets import MarketWrapper, Price, ProductInfo
 from app.api.markets.binance import BinanceWrapper
 from app.api.markets.coinbase import CoinBaseWrapper
 from app.api.markets.cryptocompare import CryptoCompareWrapper
@@ -68,7 +68,7 @@ class MarketAPIsTool(MarketWrapper, Toolkit):
             Exception: If all wrappers fail to provide results.
         """
         all_products = self.handler.try_call_all(lambda w: w.get_products(asset_ids))
-        return aggregate_product_info(all_products)
+        return ProductInfo.aggregate(all_products)
 
     def get_historical_prices_aggregated(self, asset_id: str = "BTC", limit: int = 100) -> list[Price]:
         """
@@ -83,4 +83,4 @@ class MarketAPIsTool(MarketWrapper, Toolkit):
             Exception: If all wrappers fail to provide results.
         """
         all_prices = self.handler.try_call_all(lambda w: w.get_historical_prices(asset_id, limit))
-        return aggregate_history_prices(all_prices)
+        return Price.aggregate(all_prices)

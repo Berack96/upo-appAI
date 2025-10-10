@@ -1,5 +1,18 @@
 import pytest
+import asyncio
 from app.api.markets.binance import BinanceWrapper
+
+# fix warning about no event loop
+@pytest.fixture(scope="session", autouse=True)
+def event_loop():
+    """
+    Ensure there is an event loop for the duration of the tests.
+    """
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    yield loop
+    loop.close()
+
 
 @pytest.mark.market
 @pytest.mark.api
