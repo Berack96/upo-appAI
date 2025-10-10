@@ -1,79 +1,62 @@
-import gradio as gr
+# IMPORTANTE: Carichiamo le variabili d'ambiente PRIMA di qualsiasi altra cosa
 from dotenv import load_dotenv
-from agno.utils.log import log_info #type: ignore
-from app.utils import ChatManager
-from app.agents import Pipeline
+load_dotenv()
+
+
+# Modifico il comportamento del logging (dato che ci sono molte librerie che lo usano)
+import logging.config
+logging.config.dictConfig({
+    'version': 1,
+    'disable_existing_loggers': False, # Mantiene i logger esistenti (es. di terze parti)
+    'formatters': {
+        'colored': {
+            '()': 'colorlog.ColoredFormatter',
+            'format': '%(log_color)s%(levelname)s%(reset)s [%(asctime)s] (%(name)s) - %(message)s'
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'colored',
+            'level': 'INFO'
+        },
+    },
+    'root': {  # Configura il logger root
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'httpx': {'level': 'WARNING'}, # Troppo spam per INFO
+    }
+})
+
+# Modifichiamo i logger di agno
+import agno.utils.log # type: ignore
+agno_logger_names = ["agno", "agno-team", "agno-workflow"]
+for logger_name in agno_logger_names:
+    logger = logging.getLogger(logger_name)
+    logger.handlers.clear()
+    # Imposta la propagazione su True affinché i log passino al logger root
+    # e usino i tuoi handler configurati nel logger root.
+    logger.propagate = True
+
+# IMPORTARE LIBRERIE DA QUI IN POI
+from app.utils import ChatManager, BotFunctions
+
+
 
 
 if __name__ == "__main__":
-    # Inizializzazioni
-    load_dotenv()
-    pipeline = Pipeline()
+    server, port, share = ("0.0.0.0", 8000, False) # TODO Temp configs, maybe read from env/yaml/ini file later
+
     chat = ChatManager()
+    gradio = chat.gradio_build_interface()
+    _app, local_url, share_url = gradio.launch(server_name=server, server_port=port, quiet=True, prevent_thread_lock=True, share=share)
+    logging.info(f"UPO AppAI Chat is running on {local_url} and {share_url}")
 
-    ########################################
-    # Funzioni Gradio
-    ########################################
-    def respond(message: str, history: list[dict[str, str]]) -> tuple[list[dict[str, str]], list[dict[str, str]], str]:
-        chat.send_message(message)
-        response = pipeline.interact(message)
-        chat.receive_message(response)
-        history.append({"role": "user", "content": message})
-        history.append({"role": "assistant", "content": response})
-        return history, history, ""
-
-    def save_current_chat() -> str:
-        chat.save_chat("chat.json")
-        return "💾 Chat salvata in chat.json"
-
-    def load_previous_chat() -> tuple[list[dict[str, str]], list[dict[str, str]]]:
-        chat.load_chat("chat.json")
-        history: list[dict[str, str]] = []
-        for m in chat.get_history():
-            history.append({"role": m["role"], "content": m["content"]})
-        return history, history
-
-    def reset_chat() -> tuple[list[dict[str, str]], list[dict[str, str]]]:
-        chat.reset_chat()
-        return [], []
-
-    ########################################
-    # Interfaccia Gradio
-    ########################################
-    with gr.Blocks() as demo:
-        gr.Markdown("# 🤖 Agente di Analisi e Consulenza Crypto (Chat)")
-
-        # Dropdown provider e stile
-        with gr.Row():
-            provider = gr.Dropdown(
-                choices=pipeline.list_providers(),
-                type="index",
-                label="Modello da usare"
-            )
-            provider.change(fn=pipeline.choose_predictor, inputs=provider, outputs=None)
-
-            style = gr.Dropdown(
-                choices=pipeline.list_styles(),
-                type="index",
-                label="Stile di investimento"
-            )
-            style.change(fn=pipeline.choose_style, inputs=style, outputs=None)
-
-        chatbot = gr.Chatbot(label="Conversazione", height=500, type="messages")
-        msg = gr.Textbox(label="Scrivi la tua richiesta", placeholder="Es: Quali sono le crypto interessanti oggi?")
-
-        with gr.Row():
-            clear_btn = gr.Button("🗑️ Reset Chat")
-            save_btn = gr.Button("💾 Salva Chat")
-            load_btn = gr.Button("📂 Carica Chat")
-
-        # Eventi e interazioni
-        msg.submit(respond, inputs=[msg, chatbot], outputs=[chatbot, chatbot, msg])
-        clear_btn.click(reset_chat, inputs=None, outputs=[chatbot, chatbot])
-        save_btn.click(save_current_chat, inputs=None, outputs=None)
-        load_btn.click(load_previous_chat, inputs=None, outputs=[chatbot, chatbot])
-
-    server, port = ("0.0.0.0", 8000) # 0.0.0.0 per accesso esterno (Docker)
-    server_log = "localhost" if server == "0.0.0.0" else server
-    log_info(f"Starting UPO AppAI Chat on http://{server_log}:{port}") # noqa
-    demo.launch(server_name=server, server_port=port, quiet=True)
+    try:
+        telegram = BotFunctions.create_bot(share_url)
+        telegram.run_polling()
+    except Exception as _:
+        logging.warning("Telegram bot could not be started. Continuing without it.")
+        gradio.queue().block_thread() # Keep the Gradio interface running

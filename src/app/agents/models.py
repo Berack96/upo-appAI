@@ -1,13 +1,15 @@
 import os
 import ollama
+import logging
 from enum import Enum
 from agno.agent import Agent
 from agno.models.base import Model
 from agno.models.google import Gemini
 from agno.models.ollama import Ollama
 from agno.tools import Toolkit
-from agno.utils.log import log_warning #type: ignore
 from pydantic import BaseModel
+
+logging = logging.getLogger(__name__)
 
 
 class AppModels(Enum):
@@ -36,7 +38,7 @@ class AppModels(Enum):
             app_models = [model for model in AppModels if model.name.startswith("OLLAMA")]
             return [model for model in app_models if model.value in availables]
         except Exception as e:
-            log_warning(f"Ollama is not running or not reachable: {e}")
+            logging.warning(f"Ollama is not running or not reachable: {e}")
             return []
 
     @staticmethod
@@ -46,7 +48,7 @@ class AppModels(Enum):
         come variabili d'ambiente e ritorna una lista di provider disponibili.
         """
         if not os.getenv("GOOGLE_API_KEY"):
-            log_warning("No GOOGLE_API_KEY set in environment variables.")
+            logging.warning("No GOOGLE_API_KEY set in environment variables.")
             return []
         availables = [AppModels.GEMINI, AppModels.GEMINI_PRO]
         return availables
