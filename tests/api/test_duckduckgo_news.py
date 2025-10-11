@@ -1,5 +1,5 @@
 import pytest
-from app.news import DuckDuckGoWrapper
+from app.api.news import DuckDuckGoWrapper
 
 
 @pytest.mark.news
