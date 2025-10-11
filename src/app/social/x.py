@@ -25,6 +25,7 @@ class XWrapper(SocialWrapper):
             'elonmusk'
         ]
         self.api_key = os.getenv("X_API_KEY")
+        assert self.api_key, "X_API_KEY environment variable not set"
         # Connection to the docker deamon
         self.client = docker.from_env()
         # Connect with the relative container
