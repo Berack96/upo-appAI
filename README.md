@@ -86,7 +86,7 @@ uv pip install -e .
 A questo punto si può già modificare il codice e, quando necessario, far partire il progetto tramite il comando:
 
 ```sh
-uv run python src/app
+uv run src/app
 ```
 
 # **Applicazione**
@@ -115,10 +115,11 @@ src
 └── app
     ├── __main__.py
     ├── agents       <-- Agenti, modelli, prompts e simili
-    ├── base         <-- Classi base per le API
-    ├── markets      <-- Market data provider (Es. Binance)
-    ├── news         <-- News data provider (Es. NewsAPI)
-    ├── social       <-- Social data provider (Es. Reddit)
+    ├── api          <-- Tutte le API esterne
+    │   ├── base     <-- Classi base per le API
+    │   ├── markets  <-- Market data provider (Es. Binance)
+    │   ├── news     <-- News data provider (Es. NewsAPI)
+    │   └── social   <-- Social data provider (Es. Reddit)
     └── utils        <-- Codice di utilità generale
 ```
 

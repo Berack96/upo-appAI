@@ -1,6 +1,6 @@
 import os
 import pytest
-from app.markets import CryptoCompareWrapper
+from app.api.markets import CryptoCompareWrapper
 
 @pytest.mark.market
 @pytest.mark.api

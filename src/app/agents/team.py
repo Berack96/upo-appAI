@@ -1,8 +1,8 @@
 from agno.team import Team
 from app.agents import AppModels
-from app.markets import MarketAPIsTool
-from app.news import NewsAPIsTool
-from app.social import SocialAPIsTool
+from app.api.markets import MarketAPIsTool
+from app.api.news import NewsAPIsTool
+from app.api.social import SocialAPIsTool
 
 
 def create_team_with(models: AppModels, coordinator: AppModels | None = None) -> Team:

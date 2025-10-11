@@ -1,6 +1,6 @@
 import os
 import pytest
-from app.markets import CoinBaseWrapper
+from app.api.markets import CoinBaseWrapper
 
 @pytest.mark.market
 @pytest.mark.api

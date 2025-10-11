@@ -1,7 +1,7 @@
 import os
 from typing import Any
 from binance.client import Client # type: ignore
-from app.base.markets import ProductInfo, MarketWrapper, Price
+from app.api.base.markets import ProductInfo, MarketWrapper, Price
 
 
 def extract_product(currency: str, ticker_data: dict[str, Any]) -> ProductInfo:
@@ -25,6 +25,12 @@ def extract_price(kline_data: list[Any]) -> Price:
     price.set_timestamp(timestamp_ms=timestamp)
     return price
 
+
+# Add here eventual other fiat not supported by Binance
+FIAT_TO_STABLECOIN = {
+    "USD": "USDT",
+}
+
 class BinanceWrapper(MarketWrapper):
     """
     Wrapper per le API autenticate di Binance.\n
@@ -36,16 +42,15 @@ class BinanceWrapper(MarketWrapper):
     def __init__(self, currency: str = "USD"):
         """
         Inizializza il wrapper di Binance con le credenziali API e la valuta di riferimento.
-        Se viene fornita una valuta fiat come "USD", questa viene automaticamente convertita in una stablecoin Tether ("USDT") per compatibilità con Binance,  
-        poiché Binance non supporta direttamente le valute fiat per il trading di criptovalute.
-        Tutti i prezzi e volumi restituiti saranno quindi denominati nella stablecoin (ad esempio, "USDT") e non nella valuta fiat originale.  
-        Args:  
-            currency (str): Valuta in cui restituire i prezzi. Se "USD" viene fornito, verrà utilizzato "USDT". Default è "USD".  
+        Alcune valute fiat non sono supportate direttamente da Binance (es. "USD").
+        Infatti, se viene fornita una valuta fiat come "USD", questa viene automaticamente convertita in una stablecoin Tether ("USDT") per compatibilità con Binance.
+        Args:
+            currency (str): Valuta in cui restituire i prezzi. Se "USD" viene fornito, verrà utilizzato "USDT". Default è "USD".
         """
         api_key = os.getenv("BINANCE_API_KEY")
         api_secret = os.getenv("BINANCE_API_SECRET")
 
-        self.currency = f"{currency}T"
+        self.currency = currency if currency not in FIAT_TO_STABLECOIN else FIAT_TO_STABLECOIN[currency]
         self.client = Client(api_key=api_key, api_secret=api_secret)
 
     def __format_symbol(self, asset_id: str) -> str:
