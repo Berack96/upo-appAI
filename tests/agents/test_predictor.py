@@ -1,6 +1,7 @@
 import pytest
 from app.agents import AppModels
-from app.agents.predictor import PREDICTOR_INSTRUCTIONS, PredictorInput, PredictorOutput, PredictorStyle
+from app.agents.predictor import PredictorInput, PredictorOutput, PredictorStyle
+from app.agents.prompts import PREDICTOR_INSTRUCTIONS
 from app.api.base.markets import ProductInfo
 
 def unified_checks(model: AppModels, input: PredictorInput) -> None:
