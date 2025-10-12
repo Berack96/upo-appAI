@@ -1,3 +1,4 @@
+import asyncio
 import gradio as gr
 from dotenv import load_dotenv
 from agno.utils.log import log_info #type: ignore
@@ -79,4 +80,4 @@ if __name__ == "__main__":
 
     _app, local, shared = demo.launch(server_name="0.0.0.0", server_port=configs.port, quiet=True, prevent_thread_lock=True, share=configs.gradio_share)
     log_info(f"Starting UPO AppAI Chat on {shared or local}")
-    demo.queue().block_thread()
+    asyncio.get_event_loop().run_forever()
