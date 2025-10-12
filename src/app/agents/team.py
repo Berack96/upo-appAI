@@ -12,10 +12,10 @@ logging = logging.getLogger("AppTeam")
 
 
 class AppTeam:
-    def __init__(self, configs: AppConfig, team_models: AppModel, coordinator: AppModel | None = None):
+    def __init__(self, configs: AppConfig, team_models: AppModel, team_leader: AppModel | None = None):
         self.configs = configs
         self.team_models = team_models
-        self.coordinator = coordinator or team_models
+        self.team_leader = team_leader or team_models
         self.listeners: dict[str, Callable[[RunOutputEvent | TeamRunOutputEvent], None]] = {}
 
     def add_listener(self, event: str, listener: Callable[[RunOutputEvent | TeamRunOutputEvent], None]) -> None:
@@ -26,7 +26,7 @@ class AppTeam:
 
     async def run_team_async(self, query: str) -> str:
         logging.info(f"Running team q='{query}'")
-        team = AppTeam.create_team_with(self.configs, self.team_models, self.coordinator)
+        team = AppTeam.create_team_with(self.configs, self.team_models, self.team_leader)
         result = "No output from team"
 
         async for run_event in team.arun(query, stream=True, stream_intermediate_steps=True): # type: ignore
