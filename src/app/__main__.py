@@ -2,7 +2,7 @@ import gradio as gr
 from dotenv import load_dotenv
 from agno.utils.log import log_info #type: ignore
 from app.configs import AppConfig
-from app.utils import ChatManager
+from app.interface import ChatManager
 from app.agents import Pipeline
 
 
