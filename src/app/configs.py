@@ -1,8 +1,10 @@
 import os
-from typing import Any
+import threading
 import ollama
 import yaml
 import logging.config
+import agno.utils.log # type: ignore
+from typing import Any
 from pydantic import BaseModel
 from agno.agent import Agent
 from agno.tools import Toolkit
@@ -86,6 +88,8 @@ class AppConfig(BaseModel):
     models: ModelsConfig = ModelsConfig()
     agents: AgentsConfigs = AgentsConfigs()
 
+    __lock = threading.Lock()
+
     @classmethod
     def load(cls, file_path: str = "configs.yaml") -> 'AppConfig':
         """
@@ -106,9 +110,10 @@ class AppConfig(BaseModel):
         return configs
 
     def __new__(cls, *args: Any, **kwargs: Any) -> 'AppConfig':
-        if not hasattr(cls, 'instance'):
-            cls.instance = super(AppConfig, cls).__new__(cls)
-        return cls.instance
+        with cls.__lock:
+            if not hasattr(cls, 'instance'):
+                cls.instance = super(AppConfig, cls).__new__(cls)
+            return cls.instance
 
     def get_model_by_name(self, name: str) -> AppModel:
         """
@@ -146,7 +151,7 @@ class AppConfig(BaseModel):
         """
         logging.config.dictConfig({
             'version': 1,
-            'disable_existing_loggers': False, # Mantiene i logger esistenti (es. di terze parti)
+            'disable_existing_loggers': False, # Keep existing loggers (e.g. third-party loggers)
             'formatters': {
                 'colored': {
                     '()': 'colorlog.ColoredFormatter',
@@ -160,17 +165,16 @@ class AppConfig(BaseModel):
                     'level': self.logging_level,
                 },
             },
-            'root': {  # Configura il logger root
+            'root': {  # Configure the root logger
                 'handlers': ['console'],
                 'level': self.logging_level,
             },
             'loggers': {
-                'httpx': {'level': 'WARNING'}, # Troppo spam per INFO
+                'httpx': {'level': 'WARNING'}, # Too much spam for INFO
             }
         })
 
-        # Modifichiamo i logger di agno
-        import agno.utils.log # type: ignore
+        # Modify the agno loggers
         agno_logger_names = ["agno", "agno-team", "agno-workflow"]
         for logger_name in agno_logger_names:
             logger = logging.getLogger(logger_name)
