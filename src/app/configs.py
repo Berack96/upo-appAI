@@ -88,7 +88,7 @@ class AppConfig(BaseModel):
     models: ModelsConfig = ModelsConfig()
     agents: AgentsConfigs = AgentsConfigs()
 
-    _lock: ClassVar[threading.Lock] = threading.Lock()
+    __lock: ClassVar[threading.Lock] = threading.Lock()
 
     @classmethod
     def load(cls, file_path: str = "configs.yaml") -> 'AppConfig':
@@ -110,7 +110,7 @@ class AppConfig(BaseModel):
         return configs
 
     def __new__(cls, *args: Any, **kwargs: Any) -> 'AppConfig':
-        with cls._lock:
+        with cls.__lock:
             if not hasattr(cls, 'instance'):
                 cls.instance = super(AppConfig, cls).__new__(cls)
             return cls.instance
