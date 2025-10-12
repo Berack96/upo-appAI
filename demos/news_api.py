@@ -5,7 +5,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../src'
 ###########################################
 
 from dotenv import load_dotenv
-from app.news import NewsApiWrapper
+from app.api.news import NewsApiWrapper
 
 def main():
     api = NewsApiWrapper()
