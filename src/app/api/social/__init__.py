@@ -1,6 +1,6 @@
 from agno.tools import Toolkit
 from app.api.wrapper_handler import WrapperHandler
-from app.api.base.social import SocialPost, SocialWrapper
+from app.api.core.social import SocialPost, SocialWrapper
 from app.api.social.reddit import RedditWrapper
 
 __all__ = ["SocialAPIsTool", "RedditWrapper", "SocialPost"]

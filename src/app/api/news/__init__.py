@@ -1,6 +1,6 @@
 from agno.tools import Toolkit
 from app.api.wrapper_handler import WrapperHandler
-from app.api.base.news import NewsWrapper, Article
+from app.api.core.news import NewsWrapper, Article
 from app.api.news.newsapi import NewsApiWrapper
 from app.api.news.googlenews import GoogleNewsWrapper
 from app.api.news.cryptopanic_api import CryptoPanicWrapper

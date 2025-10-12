@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from app.api.base.markets import ProductInfo
+from app.api.core.markets import ProductInfo
 
 class PredictorInput(BaseModel):
     data: list[ProductInfo] = Field(..., description="Market data as a list of ProductInfo")

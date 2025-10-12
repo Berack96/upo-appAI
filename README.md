@@ -108,7 +108,7 @@ src
     ├── config.py    <-- Configurazioni app
     ├── agents       <-- Agenti, Team, prompts e simili
     ├── api          <-- Tutte le API esterne
-    │   ├── base     <-- Classi base per le API
+    │   ├── core     <-- Classi core per le API
     │   ├── markets  <-- Market data provider (Es. Binance)
     │   ├── news     <-- News data provider (Es. NewsAPI)
     │   └── social   <-- Social data provider (Es. Reddit)

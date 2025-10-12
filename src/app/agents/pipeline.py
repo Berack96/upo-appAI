@@ -2,7 +2,7 @@ from agno.run.agent import RunOutput
 from app.agents.team import create_team_with
 from app.agents.predictor import PredictorInput, PredictorOutput
 from app.agents.prompts import *
-from app.api.base.markets import ProductInfo
+from app.api.core.markets import ProductInfo
 from app.configs import AppConfig
 
 
