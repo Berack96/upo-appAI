@@ -1,6 +1,7 @@
 import gradio as gr
 from dotenv import load_dotenv
 from agno.utils.log import log_info #type: ignore
+from app.configs import AppConfig
 from app.utils import ChatManager
 from app.agents import Pipeline
 
@@ -8,7 +9,10 @@ from app.agents import Pipeline
 if __name__ == "__main__":
     # Inizializzazioni
     load_dotenv()
-    pipeline = Pipeline()
+
+    configs = AppConfig.load()
+    pipeline = Pipeline(configs)
+
     chat = ChatManager()
 
     ########################################
@@ -57,7 +61,7 @@ if __name__ == "__main__":
                 type="index",
                 label="Stile di investimento"
             )
-            style.change(fn=pipeline.choose_style, inputs=style, outputs=None)
+            style.change(fn=pipeline.choose_strategy, inputs=style, outputs=None)
 
         chatbot = gr.Chatbot(label="Conversazione", height=500, type="messages")
         msg = gr.Textbox(label="Scrivi la tua richiesta", placeholder="Es: Quali sono le crypto interessanti oggi?")

@@ -1,0 +1,41 @@
+port: 8000
+gradio_share: false
+logging_level: INFO
+
+strategies:
+  - name: Conservative
+    label: Conservative
+    description: Focus on stable and low-risk investments.
+  - name: Balanced
+    label: Balanced
+    description: A mix of growth and stability.
+  - name: Aggressive
+    label: Aggressive
+    description: High-risk, high-reward investments.
+
+models:
+  gemini:
+    - name: gemini-2.0-flash
+      label: Gemini
+    - name: gemini-2.0-pro
+      label: Gemini Pro
+  ollama:
+    - name: gpt-oss:latest
+      label: Ollama GPT
+    - name: qwen3:8b
+      label: Qwen 3 (8B)
+    - name: qwen3:4b
+      label: Qwen 3 (4B)
+    - name: qwen3:1.7b
+      label: Qwen 3 (1.7B)
+
+api:
+  retry_attempts: 3
+  retry_delay_seconds: 2
+  currency: EUR
+
+agents:
+  strategy: Conservative
+  team_model: qwen3:1.7b
+  team_leader_model: qwen3:4b
+  predictor_model: qwen3:4b
