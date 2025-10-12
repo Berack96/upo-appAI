@@ -1,5 +1,5 @@
 import pytest
-from app.api.news import NewsAPIsTool
+from app.api.tools import NewsAPIsTool
 
 
 @pytest.mark.tools

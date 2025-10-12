@@ -1,8 +1,9 @@
 from agno.run.agent import RunOutput
-from app.agents.models import AppModels
 from app.agents.team import create_team_with
-from app.agents.predictor import PREDICTOR_INSTRUCTIONS, PredictorInput, PredictorOutput, PredictorStyle
-from app.api.base.markets import ProductInfo
+from app.agents.predictor import PredictorInput, PredictorOutput
+from app.agents.prompts import *
+from app.api.core.markets import ProductInfo
+from app.configs import AppConfig
 
 
 class Pipeline:
@@ -12,13 +13,12 @@ class Pipeline:
     e scelto dall'utente tramite i dropdown dell'interfaccia grafica.
     """
 
-    def __init__(self):
-        self.available_models = AppModels.availables()
-        self.all_styles = list(PredictorStyle)
+    def __init__(self, configs: AppConfig):
+        self.configs = configs
 
-        self.style = self.all_styles[0]
-        self.team = create_team_with(AppModels.OLLAMA_QWEN_1B)
-        self.choose_predictor(0)  # Modello di default
+        # Stato iniziale
+        self.choose_strategy(0)
+        self.choose_predictor(0)
 
     # ======================
     # Dropdown handlers
@@ -27,17 +27,17 @@ class Pipeline:
         """
         Sceglie il modello LLM da usare per il Predictor.
         """
-        model = self.available_models[index]
+        model = self.configs.models.all_models[index]
         self.predictor = model.get_agent(
             PREDICTOR_INSTRUCTIONS,
             output_schema=PredictorOutput,
         )
 
-    def choose_style(self, index: int):
+    def choose_strategy(self, index: int):
         """
-        Sceglie lo stile (conservativo/aggressivo) da usare per il Predictor.
+        Sceglie la strategia da usare per il Predictor.
         """
-        self.style = self.all_styles[index]
+        self.strat = self.configs.strategies[index].description
 
     # ======================
     # Helpers
@@ -46,13 +46,13 @@ class Pipeline:
         """
         Restituisce la lista dei nomi dei modelli disponibili.
         """
-        return [model.name for model in self.available_models]
+        return [model.label for model in self.configs.models.all_models]
 
     def list_styles(self) -> list[str]:
         """
         Restituisce la lista degli stili di previsione disponibili.
         """
-        return [style.value for style in self.all_styles]
+        return [strat.label for strat in self.configs.strategies]
 
     # ======================
     # Core interaction
@@ -65,7 +65,11 @@ class Pipeline:
         4. Restituisce la strategia finale
         """
         # Step 1: raccolta output dai membri del Team
-        team_outputs = self.team.run(query) # type: ignore
+        team_model = self.configs.get_model_by_name(self.configs.agents.team_model)
+        leader_model = self.configs.get_model_by_name(self.configs.agents.team_leader_model)
+
+        team = create_team_with(self.configs, team_model, leader_model)
+        team_outputs = team.run(query) # type: ignore
 
         # Step 2: aggregazione output strutturati
         all_products: list[ProductInfo] = []
@@ -86,7 +90,7 @@ class Pipeline:
         # Step 3: invocazione Predictor
         predictor_input = PredictorInput(
             data=all_products,
-            style=self.style,
+            style=self.strat,
             sentiment=aggregated_sentiment
         )
 
@@ -100,6 +104,6 @@ class Pipeline:
             [f"{item.asset} ({item.percentage}%): {item.motivation}" for item in prediction.portfolio]
         )
         return (
-            f"📊 Strategia ({self.style.value}): {prediction.strategy}\n\n"
+            f"📊 Strategia ({self.strat}): {prediction.strategy}\n\n"
             f"💼 Portafoglio consigliato:\n{portfolio_lines}"
         )
