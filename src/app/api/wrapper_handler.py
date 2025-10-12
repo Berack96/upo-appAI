@@ -35,6 +35,16 @@ class WrapperHandler(Generic[WrapperType]):
         self.retry_delay = retry_delay
         self.index = 0
 
+    def set_retries(self, try_per_wrapper: int, retry_delay: int) -> None:
+        """
+        Sets the retry parameters for the handler.
+        Args:
+            try_per_wrapper (int): Number of retries per wrapper before switching to the next.
+            retry_delay (int): Delay in seconds between retries.
+        """
+        self.retry_per_wrapper = try_per_wrapper
+        self.retry_delay = retry_delay
+
     def try_call(self, func: Callable[[WrapperType], OutputType]) -> OutputType:
         """
         Attempts to call the provided function on the current wrapper.

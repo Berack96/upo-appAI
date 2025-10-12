@@ -68,7 +68,7 @@ class Pipeline:
         team_model = self.configs.get_model_by_name(self.configs.agents.team_model)
         leader_model = self.configs.get_model_by_name(self.configs.agents.team_leader_model)
 
-        team = create_team_with(team_model, leader_model)
+        team = create_team_with(self.configs, team_model, leader_model)
         team_outputs = team.run(query) # type: ignore
 
         # Step 2: aggregazione output strutturati
