@@ -1,5 +1,7 @@
-from app.agents.models import AppModels
-from app.agents.predictor import PREDICTOR_INSTRUCTIONS, PredictorOutput, PredictorStyle
+from agno.run.agent import RunEvent
+from app.agents.prompts import *
+from app.agents.team import AppTeam
+from app.configs import AppConfig
 
 
 class Pipeline:
@@ -9,12 +11,12 @@ class Pipeline:
     e scelto dall'utente tramite i dropdown dell'interfaccia grafica.
     """
 
-    def __init__(self):
-        self.available_models = AppModels.availables()
-        self.all_styles = list(PredictorStyle)
+    def __init__(self, configs: AppConfig):
+        self.configs = configs
 
-        self.style = self.all_styles[0]
-        self.choose_predictor(0)  # Modello di default
+        # Stato iniziale
+        self.choose_strategy(0)
+        self.choose_predictor(0)
 
     # ======================
     # Dropdown handlers
@@ -23,17 +25,13 @@ class Pipeline:
         """
         Sceglie il modello LLM da usare per il Predictor.
         """
-        model = self.available_models[index]
-        self.predictor = model.get_agent(
-            PREDICTOR_INSTRUCTIONS,
-            output_schema=PredictorOutput,
-        )
+        self.predictor = self.configs.models.all_models[index]
 
-    def choose_style(self, index: int):
+    def choose_strategy(self, index: int):
         """
-        Sceglie lo stile (conservativo/aggressivo) da usare per il Predictor.
+        Sceglie la strategia da usare per il Predictor.
         """
-        self.style = self.all_styles[index]
+        self.strat = self.configs.strategies[index].description
 
     # ======================
     # Helpers
@@ -42,13 +40,13 @@ class Pipeline:
         """
         Restituisce la lista dei nomi dei modelli disponibili.
         """
-        return [model.name for model in self.available_models]
+        return [model.label for model in self.configs.models.all_models]
 
     def list_styles(self) -> list[str]:
         """
         Restituisce la lista degli stili di previsione disponibili.
         """
-        return [style.value for style in self.all_styles]
+        return [strat.label for strat in self.configs.strategies]
 
     # ======================
     # Core interaction
@@ -61,9 +59,7 @@ class Pipeline:
         4. Restituisce la strategia finale
         """
         # Step 1: raccolta output dai membri del Team
-        from app.agents import AppTeam
-        from agno.agent import RunEvent
-        team = AppTeam(AppModels.OLLAMA_QWEN_1B) # TODO rendere dinamico
+        team = AppTeam(configs=self.configs, team_models=self.predictor)
         team.add_listener(RunEvent.tool_call_started, lambda e: print(f"Team tool call started: {e.agent_name}")) # type: ignore
         team.add_listener(RunEvent.tool_call_completed, lambda e: print(f"Team tool call completed: {e.agent_name}")) # type: ignore
         result = team.run_team(query)

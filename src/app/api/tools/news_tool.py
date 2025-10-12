@@ -1,13 +1,7 @@
 from agno.tools import Toolkit
-from app.utils import WrapperHandler
-from app.base.news import NewsWrapper, Article
-from app.news.news_api import NewsApiWrapper
-from app.news.googlenews import GoogleNewsWrapper
-from app.news.cryptopanic_api import CryptoPanicWrapper
-from app.news.duckduckgo import DuckDuckGoWrapper
-
-__all__ = ["NewsAPIsTool", "NewsApiWrapper", "GoogleNewsWrapper", "CryptoPanicWrapper", "DuckDuckGoWrapper", "Article"]
-
+from app.api.wrapper_handler import WrapperHandler
+from app.api.core.news import NewsWrapper, Article
+from app.api.news import NewsApiWrapper, GoogleNewsWrapper, CryptoPanicWrapper, DuckDuckGoWrapper
 
 class NewsAPIsTool(NewsWrapper, Toolkit):
     """
@@ -34,7 +28,7 @@ class NewsAPIsTool(NewsWrapper, Toolkit):
         - CryptoPanicWrapper.
         """
         wrappers: list[type[NewsWrapper]] = [GoogleNewsWrapper, DuckDuckGoWrapper, NewsApiWrapper, CryptoPanicWrapper]
-        self.wrapper_handler = WrapperHandler.build_wrappers(wrappers)
+        self.handler = WrapperHandler.build_wrappers(wrappers)
 
         Toolkit.__init__( # type: ignore
             self,
@@ -48,9 +42,9 @@ class NewsAPIsTool(NewsWrapper, Toolkit):
         )
 
     def get_top_headlines(self, limit: int = 100) -> list[Article]:
-        return self.wrapper_handler.try_call(lambda w: w.get_top_headlines(limit))
+        return self.handler.try_call(lambda w: w.get_top_headlines(limit))
     def get_latest_news(self, query: str, limit: int = 100) -> list[Article]:
-        return self.wrapper_handler.try_call(lambda w: w.get_latest_news(query, limit))
+        return self.handler.try_call(lambda w: w.get_latest_news(query, limit))
 
     def get_top_headlines_aggregated(self, limit: int = 100) -> dict[str, list[Article]]:
         """
@@ -62,7 +56,7 @@ class NewsAPIsTool(NewsWrapper, Toolkit):
         Raises:
             Exception: If all wrappers fail to provide results.
         """
-        return self.wrapper_handler.try_call_all(lambda w: w.get_top_headlines(limit))
+        return self.handler.try_call_all(lambda w: w.get_top_headlines(limit))
 
     def get_latest_news_aggregated(self, query: str, limit: int = 100) -> dict[str, list[Article]]:
         """
@@ -75,4 +69,4 @@ class NewsAPIsTool(NewsWrapper, Toolkit):
         Raises:
             Exception: If all wrappers fail to provide results.
         """
-        return self.wrapper_handler.try_call_all(lambda w: w.get_latest_news(query, limit))
+        return self.handler.try_call_all(lambda w: w.get_latest_news(query, limit))

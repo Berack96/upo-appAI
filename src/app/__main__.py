@@ -1,14 +1,19 @@
+import asyncio
 import gradio as gr
 from dotenv import load_dotenv
 from agno.utils.log import log_info #type: ignore
-from app.utils import ChatManager
+from app.configs import AppConfig
+from app.interface import ChatManager
 from app.agents import Pipeline
 
 
 if __name__ == "__main__":
     # Inizializzazioni
     load_dotenv()
-    pipeline = Pipeline()
+
+    configs = AppConfig.load()
+    pipeline = Pipeline(configs)
+
     chat = ChatManager()
 
     ########################################
@@ -57,7 +62,7 @@ if __name__ == "__main__":
                 type="index",
                 label="Stile di investimento"
             )
-            style.change(fn=pipeline.choose_style, inputs=style, outputs=None)
+            style.change(fn=pipeline.choose_strategy, inputs=style, outputs=None)
 
         chatbot = gr.Chatbot(label="Conversazione", height=500, type="messages")
         msg = gr.Textbox(label="Scrivi la tua richiesta", placeholder="Es: Quali sono le crypto interessanti oggi?")
@@ -73,7 +78,9 @@ if __name__ == "__main__":
         save_btn.click(save_current_chat, inputs=None, outputs=None)
         load_btn.click(load_previous_chat, inputs=None, outputs=[chatbot, chatbot])
 
-    server, port = ("0.0.0.0", 8000) # 0.0.0.0 per accesso esterno (Docker)
-    server_log = "localhost" if server == "0.0.0.0" else server
-    log_info(f"Starting UPO AppAI Chat on http://{server_log}:{port}") # noqa
-    demo.launch(server_name=server, server_port=port, quiet=True)
+    try:
+        _app, local, shared = demo.launch(server_name="0.0.0.0", server_port=configs.port, quiet=True, prevent_thread_lock=True, share=configs.gradio_share)
+        log_info(f"Starting UPO AppAI Chat on {shared or local}")
+        asyncio.get_event_loop().run_forever()
+    except KeyboardInterrupt:
+        demo.close()
