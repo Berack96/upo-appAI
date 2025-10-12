@@ -14,7 +14,7 @@ from app.configs import AppConfig
 
 # per per_message di ConversationHandler che rompe sempre qualunque input tu metta
 warnings.filterwarnings("ignore")
-logging = logging.getLogger(__name__)
+logging = logging.getLogger("telegram")
 
 
 # Lo stato cambia in base al valore di ritorno delle funzioni async
@@ -69,7 +69,7 @@ class TelegramApp:
             })}
             httpx.post(endpoint, data=payload)
         except httpx.HTTPError as e:
-            logging.info(f"Failed to update mini app URL: {e}")
+            logging.warning(f"Failed to update mini app URL: {e}")
 
     def create_bot(self) -> None:
         """

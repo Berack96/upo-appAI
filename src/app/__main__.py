@@ -1,4 +1,3 @@
-# IMPORTANTE: Carichiamo le variabili d'ambiente PRIMA di qualsiasi altra cosa
 import asyncio
 import logging
 from dotenv import load_dotenv
@@ -8,7 +7,6 @@ from app.agents import Pipeline
 
 
 if __name__ == "__main__":
-    # Inizializzazioni
     load_dotenv()
 
     configs = AppConfig.load()
@@ -23,8 +21,11 @@ if __name__ == "__main__":
         telegram = TelegramApp(pipeline)
         telegram.add_miniapp_url(share_url)
         telegram.run()
-    except Exception as _:
-        logging.warning("Telegram bot could not be started. Continuing without it.")
-        asyncio.get_event_loop().run_forever()
+    except AssertionError as e:
+        try:
+            logging.warning(f"Telegram bot could not be started: {e}")
+            asyncio.get_event_loop().run_forever()
+        except KeyboardInterrupt:
+            logging.info("Shutting down due to KeyboardInterrupt")
     finally:
         gradio.close()

@@ -3,7 +3,7 @@ from app.agents.team import create_team_with
 from app.agents.prompts import *
 from app.configs import AppConfig
 
-logging = logging.getLogger(__name__)
+logging = logging.getLogger("pipeline")
 
 
 class Pipeline:
@@ -29,6 +29,12 @@ class Pipeline:
         Sceglie il modello LLM da usare per il Team.
         """
         self.leader_model = self.configs.models.all_models[index]
+
+    def choose_team(self, index: int):
+        """
+        Sceglie il modello LLM da usare per il Team.
+        """
+        self.team_model = self.configs.models.all_models[index]
 
     def choose_strategy(self, index: int):
         """

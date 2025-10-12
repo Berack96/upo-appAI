@@ -4,7 +4,7 @@ import time
 import traceback
 from typing import Any, Callable, Generic, TypeVar
 
-logging = logging.getLogger(__name__)
+logging = logging.getLogger("wrapper_handler")
 WrapperType = TypeVar("WrapperType")
 WrapperClassType = TypeVar("WrapperClassType")
 OutputType = TypeVar("OutputType")
