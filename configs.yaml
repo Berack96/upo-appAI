@@ -33,6 +33,10 @@ api:
   retry_attempts: 3
   retry_delay_seconds: 2
   currency: EUR
+  # TODO Magari implementare un sistema per settare i providers
+  market_providers: [BinanceWrapper, YFinanceWrapper]
+  news_providers: [GoogleNewsWrapper, DuckDuckGoWrapper]
+  social_providers: [RedditWrapper]
 
 agents:
   strategy: Conservative

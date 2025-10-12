@@ -1,4 +1,5 @@
 import os
+from typing import Any
 import ollama
 import yaml
 import logging.config
@@ -103,6 +104,11 @@ class AppConfig(BaseModel):
         configs.validate_models()
         log.info(f"Loaded configuration from {file_path}")
         return configs
+
+    def __new__(cls, *args: Any, **kwargs: Any) -> 'AppConfig':
+        if not hasattr(cls, 'instance'):
+            cls.instance = super(AppConfig, cls).__new__(cls)
+        return cls.instance
 
     def get_model_by_name(self, name: str) -> AppModel:
         """
