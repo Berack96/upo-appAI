@@ -78,6 +78,9 @@ if __name__ == "__main__":
         save_btn.click(save_current_chat, inputs=None, outputs=None)
         load_btn.click(load_previous_chat, inputs=None, outputs=[chatbot, chatbot])
 
-    _app, local, shared = demo.launch(server_name="0.0.0.0", server_port=configs.port, quiet=True, prevent_thread_lock=True, share=configs.gradio_share)
-    log_info(f"Starting UPO AppAI Chat on {shared or local}")
-    asyncio.get_event_loop().run_forever()
+    try:
+        _app, local, shared = demo.launch(server_name="0.0.0.0", server_port=configs.port, quiet=True, prevent_thread_lock=True, share=configs.gradio_share)
+        log_info(f"Starting UPO AppAI Chat on {shared or local}")
+        asyncio.get_event_loop().run_forever()
+    except KeyboardInterrupt:
+        demo.close()
