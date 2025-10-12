@@ -207,7 +207,7 @@ class TelegramApp:
         confs = self.user_requests[user]
         confs.user_query = message.text or ""
 
-        logging.info(f"@{user.username} started the team with [{confs.team_model}, {confs.leader_model}, {confs.strategy}]")
+        logging.info(f"@{user.username} started the team with [{confs.team_model.label}, {confs.leader_model.label}, {confs.strategy.label}]")
         await self.__run_team(update, confs)
 
         logging.info(f"@{user.username} team finished.")
