@@ -1,7 +1,7 @@
 import logging
-from app.agents.models import AppModels
 from app.agents.team import create_team_with
-from app.agents.predictor import PREDICTOR_INSTRUCTIONS, PredictorOutput, PredictorStyle
+from app.agents.prompts import *
+from app.configs import AppConfig
 
 logging = logging.getLogger(__name__)
 
@@ -13,33 +13,27 @@ class Pipeline:
     e scelto dall'utente tramite i dropdown dell'interfaccia grafica.
     """
 
-    # Variabili statiche
-    available_models = AppModels.availables()
-    all_styles = list(PredictorStyle)
+    def __init__(self, configs: AppConfig):
+        self.configs = configs
 
-    def __init__(self):
-        self.style = Pipeline.all_styles[0]
-        self.team = create_team_with(AppModels.OLLAMA_QWEN_1B)
-        self.choose_predictor(0)  # Modello di default
+        # Stato iniziale
+        self.leader_model = self.configs.get_model_by_name(self.configs.agents.team_leader_model)
+        self.choose_strategy(0)
 
     # ======================
     # Dropdown handlers
     # ======================
-    def choose_predictor(self, index: int):
+    def choose_leader(self, index: int):
         """
-        Sceglie il modello LLM da usare per il Predictor.
+        Sceglie il modello LLM da usare per il Team.
         """
-        model = Pipeline.available_models[index]
-        self.predictor = model.get_agent(
-            PREDICTOR_INSTRUCTIONS,
-            output_schema=PredictorOutput,
-        )
+        self.leader_model = self.configs.models.all_models[index]
 
-    def choose_style(self, index: int):
+    def choose_strategy(self, index: int):
         """
-        Sceglie lo stile (conservativo/aggressivo) da usare per il Predictor.
+        Sceglie la strategia da usare per il Predictor.
         """
-        self.style = Pipeline.all_styles[index]
+        self.strat = self.configs.strategies[index].description
 
     # ======================
     # Helpers
@@ -48,13 +42,13 @@ class Pipeline:
         """
         Restituisce la lista dei nomi dei modelli disponibili.
         """
-        return [model.name for model in Pipeline.available_models]
+        return [model.label for model in self.configs.models.all_models]
 
     def list_styles(self) -> list[str]:
         """
         Restituisce la lista degli stili di previsione disponibili.
         """
-        return [style.value for style in Pipeline.all_styles]
+        return [strat.label for strat in self.configs.strategies]
 
     # ======================
     # Core interaction
@@ -66,10 +60,13 @@ class Pipeline:
         3. Invoca Predictor
         4. Restituisce la strategia finale
         """
+        # Step 1: Creazione Team
+        team_model = self.configs.get_model_by_name(self.configs.agents.team_model)
+        team = create_team_with(self.configs, team_model, self.leader_model)
 
         # Step 1: raccolta output dai membri del Team
         logging.info(f"Pipeline received query: {query}")
-        team_outputs = self.team.run(query) # type: ignore
+        team_outputs = team.run(query) # type: ignore
 
         # Step 2: recupero ouput
         if not isinstance(team_outputs.content, str):

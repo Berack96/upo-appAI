@@ -99,7 +99,7 @@ class ChatManager:
                     type="index",
                     label="Modello da usare"
                 )
-                provider.change(fn=self.pipeline.choose_predictor, inputs=provider, outputs=None)
+                provider.change(fn=self.pipeline.choose_leader, inputs=provider, outputs=None)
 
                 style = gr.Dropdown(
                     choices=self.pipeline.list_styles(),

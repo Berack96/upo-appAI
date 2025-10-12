@@ -21,7 +21,7 @@ L'obiettivo è quello di creare un sistema di consulenza finanziaria basato su L
 
 L'installazione di questo progetto richiede 3 passaggi totali (+1 se si vuole sviluppare in locale) che devono essere eseguiti in sequenza. Se questi passaggi sono eseguiti correttamente, l'applicazione dovrebbe partire senza problemi. Altrimenti è molto probabile che si verifichino errori di vario tipo (moduli mancanti, chiavi API non trovate, ecc.).
 
-1. Configurare le variabili d'ambiente
+1. Configurazioni dell'app e delle variabili d'ambiente
 2. Installare Ollama e i modelli locali
 3. Far partire il progetto con Docker (consigliato)
 4. (Solo per sviluppo locale) Installare uv e creare l'ambiente virtuale
@@ -29,9 +29,12 @@ L'installazione di questo progetto richiede 3 passaggi totali (+1 se si vuole sv
 > [!IMPORTANT]\
 > Prima di iniziare, assicurarsi di avere clonato il repository e di essere nella cartella principale del progetto.
 
-### **1. Variabili d'Ambiente**
+### **1. Configurazioni**
 
-Copia il file `.env.example` in `.env` e successivamente modificalo con le tue API keys:
+Ci sono due file di configurazione principali che l'app utilizza: `config.yaml` e `.env`.\
+Il primo contiene le configurazioni generali dell'applicazione e può essere modificato a piacimento, mentre il secondo è utilizzato per le variabili d'ambiente.
+
+Per il secondo, bisogna copiare il file `.env.example` in `.env` e successivamente modificalo con le tue API keys:
 ```sh
 cp .env.example .env
 nano .env  # esempio di modifica del file
@@ -49,11 +52,8 @@ Per l'installazione scaricare Ollama dal loro [sito ufficiale](https://ollama.co
 
 Dopo l'installazione, si possono iniziare a scaricare i modelli desiderati tramite il comando `ollama pull <model>:<tag>`.
 
-I modelli usati dall'applicazione sono visibili in [src/app/models.py](src/app/models.py). Di seguito metto lo stesso una lista di modelli, ma potrebbe non essere aggiornata:
-- `gpt-oss:latest`
-- `qwen3:latest`
-- `qwen3:4b`
-- `qwen3:1.7b`
+I modelli usati dall'applicazione sono quelli specificati nel file [config.yaml](config.yaml) alla voce `model`. Se in locale si hanno dei modelli diversi, è possibile modificare questa voce per usare quelli disponibili.
+I modelli consigliati per questo progetto sono `qwen3:4b` e `qwen3:1.7b`.
 
 ### **3. Docker**
 Se si vuole solamente avviare il progetto, si consiglia di utilizzare [Docker](https://www.docker.com), dato che sono stati creati i files [Dockerfile](Dockerfile) e [docker-compose.yaml](docker-compose.yaml) per creare il container con tutti i file necessari e già in esecuzione.
@@ -114,13 +114,15 @@ Gli agenti coinvolti nel Team sono:
 src
 └── app
     ├── __main__.py
-    ├── agents       <-- Agenti, modelli, prompts e simili
+    ├── config.py    <-- Configurazioni app
+    ├── agents       <-- Agenti, Team, prompts e simili
     ├── api          <-- Tutte le API esterne
-    │   ├── base     <-- Classi base per le API
+    │   ├── core     <-- Classi core per le API
     │   ├── markets  <-- Market data provider (Es. Binance)
     │   ├── news     <-- News data provider (Es. NewsAPI)
-    │   └── social   <-- Social data provider (Es. Reddit)
-    └── utils        <-- Codice di utilità generale
+    │   ├── social   <-- Social data provider (Es. Reddit)
+    │   └── tools    <-- Tools per agenti creati dalle API
+    └── interface    <-- Interfacce utente
 ```
 
 ## Tests

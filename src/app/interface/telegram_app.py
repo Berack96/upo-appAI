@@ -10,7 +10,6 @@ from markdown_pdf import MarkdownPdf, Section
 from telegram import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message, Update, User
 from telegram.constants import ChatAction
 from telegram.ext import Application, CallbackQueryHandler, CommandHandler, ContextTypes, ConversationHandler, ExtBot, JobQueue, MessageHandler, filters
-from app.agents import AppModels, PredictorStyle
 from app.agents.pipeline import Pipeline
 
 # per per_message di ConversationHandler che rompe sempre qualunque input tu metta
