@@ -17,6 +17,7 @@ COPY pyproject.toml ./
 COPY uv.lock ./
 COPY LICENSE ./
 COPY src/ ./src/
+COPY configs.yaml ./
 
 # Creiamo l'ambiente virtuale con tutto già presente
 RUN uv sync
