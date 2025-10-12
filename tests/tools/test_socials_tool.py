@@ -1,5 +1,5 @@
 import pytest
-from app.api.social import SocialAPIsTool
+from app.api.tools import SocialAPIsTool
 
 
 @pytest.mark.tools
