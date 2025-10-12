@@ -4,7 +4,7 @@ import ollama
 import yaml
 import logging.config
 import agno.utils.log # type: ignore
-from typing import Any
+from typing import Any, ClassVar
 from pydantic import BaseModel
 from agno.agent import Agent
 from agno.tools import Toolkit
@@ -88,7 +88,7 @@ class AppConfig(BaseModel):
     models: ModelsConfig = ModelsConfig()
     agents: AgentsConfigs = AgentsConfigs()
 
-    __lock = threading.Lock()
+    __lock: ClassVar[threading.Lock] = threading.Lock()
 
     @classmethod
     def load(cls, file_path: str = "configs.yaml") -> 'AppConfig':
