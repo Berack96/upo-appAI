@@ -111,7 +111,8 @@ src
     │   ├── core     <-- Classi core per le API
     │   ├── markets  <-- Market data provider (Es. Binance)
     │   ├── news     <-- News data provider (Es. NewsAPI)
-    │   └── social   <-- Social data provider (Es. Reddit)
+    │   ├── social   <-- Social data provider (Es. Reddit)
+    │   └── tools    <-- Tools per agenti creati dalle API
     └── interface    <-- Interfacce utente
 ```
 
