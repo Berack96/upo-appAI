@@ -4,7 +4,7 @@ import ollama
 import yaml
 import logging.config
 import agno.utils.log # type: ignore
-from typing import Any
+from typing import Any, ClassVar
 from pydantic import BaseModel
 from agno.agent import Agent
 from agno.tools import Toolkit
@@ -88,7 +88,7 @@ class AppConfig(BaseModel):
     models: ModelsConfig = ModelsConfig()
     agents: AgentsConfigs = AgentsConfigs()
 
-    __lock = threading.Lock()
+    _lock: ClassVar[threading.Lock] = threading.Lock()
 
     @classmethod
     def load(cls, file_path: str = "configs.yaml") -> 'AppConfig':
@@ -110,7 +110,7 @@ class AppConfig(BaseModel):
         return configs
 
     def __new__(cls, *args: Any, **kwargs: Any) -> 'AppConfig':
-        with cls.__lock:
+        with cls._lock:
             if not hasattr(cls, 'instance'):
                 cls.instance = super(AppConfig, cls).__new__(cls)
             return cls.instance
@@ -144,6 +144,17 @@ class AppConfig(BaseModel):
             if strat.name == name:
                 return strat
         raise ValueError(f"Strategy with name '{name}' not found.")
+
+    def get_defaults(self) -> tuple[AppModel, AppModel, Strategy]:
+        """
+        Retrieve the default team model, leader model, and strategy.
+        Returns:
+            A tuple containing the default team model (AppModel), leader model (AppModel), and strategy (Strategy).
+        """
+        team_model = self.get_model_by_name(self.agents.team_model)
+        leader_model = self.get_model_by_name(self.agents.team_leader_model)
+        strategy = self.get_strategy_by_name(self.agents.strategy)
+        return team_model, leader_model, strategy
 
     def set_logging_level(self) -> None:
         """

@@ -18,7 +18,8 @@ class Pipeline:
 
         # Stato iniziale
         self.leader_model = self.configs.get_model_by_name(self.configs.agents.team_leader_model)
-        self.choose_strategy(0)
+        self.team_model = self.configs.get_model_by_name(self.configs.agents.team_model)
+        self.strategy = self.configs.get_strategy_by_name(self.configs.agents.strategy)
 
     # ======================
     # Dropdown handlers
@@ -33,7 +34,7 @@ class Pipeline:
         """
         Sceglie la strategia da usare per il Predictor.
         """
-        self.strat = self.configs.strategies[index].description
+        self.strategy = self.configs.strategies[index]
 
     # ======================
     # Helpers
@@ -61,14 +62,15 @@ class Pipeline:
         4. Restituisce la strategia finale
         """
         # Step 1: Creazione Team
-        team_model = self.configs.get_model_by_name(self.configs.agents.team_model)
-        team = create_team_with(self.configs, team_model, self.leader_model)
+        team = create_team_with(self.configs, self.team_model, self.leader_model)
 
-        # Step 1: raccolta output dai membri del Team
+        # Step 2: raccolta output dai membri del Team
         logging.info(f"Pipeline received query: {query}")
+        # TODO migliorare prompt (?)
+        query = f"The user query is: {query}\n\n They requested a {self.strategy.label} investment strategy."
         team_outputs = team.run(query) # type: ignore
 
-        # Step 2: recupero ouput
+        # Step 3: recupero ouput
         if not isinstance(team_outputs.content, str):
             logging.error(f"Team output is not a string: {team_outputs.content}")
             raise ValueError("Team output is not a string")

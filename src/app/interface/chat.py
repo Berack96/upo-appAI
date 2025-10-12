@@ -12,9 +12,9 @@ class ChatManager:
     - salva e ricarica le chat
     """
 
-    def __init__(self):
+    def __init__(self, pipeline: Pipeline):
         self.history: list[dict[str, str]] = []  # [{"role": "user"/"assistant", "content": "..."}]
-        self.pipeline = Pipeline()
+        self.pipeline = pipeline
 
     def send_message(self, message: str) -> None:
         """
@@ -106,7 +106,7 @@ class ChatManager:
                     type="index",
                     label="Stile di investimento"
                 )
-                style.change(fn=self.pipeline.choose_style, inputs=style, outputs=None)
+                style.change(fn=self.pipeline.choose_strategy, inputs=style, outputs=None)
 
             chatbot = gr.Chatbot(label="Conversazione", height=500, type="messages")
             msg = gr.Textbox(label="Scrivi la tua richiesta", placeholder="Es: Quali sono le crypto interessanti oggi?")
