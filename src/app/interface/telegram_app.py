@@ -140,12 +140,12 @@ class TelegramApp:
 
     async def __error_handler(self, update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
         try:
-            logging.exception(f"Unhandled exception in Telegram handler {context.error}")
+            logging.error(f"Unhandled exception in Telegram handler: {context.error}")
 
             # Try to notify the user in chat if possible
             if isinstance(update, Update) and update.effective_chat:
                 chat_id = update.effective_chat.id
-                msg = "Si è verificato un errore inatteso. Gli sviluppatori sono stati avvisati."
+                msg = "An error occurred while processing your request."
                 await context.bot.send_message(chat_id=chat_id, text=msg)
 
         except Exception:
