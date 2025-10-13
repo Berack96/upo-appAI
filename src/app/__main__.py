@@ -24,7 +24,9 @@ if __name__ == "__main__":
     except AssertionError as e:
         try:
             logging.warning(f"Telegram bot could not be started: {e}")
-            asyncio.get_event_loop().run_forever()
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            loop.run_forever()
         except KeyboardInterrupt:
             logging.info("Shutting down due to KeyboardInterrupt")
     finally:
