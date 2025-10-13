@@ -145,6 +145,17 @@ class AppConfig(BaseModel):
                 return strat
         raise ValueError(f"Strategy with name '{name}' not found.")
 
+    def get_defaults(self) -> tuple[AppModel, AppModel, Strategy]:
+        """
+        Retrieve the default team model, leader model, and strategy.
+        Returns:
+            A tuple containing the default team model (AppModel), leader model (AppModel), and strategy (Strategy).
+        """
+        team_model = self.get_model_by_name(self.agents.team_model)
+        leader_model = self.get_model_by_name(self.agents.team_leader_model)
+        strategy = self.get_strategy_by_name(self.agents.strategy)
+        return team_model, leader_model, strategy
+
     def set_logging_level(self) -> None:
         """
         Set the logging level based on the configuration.

@@ -1,9 +1,10 @@
 import inspect
+import logging
 import time
 import traceback
 from typing import Any, Callable, Generic, TypeVar
-from agno.utils.log import log_info, log_warning #type: ignore
 
+logging = logging.getLogger("wrapper_handler")
 WrapperType = TypeVar("WrapperType")
 WrapperClassType = TypeVar("WrapperClassType")
 OutputType = TypeVar("OutputType")
@@ -86,7 +87,7 @@ class WrapperHandler(Generic[WrapperType]):
             Exception: If all wrappers fail after retries.
         """
 
-        log_info(f"{inspect.getsource(func).strip()} {inspect.getclosurevars(func).nonlocals}")
+        logging.info(f"{inspect.getsource(func).strip()} {inspect.getclosurevars(func).nonlocals}")
         results: dict[str, OutputType] = {}
         starting_index = self.index
 
@@ -96,18 +97,18 @@ class WrapperHandler(Generic[WrapperType]):
             wrapper_name = wrapper.__class__.__name__
 
             if not try_all:
-                log_info(f"try_call {wrapper_name}")
+                logging.info(f"try_call {wrapper_name}")
 
             for try_count in range(1, self.retry_per_wrapper + 1):
                 try:
                     result = func(wrapper)
-                    log_info(f"{wrapper_name} succeeded")
+                    logging.info(f"{wrapper_name} succeeded")
                     results[wrapper_name] = result
                     break
 
                 except Exception as e:
                     error = WrapperHandler.__concise_error(e)
-                    log_warning(f"{wrapper_name} failed {try_count}/{self.retry_per_wrapper}: {error}")
+                    logging.warning(f"{wrapper_name} failed {try_count}/{self.retry_per_wrapper}: {error}")
                     time.sleep(self.retry_delay)
 
             if not try_all and results:
@@ -153,6 +154,6 @@ class WrapperHandler(Generic[WrapperType]):
                 wrapper = wrapper_class(**(kwargs or {}))
                 result.append(wrapper)
             except Exception as e:
-                log_warning(f"{wrapper_class} cannot be initialized: {e}")
+                logging.warning(f"'{wrapper_class.__name__}' cannot be initialized: {e}")
 
         return WrapperHandler(result, try_per_wrapper, retry_delay)
