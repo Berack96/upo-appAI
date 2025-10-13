@@ -59,6 +59,7 @@ class RedditWrapper(SocialWrapper):
             client_id=client_id,
             client_secret=client_secret,
             user_agent="upo-appAI",
+            check_for_async=False,
         )
         self.subreddits = self.tool.subreddit("+".join(SUBREDDITS))
 

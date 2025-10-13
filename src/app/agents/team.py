@@ -1,5 +1,4 @@
 import asyncio
-import logging
 from typing import Callable
 from agno.run.agent import RunOutputEvent
 from agno.team import Team, TeamRunEvent, TeamRunOutputEvent
@@ -7,8 +6,6 @@ from agno.tools.reasoning import ReasoningTools
 from app.agents.prompts import *
 from app.configs import AppConfig, AppModel
 from app.api.tools import *
-
-logging = logging.getLogger("AppTeam")
 
 
 class AppTeam:
@@ -25,7 +22,6 @@ class AppTeam:
         return asyncio.run(self.run_team_async(query))
 
     async def run_team_async(self, query: str) -> str:
-        logging.info(f"Running team q='{query}'")
         team = AppTeam.create_team_with(self.configs, self.team_models, self.team_leader)
         result = "No output from team"
 
@@ -38,7 +34,6 @@ class AppTeam:
                     thinking = result.rfind("</think>")
                     if thinking != -1: result = result[thinking:]
 
-        logging.info(f"Team finished")
         return result
 
     @classmethod

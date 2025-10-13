@@ -1,7 +1,10 @@
+import logging
 from agno.run.agent import RunEvent
 from app.agents.prompts import *
 from app.agents.team import AppTeam
 from app.configs import AppConfig
+
+logging = logging.getLogger("pipeline")
 
 
 class Pipeline:
@@ -15,23 +18,30 @@ class Pipeline:
         self.configs = configs
 
         # Stato iniziale
-        self.choose_strategy(0)
-        self.choose_predictor(0)
+        self.leader_model = self.configs.get_model_by_name(self.configs.agents.team_leader_model)
+        self.team_model = self.configs.get_model_by_name(self.configs.agents.team_model)
+        self.strategy = self.configs.get_strategy_by_name(self.configs.agents.strategy)
 
     # ======================
     # Dropdown handlers
     # ======================
-    def choose_predictor(self, index: int):
+    def choose_leader(self, index: int):
         """
-        Sceglie il modello LLM da usare per il Predictor.
+        Sceglie il modello LLM da usare per il Team.
         """
-        self.predictor = self.configs.models.all_models[index]
+        self.leader_model = self.configs.models.all_models[index]
+
+    def choose_team(self, index: int):
+        """
+        Sceglie il modello LLM da usare per il Team.
+        """
+        self.team_model = self.configs.models.all_models[index]
 
     def choose_strategy(self, index: int):
         """
         Sceglie la strategia da usare per il Predictor.
         """
-        self.strat = self.configs.strategies[index].description
+        self.strategy = self.configs.strategies[index]
 
     # ======================
     # Helpers
@@ -53,14 +63,30 @@ class Pipeline:
     # ======================
     def interact(self, query: str) -> str:
         """
-        1. Raccoglie output dai membri del Team
-        2. Aggrega output strutturati
-        3. Invoca Predictor
-        4. Restituisce la strategia finale
+        Esegue la pipeline di agenti per rispondere alla query dell'utente.
+        1. Crea il Team di agenti.
+        2. Aggiunge listener per eventi di logging.
+        3. Esegue il Team con la query dell'utente.
+        4. Recupera e restituisce l'output generato dagli agenti.
+        Args:
+            query (str): La query dell'utente.
+        Returns:
+            str: La risposta generata dagli agenti.
         """
-        # Step 1: raccolta output dai membri del Team
-        team = AppTeam(configs=self.configs, team_models=self.predictor)
+
+        # Step 1: Creazione Team
+        team = AppTeam(self.configs, self.team_model, self.leader_model)
+
+        # Step 2: Aggiunti listener per eventi
         team.add_listener(RunEvent.tool_call_started, lambda e: print(f"Team tool call started: {e.agent_name}")) # type: ignore
         team.add_listener(RunEvent.tool_call_completed, lambda e: print(f"Team tool call completed: {e.agent_name}")) # type: ignore
+
+        # Step 3: Esecuzione Team
+        logging.info(f"Pipeline received query: {query}")
+        # TODO migliorare prompt (?)
+        query = f"The user query is: {query}\n\n They requested a {self.strategy.label} investment strategy."
         result = team.run_team(query)
+
+        # Step 4: Recupero output
+        logging.info(f"Team finished")
         return result

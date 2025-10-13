@@ -91,13 +91,22 @@ uv run src/app
 
 # **Applicazione**
 
-***L'applicazione è attualmente in fase di sviluppo.***
+> [!CAUTION]\
+> ***L'applicazione è attualmente in fase di sviluppo.***
 
-Usando la libreria ``gradio`` è stata creata un'interfaccia web semplice per interagire con l'agente principale. Gli agenti secondari si trovano nella cartella `src/app/agents` e sono:
-- **Market Agent**: Agente unificato che supporta multiple fonti di dati con auto-retry e gestione degli errori.
-- **News Agent**: Recupera le notizie finanziarie più recenti sul mercato delle criptovalute.
-- **Social Agent**: Analizza i sentimenti sui social media riguardo alle criptovalute.
-- **Predictor Agent**: Utilizza i dati raccolti dagli altri agenti per fare previsioni.
+L'applicazione viene fatta partire tramite il file [src/app/\_\_main\_\_.py](src/app/__main__.py) che inizializza l'agente principale e gli agenti secondari.
+
+In esso viene creato il server `gradio` per l'interfaccia web e viene anche inizializzato il bot di Telegram (se è stata inserita la chiave nel file `.env` ottenuta da [BotFather](https://core.telegram.org/bots/features#creating-a-new-bot)).
+
+L'interazione è guidata, sia tramite l'interfaccia web che tramite il bot di Telegram; l'utente può scegliere prima di tutto delle opzioni generali (come il modello e la strategia di investimento), dopodiché può inviare un messaggio di testo libero per chiedere consigli o informazioni specifiche. Per esempio: "Qual è l'andamento attuale di Bitcoin?" o "Consigliami quali sono le migliori criptovalute in cui investire questo mese".
+
+L'applicazione, una volta ricevuta la richiesta, la passa al [Team](src/app/agents/team.py) di agenti che si occupano di raccogliere i dati necessari per rispondere in modo completo e ragionato.
+
+Gli agenti coinvolti nel Team sono:
+- **Leader**: Coordina gli altri agenti e fornisce la risposta finale all'utente.
+- **Market Agent**: Recupera i dati di mercato attuali delle criptovalute da Binance e Yahoo Finance.
+- **News Agent**: Recupera le ultime notizie sul mercato delle criptovalute da NewsAPI e GNews.
+- **Social Agent**: Recupera i dati dai social media (Reddit) per analizzare il sentiment del mercato.
 
 ## Struttura del codice del Progetto
 
