@@ -1,9 +1,7 @@
 import logging
 from typing import Callable
-from agno.run.agent import RunOutputEvent
-from agno.run.team import TeamRunOutputEvent
 from app.agents.prompts import *
-from app.agents.team import AppTeam
+from app.agents.team import AppTeam, AppEvent, TeamRunEvent, RunEvent
 from app.configs import AppConfig
 
 logging = logging.getLogger("pipeline")
@@ -63,7 +61,7 @@ class Pipeline:
     # ======================
     # Core interaction
     # ======================
-    def interact(self, query: str, listeners: dict[str, Callable[[RunOutputEvent | TeamRunOutputEvent], None]] = {}) -> str:
+    def interact(self, query: str, listeners: dict[RunEvent | TeamRunEvent, Callable[[AppEvent], None]] = {}) -> str:
         """
         Esegue la pipeline di agenti per rispondere alla query dell'utente.
         1. Crea il Team di agenti.
