@@ -236,7 +236,8 @@ class TelegramApp:
             f'Query:     "{confs.user_query}"'
         ]
         full_message = f"""```\n{'\n'.join(configs_str)}\n```\n\n"""
-        msg = await bot.edit_message_text(chat_id=chat_id, message_id=msg_id, text=full_message, parse_mode='MarkdownV2')
+        first_message = full_message + "Generating report, please wait"
+        msg = await bot.edit_message_text(chat_id=chat_id, message_id=msg_id, text=first_message, parse_mode='MarkdownV2')
         if isinstance(msg, bool): return
 
         # Remove user query and bot message
