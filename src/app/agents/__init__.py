@@ -1,5 +1,4 @@
 from app.agents.predictor import PredictorInput, PredictorOutput
-from app.agents.pipeline import Pipeline
-from app.agents.team import AppTeam
+from app.agents.pipeline import Pipeline, PipelineInputs, PipelineEvent
 
-__all__ = ["PredictorInput", "PredictorOutput", "Pipeline", "AppTeam"]
+__all__ = ["PredictorInput", "PredictorOutput", "Pipeline", "PipelineInputs", "PipelineEvent"]
