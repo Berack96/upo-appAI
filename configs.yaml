@@ -32,7 +32,7 @@ models:
 api:
   retry_attempts: 3
   retry_delay_seconds: 2
-  currency: EUR
+  currency: USD
   # TODO Magari implementare un sistema per settare i providers
   market_providers: [BinanceWrapper, YFinanceWrapper]
   news_providers: [GoogleNewsWrapper, DuckDuckGoWrapper]
