@@ -3,7 +3,6 @@ import threading
 import ollama
 import yaml
 import logging.config
-import agno.utils.log # type: ignore
 from typing import Any, ClassVar
 from pydantic import BaseModel
 from agno.agent import Agent

@@ -53,7 +53,7 @@ class PipelineInputs:
     # ======================
     def choose_team_leader(self, index: int):
         """
-        Sceglie il modello LLM da usare per il Team.
+        Sceglie il modello LLM da usare per il Team Leader.
         """
         self.leader_model = self.configs.models.all_models[index]
 
@@ -65,7 +65,7 @@ class PipelineInputs:
 
     def choose_strategy(self, index: int):
         """
-        Sceglie la strategia da usare per il Predictor.
+        Sceglie la strategia da usare per il Team.
         """
         self.strategy = self.configs.strategies[index]
 
