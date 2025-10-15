@@ -9,16 +9,16 @@ ENV PATH="/root/.local/bin:$PATH"
 # Configuriamo UV per usare copy mode ed evitare problemi di linking
 ENV UV_LINK_MODE=copy
 
-# Copiamo i file del progetto
+# Creiamo l'ambiente virtuale con tutto già presente
 COPY pyproject.toml ./
 COPY uv.lock ./
+RUN uv sync --frozen --no-dev
+ENV PYTHONPATH="./src"
+
+# Copiamo i file del progetto
 COPY LICENSE ./
 COPY src/ ./src/
 COPY configs.yaml ./
-
-# Creiamo l'ambiente virtuale con tutto già presente
-RUN uv sync
-ENV PYTHONPATH="/src"
 
 # Comando di avvio dell'applicazione
 CMD ["uv", "run", "src/app"]

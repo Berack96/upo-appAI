@@ -1,7 +1,7 @@
 import os
 import json
 import gradio as gr
-from app.agents.pipeline import Pipeline
+from app.agents.pipeline import Pipeline, PipelineInputs
 
 
 class ChatManager:
@@ -12,9 +12,9 @@ class ChatManager:
     - salva e ricarica le chat
     """
 
-    def __init__(self, pipeline: Pipeline):
+    def __init__(self):
         self.history: list[dict[str, str]] = []  # [{"role": "user"/"assistant", "content": "..."}]
-        self.pipeline = pipeline
+        self.inputs = PipelineInputs()
 
     def send_message(self, message: str) -> None:
         """
@@ -67,7 +67,11 @@ class ChatManager:
     ########################################
     def gradio_respond(self, message: str, history: list[dict[str, str]]) -> tuple[list[dict[str, str]], list[dict[str, str]], str]:
         self.send_message(message)
-        response = self.pipeline.interact(message)
+
+        self.inputs.user_query = message
+        pipeline = Pipeline(self.inputs)
+        response = pipeline.interact()
+
         self.receive_message(response)
         history.append({"role": "user", "content": message})
         history.append({"role": "assistant", "content": response})
@@ -95,18 +99,18 @@ class ChatManager:
             # Dropdown provider e stile
             with gr.Row():
                 provider = gr.Dropdown(
-                    choices=self.pipeline.list_providers(),
+                    choices=self.inputs.list_models_names(),
                     type="index",
                     label="Modello da usare"
                 )
-                provider.change(fn=self.pipeline.choose_leader, inputs=provider, outputs=None)
+                provider.change(fn=self.inputs.choose_team_leader, inputs=provider, outputs=None)
 
                 style = gr.Dropdown(
-                    choices=self.pipeline.list_styles(),
+                    choices=self.inputs.list_strategies_names(),
                     type="index",
                     label="Stile di investimento"
                 )
-                style.change(fn=self.pipeline.choose_strategy, inputs=style, outputs=None)
+                style.change(fn=self.inputs.choose_strategy, inputs=style, outputs=None)
 
             chatbot = gr.Chatbot(label="Conversazione", height=500, type="messages")
             msg = gr.Textbox(label="Scrivi la tua richiesta", placeholder="Es: Quali sono le crypto interessanti oggi?")

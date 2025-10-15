@@ -3,7 +3,6 @@ import threading
 import ollama
 import yaml
 import logging.config
-import agno.utils.log # type: ignore
 from typing import Any, ClassVar
 from pydantic import BaseModel
 from agno.agent import Agent
@@ -104,8 +103,6 @@ class AppConfig(BaseModel):
             data = yaml.safe_load(f)
 
         configs = cls(**data)
-        configs.set_logging_level()
-        configs.validate_models()
         log.info(f"Loaded configuration from {file_path}")
         return configs
 
@@ -114,6 +111,15 @@ class AppConfig(BaseModel):
             if not hasattr(cls, 'instance'):
                 cls.instance = super(AppConfig, cls).__new__(cls)
             return cls.instance
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        if hasattr(self, '_initialized'):
+            return
+
+        super().__init__(*args, **kwargs)
+        self.set_logging_level()
+        self.validate_models()
+        self._initialized = True
 
     def get_model_by_name(self, name: str) -> AppModel:
         """
@@ -144,17 +150,6 @@ class AppConfig(BaseModel):
             if strat.name == name:
                 return strat
         raise ValueError(f"Strategy with name '{name}' not found.")
-
-    def get_defaults(self) -> tuple[AppModel, AppModel, Strategy]:
-        """
-        Retrieve the default team model, leader model, and strategy.
-        Returns:
-            A tuple containing the default team model (AppModel), leader model (AppModel), and strategy (Strategy).
-        """
-        team_model = self.get_model_by_name(self.agents.team_model)
-        leader_model = self.get_model_by_name(self.agents.team_leader_model)
-        strategy = self.get_strategy_by_name(self.agents.strategy)
-        return team_model, leader_model, strategy
 
     def set_logging_level(self) -> None:
         """
