@@ -14,6 +14,7 @@ dependencies = [
     "dotenv", # Gestire variabili d'ambiente (generalmente API keys od opzioni)
     "gradio", # UI web semplice con user_input e output
     "colorlog", # Log colorati in console
+    "html5lib", # Parsing HTML & Scraping
 
     # Per costruire agenti (ovvero modelli che possono fare più cose tramite tool) https://github.com/agno-agi/agno
     # altamente consigliata dato che ha anche tools integrati per fare scraping, calcoli e molto altro
