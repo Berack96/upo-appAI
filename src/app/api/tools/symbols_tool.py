@@ -4,14 +4,16 @@ import asyncio
 import logging
 import pandas as pd
 from io import StringIO
+from agno.tools.toolkit import Toolkit
 
 logging.basicConfig(level=logging.INFO)
 logging = logging.getLogger("crypto_symbols")
 
 
+
 BASE_URL = "https://finance.yahoo.com/markets/crypto/all/"
 
-class CryptoSymbols:
+class CryptoSymbols(Toolkit):
     """
     Classe per ottenere i simboli delle criptovalute tramite Yahoo Finance.
     """
@@ -19,11 +21,40 @@ class CryptoSymbols:
     def __init__(self, cache_file: str = 'cryptos.csv'):
         self.cache_file = cache_file
         self.final_table = pd.read_csv(self.cache_file) if os.path.exists(self.cache_file) else pd.DataFrame() # type: ignore
+        Toolkit.__init__(self, # type: ignore
+            name="Crypto Symbols Tool",
+            tools=[
+                self.get_all_symbols,
+                self.get_symbol_by_name,
+            ],
+        )
 
-    def get_symbols(self) -> list[str]:
+    def get_all_symbols(self) -> list[str]:
+        """
+        Restituisce tutti i simboli delle criptovalute.
+        Returns:
+            list[str]: Lista di tutti i simboli delle criptovalute.
+        """
         return self.final_table['Symbol'].tolist() if not self.final_table.empty else []
 
+    def get_symbol_by_name(self, query: str) -> list[str]:
+        """
+        Cerca i simboli che contengono la query.
+        Args:
+            query (str): Query di ricerca.
+        Returns:
+            list[str]: Lista di simboli che contengono la query.
+        """
+        query_lower = query.lower()
+        positions = self.final_table['Name'].str.lower().str.contains(query_lower)
+        return self.final_table[positions]['Symbol'].tolist()
+
     async def fetch_crypto_symbols(self, force_refresh: bool = False) -> None:
+        """
+        Recupera tutti i simboli delle criptovalute da Yahoo Finance e li memorizza in cache.
+        Args:
+            force_refresh (bool): Se True, forza il recupero anche se i dati sono già in cache.
+        """
         if not force_refresh and not self.final_table.empty:
             return
 
