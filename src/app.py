@@ -51,6 +51,7 @@ if __name__ == "__main__":
                 type="index",
                 label="Modello da usare"
             )
+            # Per qualche motivo deep seek non viene mostrato ma se si fa print(provider.choices) sembra esserci
             provider.change(fn=chat.choose_provider, inputs=provider, outputs=None)
 
             style = gr.Dropdown(
