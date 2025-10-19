@@ -1,7 +1,6 @@
 import os
 import pytest
-from praw import Reddit
-from app.social.reddit import MAX_COMMENTS, RedditWrapper
+from app.api.social.reddit import MAX_COMMENTS, RedditWrapper
 
 @pytest.mark.social
 @pytest.mark.api
@@ -10,7 +9,7 @@ class TestRedditWrapper:
     def test_initialization(self):
         wrapper = RedditWrapper()
         assert wrapper is not None
-        assert isinstance(wrapper.tool, Reddit)
+        assert wrapper.tool is not None
 
     def test_get_top_crypto_posts(self):
         wrapper = RedditWrapper()

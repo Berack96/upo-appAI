@@ -1,5 +1,5 @@
 import pytest
-from app.social import SocialAPIsTool
+from app.api.tools import SocialAPIsTool
 
 
 @pytest.mark.tools
@@ -12,7 +12,7 @@ class TestSocialAPIsTool:
 
     def test_social_api_tool_get_top(self):
         tool = SocialAPIsTool()
-        result = tool.wrapper_handler.try_call(lambda w: w.get_top_crypto_posts(limit=2))
+        result = tool.handler.try_call(lambda w: w.get_top_crypto_posts(limit=2))
         assert isinstance(result, list)
         assert len(result) > 0
         for post in result:
@@ -21,10 +21,10 @@ class TestSocialAPIsTool:
 
     def test_social_api_tool_get_top__all_results(self):
         tool = SocialAPIsTool()
-        result = tool.wrapper_handler.try_call_all(lambda w: w.get_top_crypto_posts(limit=2))
+        result = tool.handler.try_call_all(lambda w: w.get_top_crypto_posts(limit=2))
         assert isinstance(result, dict)
         assert len(result.keys()) > 0
-        for provider, posts in result.items():
+        for _provider, posts in result.items():
             for post in posts:
                 assert post.title is not None
                 assert post.time is not None
