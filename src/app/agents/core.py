@@ -3,6 +3,9 @@ from app.configs import AppConfig
 
 
 
+class QueryInputs(BaseModel):
+    user_query: str
+    strategy: str
 
 class QueryOutputs(BaseModel):
     response: str
@@ -26,7 +29,8 @@ class PipelineInputs:
         agents = self.configs.agents
         self.team_model = self.configs.get_model_by_name(agents.team_model)
         self.team_leader_model = self.configs.get_model_by_name(agents.team_leader_model)
-        self.predictor_model = self.configs.get_model_by_name(agents.predictor_model)
+        self.query_analyzer_model = self.configs.get_model_by_name(agents.query_analyzer_model)
+        self.report_generation_model = self.configs.get_model_by_name(agents.report_generation_model)
         self.strategy = self.configs.get_strategy_by_name(agents.strategy)
         self.user_query = ""
 
