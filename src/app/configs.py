@@ -57,7 +57,6 @@ class AppModel(BaseModel):
 class APIConfig(BaseModel):
     retry_attempts: int = 3
     retry_delay_seconds: int = 2
-    currency: str = "USD"
 
 class Strategy(BaseModel):
     name: str = "Conservative"

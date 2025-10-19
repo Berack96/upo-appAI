@@ -15,7 +15,7 @@ class MarketAPIsTool(MarketWrapper, Toolkit):
     - CryptoCompareWrapper
     """
 
-    def __init__(self, currency: str = "USD"):
+    def __init__(self):
         """
         Initialize the MarketAPIsTool with multiple market API wrappers.
         The following wrappers are included in this order:
@@ -23,12 +23,9 @@ class MarketAPIsTool(MarketWrapper, Toolkit):
         - YFinanceWrapper
         - CoinBaseWrapper
         - CryptoCompareWrapper
-        Args:
-            currency (str): Valuta in cui restituire i prezzi. Default è "USD".
         """
-        kwargs = {"currency": currency or "USD"}
         wrappers: list[type[MarketWrapper]] = [BinanceWrapper, YFinanceWrapper, CoinBaseWrapper, CryptoCompareWrapper]
-        self.handler = WrapperHandler.build_wrappers(wrappers, kwargs=kwargs)
+        self.handler = WrapperHandler.build_wrappers(wrappers)
 
         Toolkit.__init__( # type: ignore
             self,

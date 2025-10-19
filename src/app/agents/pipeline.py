@@ -163,7 +163,7 @@ class Pipeline:
         """
         api = self.inputs.configs.api
 
-        market_tool = MarketAPIsTool(currency=api.currency)
+        market_tool = MarketAPIsTool()
         market_tool.handler.set_retries(api.retry_attempts, api.retry_delay_seconds)
         news_tool = NewsAPIsTool()
         news_tool.handler.set_retries(api.retry_attempts, api.retry_delay_seconds)
