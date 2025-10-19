@@ -120,7 +120,7 @@ class Pipeline:
         logging.info(f"[{run_id}] Pipeline query: {self.inputs.user_query}")
 
         # Step 1: Crea gli agenti e il team
-        market_tool, news_tool, social_tool = self.get_tools()
+        market_tool, news_tool, social_tool = self.get_api_tools()
         market_agent = self.inputs.team_model.get_agent(instructions=MARKET_INSTRUCTIONS, name="MarketAgent", tools=[market_tool])
         news_agent = self.inputs.team_model.get_agent(instructions=NEWS_INSTRUCTIONS, name="NewsAgent", tools=[news_tool])
         social_agent = self.inputs.team_model.get_agent(instructions=SOCIAL_INSTRUCTIONS, name="SocialAgent", tools=[social_tool])
@@ -157,7 +157,7 @@ class Pipeline:
     # ======================
     # Helpers
     # =====================
-    def get_tools(self) -> tuple[MarketAPIsTool, NewsAPIsTool, SocialAPIsTool]:
+    def get_api_tools(self) -> tuple[MarketAPIsTool, NewsAPIsTool, SocialAPIsTool]:
         """
         Restituisce la lista di tools disponibili per gli agenti.
         """

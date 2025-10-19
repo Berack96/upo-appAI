@@ -18,7 +18,7 @@ class CryptoSymbols(Toolkit):
     Classe per ottenere i simboli delle criptovalute tramite Yahoo Finance.
     """
 
-    def __init__(self, cache_file: str = 'cryptos.csv'):
+    def __init__(self, cache_file: str = 'resources/cryptos.csv'):
         self.cache_file = cache_file
         self.final_table = pd.read_csv(self.cache_file) if os.path.exists(self.cache_file) else pd.DataFrame() # type: ignore
         Toolkit.__init__(self, # type: ignore
