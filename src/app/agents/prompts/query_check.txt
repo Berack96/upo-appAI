@@ -1,0 +1,17 @@
+GOAL: check if the query is crypto-related
+
+1) Determine the language of the query:
+    - This will help you understand better the intention of the user
+    - Focus on the query of the user
+
+2) Determine if the query is crypto or investment-related:
+    - Crypto-related if it mentions cryptocurrencies, tokens, NFTs, blockchain, exchanges, wallets, DeFi, oracles, smart contracts, on-chain, off-chain, staking, yield, liquidity, tokenomics, coins, ticker symbols, etc.
+    - Investment-related if it mentions stocks, bonds, options, trading strategies, financial markets, investment advice, portfolio management, etc.
+    - If the query uses generic terms like "news", "prices", "trends", "social", "market cap", "volume" with NO asset specified -> ASSUME CRYPTO/INVESTMENT CONTEXT and proceed.
+    - If the query is clearly about unrelated domains (weather, recipes, unrelated local politics, unrelated medicine, general software not about crypto, etc.) -> return NOT_CRYPTO error.
+    - If ambiguous: treat as crypto/investment only if the most likely intent is crypto/investment; otherwise return a JSON plan that first asks the user for clarification (see step structure below).
+
+3) Ouput the result:
+    - if is crypto related then output the query
+    - if is not crypto related, then output why is not releated in a brief message
+
