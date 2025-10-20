@@ -12,7 +12,7 @@ class TestQueryCheckAgent:
         self.agent = self.model.get_agent(QUERY_CHECK_INSTRUCTIONS, output_schema=QueryOutputs)
 
     def test_query_not_ok(self):
-        response = self.agent.run("Is the sky blue?")  #type: ignore
+        response = self.agent.run("Is the sky blue?")  # type: ignore
         assert response is not None
         assert response.content is not None
         content = response.content
@@ -20,7 +20,7 @@ class TestQueryCheckAgent:
         assert content.is_crypto == False
 
     def test_query_not_ok2(self):
-        response = self.agent.run("What is the capital of France?")  #type: ignore
+        response = self.agent.run("What is the capital of France?")  # type: ignore
         assert response is not None
         assert response.content is not None
         content = response.content
@@ -28,7 +28,7 @@ class TestQueryCheckAgent:
         assert content.is_crypto == False
 
     def test_query_ok(self):
-        response = self.agent.run("Bitcoin")  #type: ignore
+        response = self.agent.run("Bitcoin")  # type: ignore
         assert response is not None
         assert response.content is not None
         content = response.content
@@ -36,7 +36,7 @@ class TestQueryCheckAgent:
         assert content.is_crypto == True
 
     def test_query_ok2(self):
-        response = self.agent.run("Ha senso investire in Ethereum?")  #type: ignore
+        response = self.agent.run("Ha senso investire in Ethereum?")  # type: ignore
         assert response is not None
         assert response.content is not None
         content = response.content

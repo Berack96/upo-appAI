@@ -45,12 +45,14 @@ class PipelineInputs:
         """
         Sceglie il modello LLM da usare per il Team Leader.
         """
+        assert index >= 0 and index < len(self.configs.models.all_models), "Index out of range for models list."
         self.team_leader_model = self.configs.models.all_models[index]
 
     def choose_team(self, index: int):
         """
         Sceglie il modello LLM da usare per il Team.
         """
+        assert index >= 0 and index < len(self.configs.models.all_models), "Index out of range for models list."
         self.team_model = self.configs.models.all_models[index]
 
     def choose_strategy(self, index: int):

@@ -14,5 +14,5 @@ GOAL: check if the query is crypto-related
 
 3) Ouput the result:
     - if is crypto related then output the query
-    - if is not crypto related, then output why is not releated in a brief message
+    - if is not crypto related, then output why is not related in a brief message
 

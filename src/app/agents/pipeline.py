@@ -46,6 +46,11 @@ class Pipeline:
     """
 
     def __init__(self, inputs: PipelineInputs):
+        """
+        Inizializza la pipeline con gli input forniti.
+        Args:
+            inputs: istanza di PipelineInputs contenente le configurazioni e i parametri della pipeline.
+        """
         self.inputs = inputs
 
     def interact(self, listeners: list[tuple[PipelineEvent, Callable[[Any], None]]] = []) -> str:

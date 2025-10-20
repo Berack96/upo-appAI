@@ -12,7 +12,7 @@ class Task(TypedDict):
 class PlanMemoryTool(Toolkit):
     def __init__(self):
         self.tasks: list[Task] = []
-        Toolkit.__init__(self, # type: ignore
+        Toolkit.__init__(self, # type: ignore[call-arg]
             instructions="This tool manages an execution plan. Add tasks, get the next pending task, update a task's status (completed, failed) and result, or list all tasks.",
             tools=[
                 self.add_tasks,

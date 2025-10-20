@@ -19,7 +19,7 @@ class TestReportGenerationAgent:
         No significant regulatory news has been reported and the social media sentiment remains unknown.
         """
 
-        response = self.agent.run(sample_data)  #type: ignore
+        response = self.agent.run(sample_data)  # type: ignore
         assert response is not None
         assert response.content is not None
         content = response.content
