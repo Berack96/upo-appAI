@@ -59,18 +59,17 @@ class ChanWrapper(SocialWrapper):
                 if not thread_description:
                     continue
 
-                # una lista di dizionari conteneti le risposte al thread principale, sono strutturate similarmente al thread, di queste ci interessano i seguenti campi:
-                # - "now": la data di creazione della risposta tipo "MM/GG/AA(day)hh:mm:ss", ci interessa solo MM/GG/AA
-                # - "name": il nome dell'utente
-                # - "com": il commento della risposta, possono contenere anche elementi di formattazione html che saranno da ignorare
+                # una lista di dizionari conteneti le risposte al thread principale, sono strutturate similarmente al thread
                 response_list = thread.get('last_replies', [])
                 comments_list: list[SocialComment] = []
 
                 for i, response in enumerate(response_list):
                     if i >= MAX_COMMENTS: break
 
+                    # la data di creazione della risposta tipo "MM/GG/AA(day)hh:mm:ss", ci interessa solo MM/GG/AA
                     time = self.__time_str(response['now'])
 
+                    # il commento della risposta, può contenere anche elementi di formattazione html che saranno da ignorare
                     comment = self.__unformat_html_str(response.get('com', ''))
                     if not comment:
                         continue
