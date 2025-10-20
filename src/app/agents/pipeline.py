@@ -20,8 +20,8 @@ class PipelineEvent(str, Enum):
     INFO_RECOVERY = "Info Recovery"
     REPORT_GENERATION = "Report Generation"
     REPORT_TRANSLATION = "Report Translation"
-    RUN_FINISHED = WorkflowRunEvent.workflow_completed
-    TOOL_USED = RunEvent.tool_call_completed
+    RUN_FINISHED = WorkflowRunEvent.workflow_completed.value
+    TOOL_USED = RunEvent.tool_call_completed.value
 
     def check_event(self, event: str, step_name: str) -> bool:
         return event == self.value or (WorkflowRunEvent.step_completed == event and step_name == self.value)
@@ -33,7 +33,7 @@ class PipelineEvent(str, Enum):
             (PipelineEvent.QUERY_ANALYZER, lambda _: logging.info(f"[{run_id}] Query Analyzer completed.")),
             (PipelineEvent.INFO_RECOVERY, lambda _: logging.info(f"[{run_id}] Info Recovery completed.")),
             (PipelineEvent.REPORT_GENERATION, lambda _: logging.info(f"[{run_id}] Report Generation completed.")),
-            (PipelineEvent.TOOL_USED, lambda e: logging.info(f"[{run_id}] Tool used: {getattr(e, 'tool_name', 'unknown')}")),
+            (PipelineEvent.TOOL_USED, lambda e: logging.info(f"[{run_id}] Tool used [{e.tool.tool_name}] by {e.agent_name}.")),
             (PipelineEvent.RUN_FINISHED, lambda _: logging.info(f"[{run_id}] Run completed.")),
         ]
 
