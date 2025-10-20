@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from agno.agent import Agent
 from agno.team import Team
 from agno.tools.reasoning import ReasoningTools
+from app.agents.plan_memory_tool import PlanMemoryTool
 from app.api.tools import *
 from app.configs import AppConfig
 from app.agents.prompts import *
@@ -93,7 +94,7 @@ class PipelineInputs:
         return Team(
             model=self.team_leader_model.get_model(TEAM_LEADER_INSTRUCTIONS),
             name="CryptoAnalysisTeam",
-            tools=[ReasoningTools()],
+            tools=[ReasoningTools(), PlanMemoryTool()],
             members=[market_agent, news_agent, social_agent],
         )
 
