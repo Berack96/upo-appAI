@@ -1,25 +1,29 @@
-# Vogliamo usare una versione di linux leggera con già uv installato
-# Infatti scegliamo l'immagine ufficiale di uv che ha già tutto configurato
-FROM ghcr.io/astral-sh/uv:python3.12-alpine
+# Utilizziamo Debian slim invece di Alpine per migliore compatibilità
+FROM debian:bookworm-slim
 
-RUN apk add --update npm
+# Installiamo le dipendenze di sistema
+RUN apt-get update && \
+    apt-get install -y curl npm && \
+    rm -rf /var/lib/apt/lists/*
 RUN npm install -g rettiwt-api
-# Dopo aver definito la workdir mi trovo già in essa
-WORKDIR /app
 
-# Settiamo variabili d'ambiente per usare python del sistema invece che venv
-ENV UV_PROJECT_ENVIRONMENT=/usr/local
+# Installiamo uv
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+ENV PATH="/root/.local/bin:$PATH"
+
+# Configuriamo UV per usare copy mode ed evitare problemi di linking
 ENV UV_LINK_MODE=copy
 
-# Copiamo prima i file di configurazione delle dipendenze e installiamo le dipendenze
+# Creiamo l'ambiente virtuale con tutto già presente
 COPY pyproject.toml ./
 COPY uv.lock ./
-RUN uv sync --frozen --no-cache
+RUN uv sync --frozen --no-dev
+ENV PYTHONPATH="./src"
 
-# Copiamo i file sorgente dopo aver installato le dipendenze per sfruttare la cache di Docker
-COPY LICENSE .
-COPY src ./src
+# Copiamo i file del progetto
+COPY LICENSE ./
+COPY src/ ./src/
+COPY configs.yaml ./
 
-# Comando di default all'avvio dell'applicazione
-CMD ["echo", "Benvenuto in UPO AppAI!"]
-CMD ["uv", "run", "src/app.py"]
+# Comando di avvio dell'applicazione
+CMD ["uv", "run", "src/app"]

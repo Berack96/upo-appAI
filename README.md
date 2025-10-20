@@ -9,19 +9,19 @@ L'obiettivo è quello di creare un sistema di consulenza finanziaria basato su L
 
 # **Indice**
 - [Installazione](#installazione)
-    - [1. Variabili d'Ambiente](#1-variabili-dambiente)
-    - [2. Ollama](#2-ollama)
-    - [3. Docker](#3-docker)
-    - [4. UV (solo per sviluppo locale)](#4-uv-solo-per-sviluppo-locale)
+  - [1. Variabili d'Ambiente](#1-variabili-dambiente)
+  - [2. Ollama](#2-ollama)
+  - [3. Docker](#3-docker)
+  - [4. UV (solo per sviluppo locale)](#4-uv-solo-per-sviluppo-locale)
 - [Applicazione](#applicazione)
-   - [Ultimo Aggiornamento](#ultimo-aggiornamento)
-   - [Tests](#tests)
+  - [Struttura del codice del Progetto](#struttura-del-codice-del-progetto)
+  - [Tests](#tests)
 
 # **Installazione**
 
 L'installazione di questo progetto richiede 3 passaggi totali (+1 se si vuole sviluppare in locale) che devono essere eseguiti in sequenza. Se questi passaggi sono eseguiti correttamente, l'applicazione dovrebbe partire senza problemi. Altrimenti è molto probabile che si verifichino errori di vario tipo (moduli mancanti, chiavi API non trovate, ecc.).
 
-1. Configurare le variabili d'ambiente
+1. Configurazioni dell'app e delle variabili d'ambiente
 2. Installare Ollama e i modelli locali
 3. Far partire il progetto con Docker (consigliato)
 4. (Solo per sviluppo locale) Installare uv e creare l'ambiente virtuale
@@ -29,11 +29,15 @@ L'installazione di questo progetto richiede 3 passaggi totali (+1 se si vuole sv
 > [!IMPORTANT]\
 > Prima di iniziare, assicurarsi di avere clonato il repository e di essere nella cartella principale del progetto.
 
-### **1. Variabili d'Ambiente**
+### **1. Configurazioni**
 
-Copia il file `.env.example` in `.env` e modificalo con le tue API keys:
+Ci sono due file di configurazione principali che l'app utilizza: `config.yaml` e `.env`.\
+Il primo contiene le configurazioni generali dell'applicazione e può essere modificato a piacimento, mentre il secondo è utilizzato per le variabili d'ambiente.
+
+Per il secondo, bisogna copiare il file `.env.example` in `.env` e successivamente modificalo con le tue API keys:
 ```sh
 cp .env.example .env
+nano .env  # esempio di modifica del file
 ```
 
 Le API Keys devono essere inserite nelle variabili opportune dopo l'uguale e ***senza*** spazi. Esse si possono ottenere tramite i loro providers (alcune sono gratuite, altre a pagamento).\
@@ -48,21 +52,13 @@ Per l'installazione scaricare Ollama dal loro [sito ufficiale](https://ollama.co
 
 Dopo l'installazione, si possono iniziare a scaricare i modelli desiderati tramite il comando `ollama pull <model>:<tag>`.
 
-I modelli usati dall'applicazione sono visibili in [src/app/models.py](src/app/models.py). Di seguito metto lo stesso una lista di modelli, ma potrebbe non essere aggiornata:
-- `gpt-oss:latest`
-- `qwen3:latest`
-- `qwen3:4b`
-- `qwen3:1.7b`
+I modelli usati dall'applicazione sono quelli specificati nel file [config.yaml](config.yaml) alla voce `model`. Se in locale si hanno dei modelli diversi, è possibile modificare questa voce per usare quelli disponibili.
+I modelli consigliati per questo progetto sono `qwen3:4b` e `qwen3:1.7b`.
 
 ### **3. Docker**
 Se si vuole solamente avviare il progetto, si consiglia di utilizzare [Docker](https://www.docker.com), dato che sono stati creati i files [Dockerfile](Dockerfile) e [docker-compose.yaml](docker-compose.yaml) per creare il container con tutti i file necessari e già in esecuzione.
 
 ```sh
-# Configura le variabili d'ambiente
-cp .env.example .env
-nano .env  # Modifica il file
-
-# Avvia il container
 docker compose up --build -d
 ```
 
@@ -80,27 +76,54 @@ powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | ie
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-UV installerà python e creerà automaticamente l'ambiente virtuale con le dipendenze corrette (nota che questo passaggio è opzionale, dato che uv, ogni volta che si esegue un comando, controlla se l'ambiente è attivo e se le dipendenze sono installate):
+Dopodiché bisogna creare un ambiente virtuale per lo sviluppo locale e impostare PYTHONPATH. Questo passaggio è necessario per far sì che Python riesca a trovare tutti i moduli del progetto e ad installare tutte le dipendenze. Fortunatamente uv semplifica molto questo processo:
 
 ```sh
-uv sync --frozen --no-cache
+uv venv
+uv pip install -e .
 ```
 
-A questo punto si può far partire il progetto tramite il comando:
+A questo punto si può già modificare il codice e, quando necessario, far partire il progetto tramite il comando:
 
 ```sh
-uv run python src/app.py
+uv run src/app
 ```
 
 # **Applicazione**
 
-***L'applicazione è attualmente in fase di sviluppo.***
+> [!CAUTION]\
+> ***L'applicazione è attualmente in fase di sviluppo.***
 
-Usando la libreria ``gradio`` è stata creata un'interfaccia web semplice per interagire con l'agente principale. Gli agenti secondari si trovano nella cartella `src/app/agents` e sono:
-- **Market Agent**: Agente unificato che supporta multiple fonti di dati con auto-retry e gestione degli errori.
-- **News Agent**: Recupera le notizie finanziarie più recenti sul mercato delle criptovalute.
-- **Social Agent**: Analizza i sentimenti sui social media riguardo alle criptovalute.
-- **Predictor Agent**: Utilizza i dati raccolti dagli altri agenti per fare previsioni.
+L'applicazione viene fatta partire tramite il file [src/app/\_\_main\_\_.py](src/app/__main__.py) che inizializza l'agente principale e gli agenti secondari.
+
+In esso viene creato il server `gradio` per l'interfaccia web e viene anche inizializzato il bot di Telegram (se è stata inserita la chiave nel file `.env` ottenuta da [BotFather](https://core.telegram.org/bots/features#creating-a-new-bot)).
+
+L'interazione è guidata, sia tramite l'interfaccia web che tramite il bot di Telegram; l'utente può scegliere prima di tutto delle opzioni generali (come il modello e la strategia di investimento), dopodiché può inviare un messaggio di testo libero per chiedere consigli o informazioni specifiche. Per esempio: "Qual è l'andamento attuale di Bitcoin?" o "Consigliami quali sono le migliori criptovalute in cui investire questo mese".
+
+L'applicazione, una volta ricevuta la richiesta, la passa al [Team](src/app/agents/team.py) di agenti che si occupano di raccogliere i dati necessari per rispondere in modo completo e ragionato.
+
+Gli agenti coinvolti nel Team sono:
+- **Leader**: Coordina gli altri agenti e fornisce la risposta finale all'utente.
+- **Market Agent**: Recupera i dati di mercato attuali delle criptovalute da Binance e Yahoo Finance.
+- **News Agent**: Recupera le ultime notizie sul mercato delle criptovalute da NewsAPI e GNews.
+- **Social Agent**: Recupera i dati dai social media (Reddit) per analizzare il sentiment del mercato.
+
+## Struttura del codice del Progetto
+
+```
+src
+└── app
+    ├── __main__.py
+    ├── config.py    <-- Configurazioni app
+    ├── agents       <-- Agenti, Team, prompts e simili
+    ├── api          <-- Tutte le API esterne
+    │   ├── core     <-- Classi core per le API
+    │   ├── markets  <-- Market data provider (Es. Binance)
+    │   ├── news     <-- News data provider (Es. NewsAPI)
+    │   ├── social   <-- Social data provider (Es. Reddit)
+    │   └── tools    <-- Tools per agenti creati dalle API
+    └── interface    <-- Interfacce utente
+```
 
 ## Tests
 

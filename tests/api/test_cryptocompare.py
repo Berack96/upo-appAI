@@ -1,6 +1,6 @@
 import os
 import pytest
-from app.markets import CryptoCompareWrapper
+from app.api.markets import CryptoCompareWrapper
 
 @pytest.mark.market
 @pytest.mark.api
@@ -49,9 +49,9 @@ class TestCryptoCompare:
         assert isinstance(history, list)
         assert len(history) == 5
         for entry in history:
-            assert hasattr(entry, 'timestamp_ms')
+            assert hasattr(entry, 'timestamp')
             assert hasattr(entry, 'close')
             assert hasattr(entry, 'high')
             assert entry.close > 0
             assert entry.high > 0
-            assert entry.timestamp_ms > 0
+            assert entry.timestamp != ''
