@@ -1,11 +1,11 @@
-import json
 from typing import Any
-from agno.tools.duckduckgo import DuckDuckGoTools
+from ddgs import DDGS
 from app.api.core.news import Article, NewsWrapper
 
 
 def extract_article(result: dict[str, Any]) -> Article:
     article = Article()
+    print(result)
     article.source = result.get("source", "")
     article.time = result.get("date", "")
     article.title = result.get("title", "")
@@ -20,16 +20,14 @@ class DuckDuckGoWrapper(NewsWrapper):
     """
 
     def __init__(self):
-        self.tool = DuckDuckGoTools()
+        self.tool = DDGS()
         self.query = "crypto"
 
     def get_top_headlines(self, limit: int = 100) -> list[Article]:
-        results = self.tool.duckduckgo_news(self.query, max_results=limit)
-        json_results = json.loads(results)
-        return [extract_article(result) for result in json_results]
+        results = self.tool.news(self.query, max_results=limit)
+        return [extract_article(result) for result in results]
 
     def get_latest_news(self, query: str, limit: int = 100) -> list[Article]:
-        results = self.tool.duckduckgo_news(query or self.query, max_results=limit)
-        json_results = json.loads(results)
-        return [extract_article(result) for result in json_results]
+        results = self.tool.news(query or self.query, max_results=limit)
+        return [extract_article(result) for result in results]
 
