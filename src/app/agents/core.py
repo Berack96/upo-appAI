@@ -44,7 +44,7 @@ class PipelineInputs:
         """
         Sceglie il modello LLM da usare per il Team Leader.
         """
-        self.leader_model = self.configs.models.all_models[index]
+        self.team_leader_model = self.configs.models.all_models[index]
 
     def choose_team(self, index: int):
         """

@@ -41,7 +41,7 @@ api:
 agents:
   strategy: Conservative
   team_model: qwen3:1.7b
-  team_leader_model: qwen3:4b
+  team_leader_model: qwen3:8b
   query_analyzer_model: qwen3:4b
-  report_generation_model: qwen3:4b
+  report_generation_model: qwen3:8b
   predictor_model: qwen3:4b
