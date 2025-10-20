@@ -1,7 +1,7 @@
 from agno.tools import Toolkit
 from app.api.wrapper_handler import WrapperHandler
 from app.api.core.social import SocialPost, SocialWrapper
-from app.api.social import RedditWrapper
+from app.api.social import *
 
 
 class SocialAPIsTool(SocialWrapper, Toolkit):
@@ -23,7 +23,7 @@ class SocialAPIsTool(SocialWrapper, Toolkit):
         - RedditWrapper.
         """
 
-        wrappers: list[type[SocialWrapper]] = [RedditWrapper]
+        wrappers: list[type[SocialWrapper]] = [RedditWrapper, XWrapper, ChanWrapper]
         self.handler = WrapperHandler.build_wrappers(wrappers)
 
         Toolkit.__init__( # type: ignore
