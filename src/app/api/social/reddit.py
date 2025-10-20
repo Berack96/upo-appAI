@@ -1,10 +1,9 @@
 import os
 from praw import Reddit # type: ignore
 from praw.models import Submission # type: ignore
-from app.api.core.social import SocialWrapper, SocialPost, SocialComment
+from app.api.core.social import *
 
 
-MAX_COMMENTS = 5
 # metterne altri se necessario.
 # fonti: https://lkiconsulting.io/marketing/best-crypto-subreddits/
 SUBREDDITS = [

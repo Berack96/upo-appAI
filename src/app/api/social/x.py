@@ -5,6 +5,15 @@ from shutil import which
 from app.api.core.social import SocialWrapper, SocialPost
 
 
+# This is the list of users that can be interesting
+# To get the ID of a new user is necessary to search it on X, copy the url and insert it in a service like "https://get-id-x.foundtt.com/en/"
+X_USERS = [
+    'watcherguru',
+    'Cointelegraph',
+    'BTC_Archive',
+    'elonmusk'
+]
+
 class XWrapper(SocialWrapper):
     def __init__(self):
         '''
@@ -17,20 +26,11 @@ class XWrapper(SocialWrapper):
         assert self.api_key, "X_API_KEY environment variable not set"
         assert which('rettiwt') is not None, "Command `rettiwt` not installed"
 
-        # This is the list of users that can be interesting
-        # To get the ID of a new user is necessary to search it on X, copy the url and insert it in a service like "https://get-id-x.foundtt.com/en/"
-        self.users = [
-            'watcherguru',
-            'Cointelegraph',
-            'BTC_Archive',
-            'elonmusk'
-        ]
-
 
     def get_top_crypto_posts(self, limit:int = 5) -> list[SocialPost]:
         social_posts: list[SocialPost] = []
 
-        for user in self.users:
+        for user in X_USERS:
             process = subprocess.run(f"rettiwt -k {self.api_key} tweet search -f {str(user)}", capture_output=True)
             results = process.stdout.decode()
             json_result = json.loads(results)

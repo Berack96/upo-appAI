@@ -1,6 +1,9 @@
 from pydantic import BaseModel
 
 
+
+MAX_COMMENTS = 5
+
 class SocialPost(BaseModel):
     """
     Represents a social media post with time, title, description, and comments.
