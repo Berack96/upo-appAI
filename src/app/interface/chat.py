@@ -15,6 +15,7 @@ class ChatManager:
     def __init__(self):
         self.history: list[tuple[str, str]] = []  
         self.inputs = PipelineInputs()
+
     def save_chat(self, filename: str = "chat.json") -> None:
         """
         Salva la chat corrente in src/saves/<filename>.
@@ -49,29 +50,23 @@ class ChatManager:
     # Funzioni Gradio
     ########################################
     def gradio_respond(self, message: str, history: list[tuple[str, str]]) -> str:
-        '''
-        self.send_message(message)
-
         self.inputs.user_query = message
-
-        self.receive_message(response)
-        return response
-        '''
         pipeline = Pipeline(self.inputs)
         response = pipeline.interact()
+
         self.history.append((message, response))
         return response
-        
+
     def gradio_save(self) -> str:
         self.save_chat("chat.json")
         return "💾 Chat salvata in chat.json"
 
-    def gradio_load(self) -> str:
+    def gradio_load(self) -> tuple[list[tuple[str, str]], list[tuple[str, str]]]:
         self.load_chat("chat.json")
         history = self.get_history()
         return history, history
 
-    def gradio_clear(self) -> str:
+    def gradio_clear(self) -> tuple[list[str], list[str]]:
         self.reset_chat()
         return [], []
 
@@ -95,7 +90,7 @@ class ChatManager:
                     label="Stile di investimento"
                 )
                 style.change(fn=self.inputs.choose_strategy, inputs=style, outputs=None)
-            
+
             chat = gr.ChatInterface(
                 fn=self.gradio_respond
             )
@@ -104,7 +99,7 @@ class ChatManager:
                 clear_btn = gr.Button("🗑️ Reset Chat")
                 save_btn = gr.Button("💾 Salva Chat")
                 load_btn = gr.Button("📂 Carica Chat")
-            
+
             clear_btn.click(self.gradio_clear, inputs=None, outputs=[chat.chatbot, chat.chatbot_state])
             save_btn.click(self.gradio_save, inputs=None, outputs=None)
             load_btn.click(self.gradio_load, inputs=None, outputs=[chat.chatbot, chat.chatbot_state])
