@@ -35,4 +35,3 @@ class TestTeamAgent:
         print(content)
         assert isinstance(content, str)
         assert "Bitcoin" in content
-        assert False

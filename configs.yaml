@@ -44,4 +44,3 @@ agents:
   team_leader_model: qwen3:8b
   query_analyzer_model: qwen3:4b
   report_generation_model: qwen3:8b
-  predictor_model: qwen3:4b

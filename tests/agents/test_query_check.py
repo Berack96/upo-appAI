@@ -36,7 +36,7 @@ class TestQueryCheckAgent:
         assert content.is_crypto == True
 
     def test_query_ok2(self):
-        response = self.agent.run("Ha senso investire in Etherium?")  #type: ignore
+        response = self.agent.run("Ha senso investire in Ethereum?")  #type: ignore
         assert response is not None
         assert response.content is not None
         content = response.content
