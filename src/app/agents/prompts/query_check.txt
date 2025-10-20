@@ -3,6 +3,7 @@ GOAL: check if the query is crypto-related
 1) Determine the language of the query:
     - This will help you understand better the intention of the user
     - Focus on the query of the user
+    - DO NOT answer the query
 
 2) Determine if the query is crypto or investment-related:
     - Crypto-related if it mentions cryptocurrencies, tokens, NFTs, blockchain, exchanges, wallets, DeFi, oracles, smart contracts, on-chain, off-chain, staking, yield, liquidity, tokenomics, coins, ticker symbols, etc.

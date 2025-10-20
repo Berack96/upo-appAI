@@ -108,7 +108,7 @@ class Pipeline:
         # Step 2: Crea gli steps
         def condition_query_ok(step_input: StepInput) -> StepOutput:
             val = step_input.previous_step_content
-            return StepOutput(stop=not val.is_ok) if isinstance(val, QueryOutputs) else StepOutput(stop=True)
+            return StepOutput(stop=not val.is_crypto) if isinstance(val, QueryOutputs) else StepOutput(stop=True)
 
         query_check = Step(name=PipelineEvent.QUERY_CHECK, agent=q_check_agent)
         info_recovery = Step(name=PipelineEvent.INFO_RECOVERY, team=team)

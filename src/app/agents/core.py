@@ -9,7 +9,7 @@ class QueryInputs(BaseModel):
 
 class QueryOutputs(BaseModel):
     response: str
-    is_ok: bool
+    is_crypto: bool
 
 
 
