@@ -29,6 +29,7 @@ def extract_articles(response: dict[str, Any]) -> list[Article]:
             article.time = item.get('published_at', '')
             article.title = item.get('title', '')
             article.description = item.get('description', '')
+            article.url = item.get('url', '')
             articles.append(article)
     return articles
 

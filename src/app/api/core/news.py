@@ -9,6 +9,7 @@ class Article(BaseModel):
     time: str = ""
     title: str = ""
     description: str = ""
+    url: str = ""
 
 class NewsWrapper:
     """

@@ -10,6 +10,7 @@ def extract_article(result: dict[str, Any]) -> Article:
     article.time = result.get("date", "")
     article.title = result.get("title", "")
     article.description = result.get("body", "")
+    article.url = result.get("url", "")
     return article
 
 class DuckDuckGoWrapper(NewsWrapper):

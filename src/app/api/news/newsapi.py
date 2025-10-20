@@ -10,6 +10,7 @@ def extract_article(result: dict[str, Any]) -> Article:
     article.time = result.get("publishedAt", "")
     article.title = result.get("title", "")
     article.description = result.get("description", "")
+    article.url = result.get("url", "")
     return article
 
 class NewsApiWrapper(NewsWrapper):
