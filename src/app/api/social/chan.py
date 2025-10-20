@@ -5,6 +5,7 @@ import re
 import html
 import requests
 from bs4 import BeautifulSoup
+from datetime import datetime
 from app.api.core.social import *
 
 
@@ -12,14 +13,10 @@ class ChanWrapper(SocialWrapper):
     def __init__(self):
         super().__init__()
 
-    def __time_str(self, timestamp: str) -> str:
-        """Converte una stringa da MM/GG/AA di timestamp nel formato GG/MM/AA"""
-        if len(timestamp) < 8: return ""
-
-        month = timestamp[:2]
-        day = timestamp[3:5]
-        year = timestamp[6:8]
-        return f"{day}/{month}/{year}"
+    def __time_str(self, timestamp: str) -> int:
+        """Converte una stringa da MM/GG/AA(DAY)HH:MM:SS di 4chan a millisecondi"""
+        time = datetime.strptime(timestamp, "%m/%d/%y(%a)%H:%M:%S")
+        return int(time.timestamp() * 1000)
 
     def __unformat_html_str(self, html_element: str) -> str:
         """Pulisce il commento rimuovendo HTML e formattazioni inutili"""
@@ -78,15 +75,16 @@ class ChanWrapper(SocialWrapper):
                     if not comment:
                         continue
 
-                    social_comment = SocialComment(time=time, description=comment)
+                    social_comment = SocialComment(description=comment)
+                    social_comment.set_timestamp(timestamp_ms=time)
                     comments_list.append(social_comment)
 
                 social_post: SocialPost = SocialPost(
-                    time=time,
                     title=title,
                     description=thread_description,
                     comments=comments_list
                 )
+                social_post.set_timestamp(timestamp_ms=time)
                 social_posts.append(social_post)
 
         return social_posts[:limit]
