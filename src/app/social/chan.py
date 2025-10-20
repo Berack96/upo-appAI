@@ -43,97 +43,60 @@ class ChanWrapper(SocialWrapper):
                 if 'sticky' in thread:
                     continue
                 else:
-                    # print(thread)
-                    # Otteniamo la data 
                     time: str = thread['now']
-                    # Otteniamo dalla data il mese (primi 2 caratteri)
                     month: str = time[:2]
-                    # Otteniamo dalla data il giorno (caratteri 4 e 5)
                     day: str = time[4:6]
-                    # Otteniamo dalla data l'anno (caratteri 7 e 8)
                     year: str = time[7:9]
-                    # Ricreiamo la data completa come dd/mm/yy
                     time: str = day + '/' + month + '/' + year
                     
-                    # Otteniamo il nome dell'utente
                     name: str = thread['name']
-                    # Proviamo a recuperare il titolo
                     try:
-                        # Otteniamo il titolo del thread contenuto nella key "sub"
                         title: str = thread['sub']
-                        # Ripuliamo la stringa
-                        # Decodifichiamo caratteri ed entità HTML
                         html_entities = html.unescape(title)
-                        # Rimuoviamo caratteri HTML
                         soup = BeautifulSoup(html_entities, 'html.parser')
                         title = soup.get_text(separator=" ")
-                        # Rimuoviamo backlash e doppi slash
                         title = re.sub(r"[\\/]+", "/", title)
-                        # Rimuoviamo spazi in piú
                         title = re.sub(r"\s+", " ", title).strip()
-                        # Aggiungiamo il nome dell'utente al titolo
                         title = name + " posted: " + title
                     except:
                         title: str = name + " posted"
 
                     try: 
-                        # Otteniamo il commento del thread contenuto nella key "com"
                         thread_description: str = thread['com']
-                        # Ripuliamo la stringa
-                        # Decodifichiamo caratteri ed entità HTML
                         html_entities = html.unescape(thread_description)
-                        # Rimuoviamo caratteri HTML
                         soup = BeautifulSoup(html_entities, 'html.parser')
                         thread_description = soup.get_text(separator=" ")
-                        # Rimuoviamo backlash e doppi slash
                         thread_description = re.sub(r"[\\/]+", "/", thread_description)
-                        # Rimuoviamo spazi in piú
                         thread_description = re.sub(r"\s+", " ", thread_description).strip()
                     except:
                         thread_description = None
-                    # Creiamo la lista delle risposte al thread
                     try:
                         response_list: list[dict] = thread['last_replies']
                     except:
                         response_list: list[dict] = []
-                    # Creiamo la lista che conterrà i commenti
                     comments_list: list[SocialComment] = []
 
                     # Otteniamo i primi 5 commenti
                     i = 0
                     for response in response_list:
-                        # Otteniamo la data 
                         time: str = response['now']
-                        # print(time)
-                        # Otteniamo dalla data il mese (primi 2 caratteri)
                         month: str = time[:2]
-                        # Otteniamo dalla data il giorno (caratteri 4 e 5)
                         day: str = time[3:5]
-                        # Otteniamo dalla data l'anno (caratteri 7 e 8)
                         year: str = time[6:8]
-                        # Ricreiamo la data completa come dd/mm/yy
                         time: str = day + '/' + month + '/' + year
 
                         try: 
-                            # Otteniamo il commento della risposta contenuto nella key "com"
                             comment_description: str = response['com']
-                            # Ripuliamo la stringa
-                            # Decodifichiamo caratteri ed entità HTML
                             html_entities = html.unescape(comment_description)
-                            # Rimuoviamo caratteri HTML
                             soup = BeautifulSoup(html_entities, 'html.parser')
                             comment_description = soup.get_text(separator=" ")
-                            # Rimuoviamo backlash e doppi slash
                             comment_description = re.sub(r"[\\/]+", "/", comment_description)
-                            # Rimuoviamo spazi in piú
                             comment_description = re.sub(r"\s+", " ", comment_description).strip()
                         except:
                             comment_description = None
-                        # Se la descrizione del commento non esiste, passiamo al commento successivo
                         if comment_description is None:
                             continue
                         else:
-                            # Creiamo il SocialComment
                             social_comment: SocialComment = SocialComment(
                                 time=time,
                                 description=comment_description
@@ -145,7 +108,6 @@ class ChanWrapper(SocialWrapper):
                     if thread_description is None:
                         continue
                     else:
-                        # Creiamo il SocialPost
                         social_post: SocialPost = SocialPost(
                             time=time,
                             title=title,

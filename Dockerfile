@@ -2,6 +2,8 @@
 # Infatti scegliamo l'immagine ufficiale di uv che ha già tutto configurato
 FROM ghcr.io/astral-sh/uv:python3.12-alpine
 
+RUN apk add --update npm
+RUN npm install -g rettiwt-api
 # Dopo aver definito la workdir mi trovo già in essa
 WORKDIR /app
 

@@ -6,9 +6,10 @@ https://www.npmjs.com/package/rettiwt-api
 '''
 
 import os
-import docker
 import json
-from .base import SocialWrapper, SocialPost, SocialComment
+from .base import SocialWrapper, SocialPost
+from shutil import which
+import subprocess
 class XWrapper(SocialWrapper):
     def __init__(self):
         '''
@@ -26,10 +27,13 @@ class XWrapper(SocialWrapper):
         ]
         self.api_key = os.getenv("X_API_KEY")
         assert self.api_key, "X_API_KEY environment variable not set"
+        '''
         # Connection to the docker deamon
         self.client = docker.from_env()
         # Connect with the relative container
         self.container = self.client.containers.get("node_rettiwt")
+        '''
+        assert which('rettiwt') is not None, "Command `rettiwt` not installed"
         self.social_posts: list[SocialPost] = []
     def get_top_crypto_posts(self, limit = 5) -> list[SocialPost]: #-> list[SocialPost]:
         '''
@@ -38,7 +42,8 @@ class XWrapper(SocialWrapper):
         social_posts: list[SocialPost] = []
         for user in self.users:
             # This currently doesn't work as intended since it returns the posts in random order
-            tweets = self.container.exec_run("rettiwt -k" + self.api_key + " tweet search -f " + str(user), tty=True)
+            # tweets = self.container.exec_run("rettiwt -k" + self.api_key + " tweet search -f " + str(user), tty=True)
+            tweets = subprocess.run("rettiwt -k" + self.api_key + " tweet search -f " + str(user))
             tweets = tweets.output.decode()
             tweets = json.loads(tweets)
             tweets: list[dict] = tweets['list']
