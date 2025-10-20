@@ -4,14 +4,10 @@ import logging
 import random
 from typing import Any, Callable
 from agno.agent import RunEvent
-from agno.team import Team
-from agno.tools.reasoning import ReasoningTools
 from agno.run.workflow import WorkflowRunEvent
 from agno.workflow.types import StepInput, StepOutput
 from agno.workflow.step import Step
 from agno.workflow.workflow import Workflow
-from app.api.tools import *
-from app.agents.prompts import *
 from app.agents.core import *
 
 logging = logging.getLogger("pipeline")
@@ -91,28 +87,18 @@ class Pipeline:
             L'istanza di Workflow costruita.
         """
         # Step 1: Crea gli agenti e il team
-        q_check_agent = self.inputs.query_analyzer_model.get_agent(instructions=QUERY_CHECK_INSTRUCTIONS, name="QueryCheckAgent", output_schema=QueryOutputs)
-        report_agent = self.inputs.report_generation_model.get_agent(instructions=REPORT_GENERATION_INSTRUCTIONS, name="ReportGeneratorAgent")
-
-        market_tool, news_tool, social_tool = self.get_tools()
-        market_agent = self.inputs.team_model.get_agent(instructions=MARKET_INSTRUCTIONS, name="MarketAgent", tools=[market_tool])
-        news_agent = self.inputs.team_model.get_agent(instructions=NEWS_INSTRUCTIONS, name="NewsAgent", tools=[news_tool])
-        social_agent = self.inputs.team_model.get_agent(instructions=SOCIAL_INSTRUCTIONS, name="SocialAgent", tools=[social_tool])
-        team = Team(
-            model=self.inputs.team_leader_model.get_model(COORDINATOR_INSTRUCTIONS),
-            name="CryptoAnalysisTeam",
-            tools=[ReasoningTools()],
-            members=[market_agent, news_agent, social_agent],
-        )
+        team = self.inputs.get_agent_team()
+        query_check = self.inputs.get_agent_query_checker()
+        report = self.inputs.get_agent_report_generator()
 
         # Step 2: Crea gli steps
         def condition_query_ok(step_input: StepInput) -> StepOutput:
             val = step_input.previous_step_content
             return StepOutput(stop=not val.is_crypto) if isinstance(val, QueryOutputs) else StepOutput(stop=True)
 
-        query_check = Step(name=PipelineEvent.QUERY_CHECK, agent=q_check_agent)
+        query_check = Step(name=PipelineEvent.QUERY_CHECK, agent=query_check)
         info_recovery = Step(name=PipelineEvent.INFO_RECOVERY, team=team)
-        report_generation = Step(name=PipelineEvent.REPORT_GENERATION, agent=report_agent)
+        report_generation = Step(name=PipelineEvent.REPORT_GENERATION, agent=report)
 
         # Step 3: Ritorna il workflow completo
         return Workflow(name="App Workflow", steps=[
@@ -121,22 +107,6 @@ class Pipeline:
             info_recovery,
             report_generation
         ])
-
-
-    def get_tools(self) -> tuple[MarketAPIsTool, NewsAPIsTool, SocialAPIsTool]:
-        """
-        Restituisce la lista di tools disponibili per gli agenti.
-        """
-        api = self.inputs.configs.api
-
-        market_tool = MarketAPIsTool(currency=api.currency)
-        market_tool.handler.set_retries(api.retry_attempts, api.retry_delay_seconds)
-        news_tool = NewsAPIsTool()
-        news_tool.handler.set_retries(api.retry_attempts, api.retry_delay_seconds)
-        social_tool = SocialAPIsTool()
-        social_tool.handler.set_retries(api.retry_attempts, api.retry_delay_seconds)
-
-        return (market_tool, news_tool, social_tool)
 
     @classmethod
     async def run(cls, workflow: Workflow, query: QueryInputs, events: list[tuple[PipelineEvent, Callable[[Any], None]]]) -> str:

@@ -1,5 +1,10 @@
 from pydantic import BaseModel
+from agno.agent import Agent
+from agno.team import Team
+from agno.tools.reasoning import ReasoningTools
+from app.api.tools import *
 from app.configs import AppConfig
+from app.agents.prompts import *
 
 
 
@@ -10,8 +15,6 @@ class QueryInputs(BaseModel):
 class QueryOutputs(BaseModel):
     response: str
     is_crypto: bool
-
-
 
 class PipelineInputs:
     """
@@ -70,7 +73,46 @@ class PipelineInputs:
         """
         return [strat.label for strat in self.configs.strategies]
 
+    def get_query_inputs(self) -> QueryInputs:
+        """
+        Restituisce gli input per l'agente di verifica della query.
+        """
+        return QueryInputs(
+            user_query=self.user_query,
+            strategy=self.strategy.label,
+        )
 
+    # ======================
+    # Agent getters
+    # ======================
+    def get_agent_team(self) -> Team:
+        market, news, social = self.get_tools()
+        market_agent = self.team_model.get_agent(MARKET_INSTRUCTIONS, "Market Agent", tools=[market])
+        news_agent = self.team_model.get_agent(NEWS_INSTRUCTIONS, "News Agent", tools=[news])
+        social_agent = self.team_model.get_agent(SOCIAL_INSTRUCTIONS, "Socials Agent", tools=[social])
+        return Team(
+            model=self.team_leader_model.get_model(TEAM_LEADER_INSTRUCTIONS),
+            name="CryptoAnalysisTeam",
+            tools=[ReasoningTools()],
+            members=[market_agent, news_agent, social_agent],
+        )
 
+    def get_agent_query_checker(self) -> Agent:
+        return self.query_analyzer_model.get_agent(QUERY_CHECK_INSTRUCTIONS, "Query Check Agent", output_schema=QueryOutputs)
 
+    def get_agent_report_generator(self) -> Agent:
+        return self.report_generation_model.get_agent(REPORT_GENERATION_INSTRUCTIONS, "Report Generator Agent")
 
+    def get_tools(self) -> tuple[MarketAPIsTool, NewsAPIsTool, SocialAPIsTool]:
+        """
+        Restituisce la lista di tools disponibili per gli agenti.
+        """
+        api = self.configs.api
+
+        market_tool = MarketAPIsTool(currency=api.currency)
+        market_tool.handler.set_retries(api.retry_attempts, api.retry_delay_seconds)
+        news_tool = NewsAPIsTool()
+        news_tool.handler.set_retries(api.retry_attempts, api.retry_delay_seconds)
+        social_tool = SocialAPIsTool()
+        social_tool.handler.set_retries(api.retry_attempts, api.retry_delay_seconds)
+        return market_tool, news_tool, social_tool
