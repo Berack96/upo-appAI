@@ -96,7 +96,7 @@ class PipelineInputs:
         return Team(
             model=self.team_leader_model.get_model(TEAM_LEADER_INSTRUCTIONS),
             name="CryptoAnalysisTeam",
-            tools=[ReasoningTools(), PlanMemoryTool()],
+            tools=[ReasoningTools(), PlanMemoryTool(), CryptoSymbolsTools()],
             members=[market_agent, news_agent, social_agent],
         )
 
@@ -112,7 +112,7 @@ class PipelineInputs:
         """
         api = self.configs.api
 
-        market_tool = MarketAPIsTool(currency=api.currency)
+        market_tool = MarketAPIsTool()
         market_tool.handler.set_retries(api.retry_attempts, api.retry_delay_seconds)
         news_tool = NewsAPIsTool()
         news_tool.handler.set_retries(api.retry_attempts, api.retry_delay_seconds)
