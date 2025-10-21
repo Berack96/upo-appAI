@@ -61,7 +61,9 @@ class CoinBaseWrapper(MarketWrapper):
         )
 
     def __format(self, asset_id: str) -> str:
-        return asset_id if '-' in asset_id else f"{asset_id}-{self.currency}"
+        i = asset_id.index('-')
+        if i != -1: asset_id = asset_id[:i]
+        return f"{asset_id}-{self.currency}"
 
     def get_product(self, asset_id: str) -> ProductInfo:
         asset_id = self.__format(asset_id)

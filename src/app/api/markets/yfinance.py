@@ -47,8 +47,9 @@ class YFinanceWrapper(MarketWrapper):
         Formatta il simbolo per yfinance.
         Per crypto, aggiunge '-' e la valuta (es. BTC -> BTC-USD).
         """
-        asset_id = asset_id.upper()
-        return f"{asset_id}-{self.currency}" if '-' not in asset_id else asset_id
+        i = asset_id.index('-')
+        if i != -1: asset_id = asset_id[:i]
+        return f"{asset_id}-{self.currency}"
 
     def get_product(self, asset_id: str) -> ProductInfo:
         symbol = self._format_symbol(asset_id)
