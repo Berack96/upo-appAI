@@ -13,7 +13,7 @@ logging = logging.getLogger("crypto_symbols")
 
 BASE_URL = "https://finance.yahoo.com/markets/crypto/all/"
 
-class CryptoSymbols(Toolkit):
+class CryptoSymbolsTools(Toolkit):
     """
     Classe per ottenere i simboli delle criptovalute tramite Yahoo Finance.
     """
@@ -23,9 +23,10 @@ class CryptoSymbols(Toolkit):
         self.final_table = pd.read_csv(self.cache_file) if os.path.exists(self.cache_file) else pd.DataFrame() # type: ignore
         Toolkit.__init__(self, # type: ignore
             name="Crypto Symbols Tool",
+            instructions="Tool to get cryptocurrency symbols and search them by name.",
             tools=[
                 self.get_all_symbols,
-                self.get_symbol_by_name,
+                self.get_symbols_by_name,
             ],
         )
 
@@ -37,7 +38,7 @@ class CryptoSymbols(Toolkit):
         """
         return self.final_table['Symbol'].tolist() if not self.final_table.empty else []
 
-    def get_symbol_by_name(self, query: str) -> list[str]:
+    def get_symbols_by_name(self, query: str) -> list[tuple[str, str]]:
         """
         Cerca i simboli che contengono la query.
         Args:
@@ -47,7 +48,7 @@ class CryptoSymbols(Toolkit):
         """
         query_lower = query.lower()
         positions = self.final_table['Name'].str.lower().str.contains(query_lower)
-        return self.final_table[positions]['Symbol'].tolist()
+        return self.final_table[positions][['Symbol', 'Name']].apply(tuple, axis=1).tolist()
 
     async def fetch_crypto_symbols(self, force_refresh: bool = False) -> None:
         """
@@ -98,5 +99,5 @@ class CryptoSymbols(Toolkit):
 
 
 if __name__ == "__main__":
-    crypto_symbols = CryptoSymbols()
+    crypto_symbols = CryptoSymbolsTools()
     asyncio.run(crypto_symbols.fetch_crypto_symbols(force_refresh=True))

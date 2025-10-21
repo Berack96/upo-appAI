@@ -96,7 +96,7 @@ class PipelineInputs:
         return Team(
             model=self.team_leader_model.get_model(TEAM_LEADER_INSTRUCTIONS),
             name="CryptoAnalysisTeam",
-            tools=[ReasoningTools(), PlanMemoryTool()],
+            tools=[ReasoningTools(), PlanMemoryTool(), CryptoSymbolsTools()],
             members=[market_agent, news_agent, social_agent],
         )
 
