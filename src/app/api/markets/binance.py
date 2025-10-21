@@ -57,7 +57,7 @@ class BinanceWrapper(MarketWrapper):
         """
         Formatta l'asset_id nel formato richiesto da Binance.
         """
-        i = asset_id.index('-')
+        i = asset_id.find('-')
         if i != -1: asset_id = asset_id[:i]
         return f"{asset_id}{self.currency}" if self.currency not in asset_id else asset_id
 

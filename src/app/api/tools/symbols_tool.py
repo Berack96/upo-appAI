@@ -44,7 +44,7 @@ class CryptoSymbolsTools(Toolkit):
         Args:
             query (str): Query di ricerca.
         Returns:
-            list[str]: Lista di simboli che contengono la query.
+            list[tuple[str, str]]: Lista di tuple (simbolo, nome) che contengono la query.
         """
         query_lower = query.lower()
         positions = self.final_table['Name'].str.lower().str.contains(query_lower)
@@ -59,7 +59,7 @@ class CryptoSymbolsTools(Toolkit):
         if not force_refresh and not self.final_table.empty:
             return
 
-        num_currencies = 250 # It looks like is the max per page otherwise yahoo returns 26
+        num_currencies = 250 # It looks like this is the max per page otherwise yahoo returns 26
         offset = 0
         stop = not self.final_table.empty
         table = self.final_table.copy()
