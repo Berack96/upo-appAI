@@ -1,6 +1,11 @@
 # Utilizziamo Debian slim invece di Alpine per migliore compatibilità
 FROM debian:bookworm-slim
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
+# Installiamo le dipendenze di sistema
+RUN apt-get update && \
+    apt-get install -y curl npm && \
+    rm -rf /var/lib/apt/lists/*
+RUN npm install -g rettiwt-api
 
 # Installiamo uv
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh

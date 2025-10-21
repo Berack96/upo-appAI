@@ -97,12 +97,12 @@ class WrapperHandler(Generic[WrapperType]):
             wrapper_name = wrapper.__class__.__name__
 
             if not try_all:
-                logging.info(f"try_call {wrapper_name}")
+                logging.debug(f"try_call {wrapper_name}")
 
             for try_count in range(1, self.retry_per_wrapper + 1):
                 try:
                     result = func(wrapper)
-                    logging.info(f"{wrapper_name} succeeded")
+                    logging.debug(f"{wrapper_name} succeeded")
                     results[wrapper_name] = result
                     break
 

@@ -13,24 +13,8 @@ class ChatManager:
     """
 
     def __init__(self):
-        self.history: list[dict[str, str]] = []  # [{"role": "user"/"assistant", "content": "..."}]
+        self.history: list[tuple[str, str]] = []  
         self.inputs = PipelineInputs()
-
-    def send_message(self, message: str) -> None:
-        """
-        Aggiunge un messaggio utente, chiama la Pipeline e salva la risposta nello storico.
-        """
-        # Aggiungi messaggio utente allo storico
-        self.history.append({"role": "user", "content": message})
-
-    def receive_message(self, response: str) -> str:
-        """
-        Riceve un messaggio dalla pipeline e lo aggiunge allo storico.
-        """
-        # Aggiungi risposta assistente allo storico
-        self.history.append({"role": "assistant", "content": response})
-
-        return response
 
     def save_chat(self, filename: str = "chat.json") -> None:
         """
@@ -55,7 +39,7 @@ class ChatManager:
         """
         self.history = []
 
-    def get_history(self) -> list[dict[str, str]]:
+    def get_history(self) -> list[tuple[str, str]]:
         """
         Restituisce lo storico completo della chat.
         """
@@ -65,32 +49,27 @@ class ChatManager:
     ########################################
     # Funzioni Gradio
     ########################################
-    def gradio_respond(self, message: str, history: list[dict[str, str]]) -> tuple[list[dict[str, str]], list[dict[str, str]], str]:
-        self.send_message(message)
-
+    def gradio_respond(self, message: str, history: list[tuple[str, str]]) -> str:
         self.inputs.user_query = message
         pipeline = Pipeline(self.inputs)
         response = pipeline.interact()
 
-        self.receive_message(response)
-        history.append({"role": "user", "content": message})
-        history.append({"role": "assistant", "content": response})
-        return history, history, ""
+        self.history.append((message, response))
+        return response
 
     def gradio_save(self) -> str:
         self.save_chat("chat.json")
         return "💾 Chat salvata in chat.json"
 
-    def gradio_load(self) -> tuple[list[dict[str, str]], list[dict[str, str]]]:
+    def gradio_load(self) -> tuple[list[tuple[str, str]], list[tuple[str, str]]]:
         self.load_chat("chat.json")
-        history: list[dict[str, str]] = []
-        for m in self.get_history():
-            history.append({"role": m["role"], "content": m["content"]})
+        history = self.get_history()
         return history, history
 
-    def gradio_clear(self) -> tuple[list[dict[str, str]], list[dict[str, str]]]:
+    def gradio_clear(self) -> tuple[list[str], list[str]]:
         self.reset_chat()
         return [], []
+
 
     def gradio_build_interface(self) -> gr.Blocks:
         with gr.Blocks() as interface:
@@ -112,18 +91,16 @@ class ChatManager:
                 )
                 style.change(fn=self.inputs.choose_strategy, inputs=style, outputs=None)
 
-            chatbot = gr.Chatbot(label="Conversazione", height=500, type="messages")
-            msg = gr.Textbox(label="Scrivi la tua richiesta", placeholder="Es: Quali sono le crypto interessanti oggi?")
+            chat = gr.ChatInterface(
+                fn=self.gradio_respond
+            )
 
             with gr.Row():
                 clear_btn = gr.Button("🗑️ Reset Chat")
                 save_btn = gr.Button("💾 Salva Chat")
                 load_btn = gr.Button("📂 Carica Chat")
 
-            # Eventi e interazioni
-            msg.submit(self.gradio_respond, inputs=[msg, chatbot], outputs=[chatbot, chatbot, msg])
-            clear_btn.click(self.gradio_clear, inputs=None, outputs=[chatbot, chatbot])
+            clear_btn.click(self.gradio_clear, inputs=None, outputs=[chat.chatbot, chat.chatbot_state])
             save_btn.click(self.gradio_save, inputs=None, outputs=None)
-            load_btn.click(self.gradio_load, inputs=None, outputs=[chatbot, chatbot])
-
+            load_btn.click(self.gradio_load, inputs=None, outputs=[chat.chatbot, chat.chatbot_state])
         return interface

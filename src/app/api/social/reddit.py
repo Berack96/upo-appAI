@@ -1,10 +1,9 @@
 import os
 from praw import Reddit # type: ignore
 from praw.models import Submission # type: ignore
-from app.api.core.social import SocialWrapper, SocialPost, SocialComment
+from app.api.core.social import *
 
 
-MAX_COMMENTS = 5
 # metterne altri se necessario.
 # fonti: https://lkiconsulting.io/marketing/best-crypto-subreddits/
 SUBREDDITS = [
@@ -24,13 +23,13 @@ SUBREDDITS = [
 
 def extract_post(post: Submission) -> SocialPost:
     social = SocialPost()
-    social.time = str(post.created)
+    social.set_timestamp(timestamp_ms=post.created)
     social.title = post.title
     social.description = post.selftext
 
     for top_comment in post.comments:
         comment = SocialComment()
-        comment.time = str(top_comment.created)
+        comment.set_timestamp(timestamp_ms=top_comment.created)
         comment.description = top_comment.body
         social.comments.append(comment)
 
