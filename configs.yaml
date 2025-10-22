@@ -32,10 +32,9 @@ models:
 api:
   retry_attempts: 3
   retry_delay_seconds: 2
-  # TODO Magari implementare un sistema per settare i providers
-  market_providers: [BinanceWrapper, YFinanceWrapper]
-  news_providers: [GoogleNewsWrapper, DuckDuckGoWrapper]
-  social_providers: [RedditWrapper]
+  market_providers: [BinanceWrapper, YFinanceWrapper, CoinBaseWrapper, CryptoCompareWrapper]
+  news_providers: [GoogleNewsWrapper, DuckDuckGoWrapper, NewsApiWrapper, CryptoPanicWrapper]
+  social_providers: [RedditWrapper, XWrapper, ChanWrapper]
 
 agents:
   strategy: Conservative

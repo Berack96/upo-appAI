@@ -57,6 +57,9 @@ class AppModel(BaseModel):
 class APIConfig(BaseModel):
     retry_attempts: int = 3
     retry_delay_seconds: int = 2
+    market_providers: list[str] = []
+    news_providers: list[str] = []
+    social_providers: list[str] = []
 
 class Strategy(BaseModel):
     name: str = "Conservative"

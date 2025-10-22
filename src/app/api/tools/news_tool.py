@@ -2,33 +2,49 @@ from agno.tools import Toolkit
 from app.api.wrapper_handler import WrapperHandler
 from app.api.core.news import NewsWrapper, Article
 from app.api.news import NewsApiWrapper, GoogleNewsWrapper, CryptoPanicWrapper, DuckDuckGoWrapper
+from app.configs import AppConfig
 
 class NewsAPIsTool(NewsWrapper, Toolkit):
     """
     Aggregates multiple news API wrappers and manages them using WrapperHandler.
-    This class supports retrieving top headlines and latest news articles by querying multiple sources:
-    - GoogleNewsWrapper
-    - DuckDuckGoWrapper
-    - NewsApiWrapper
-    - CryptoPanicWrapper
+    This class supports retrieving top headlines and latest news articles by querying multiple sources.
+    Providers can be configured in configs.yaml under api.news_providers.
 
     By default, it returns results from the first successful wrapper. 
     Optionally, it can be configured to collect articles from all wrappers.
     If no wrapper succeeds, an exception is raised.
     """
 
+    # Mapping of wrapper names to wrapper classes
+    _WRAPPER_MAP = {
+        'GoogleNewsWrapper': GoogleNewsWrapper,
+        'DuckDuckGoWrapper': DuckDuckGoWrapper,
+        'NewsApiWrapper': NewsApiWrapper,
+        'CryptoPanicWrapper': CryptoPanicWrapper,
+    }
+
     def __init__(self):
         """
-        Initialize the NewsAPIsTool with multiple news API wrappers.
-        The tool uses WrapperHandler to manage and invoke the different news API wrappers.
-        The following wrappers are included in this order:
-        - GoogleNewsWrapper.
-        - DuckDuckGoWrapper.
-        - NewsApiWrapper.
-        - CryptoPanicWrapper.
+        Initialize the NewsAPIsTool with news API wrappers configured in configs.yaml.
+        The order of wrappers is determined by the api.news_providers list in the configuration.
         """
-        wrappers: list[type[NewsWrapper]] = [GoogleNewsWrapper, DuckDuckGoWrapper, NewsApiWrapper, CryptoPanicWrapper]
-        self.handler = WrapperHandler.build_wrappers(wrappers)
+        config = AppConfig()
+        
+        # Get wrapper classes based on configuration
+        wrappers: list[type[NewsWrapper]] = []
+        for provider_name in config.api.news_providers:
+            if provider_name in self._WRAPPER_MAP:
+                wrappers.append(self._WRAPPER_MAP[provider_name])
+        
+        # Fallback to all wrappers if none configured
+        if not wrappers:
+            wrappers = [GoogleNewsWrapper, DuckDuckGoWrapper, NewsApiWrapper, CryptoPanicWrapper]
+        
+        self.handler = WrapperHandler.build_wrappers(
+            wrappers,
+            try_per_wrapper=config.api.retry_attempts,
+            retry_delay=config.api.retry_delay_seconds
+        )
 
         Toolkit.__init__( # type: ignore
             self,

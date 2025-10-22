@@ -2,30 +2,46 @@ from agno.tools import Toolkit
 from app.api.wrapper_handler import WrapperHandler
 from app.api.core.markets import MarketWrapper, Price, ProductInfo
 from app.api.markets import BinanceWrapper, CoinBaseWrapper, CryptoCompareWrapper, YFinanceWrapper
+from app.configs import AppConfig
 
 class MarketAPIsTool(MarketWrapper, Toolkit):
     """
     Class that aggregates multiple market API wrappers and manages them using WrapperHandler.
     This class supports retrieving product information and historical prices.
     This class can also aggregate data from multiple sources to provide a more comprehensive view of the market.
-    The following wrappers are included in this order:
-    - BinanceWrapper
-    - YFinanceWrapper
-    - CoinBaseWrapper
-    - CryptoCompareWrapper
+    Providers can be configured in configs.yaml under api.market_providers.
     """
+
+    # Mapping of wrapper names to wrapper classes
+    _WRAPPER_MAP = {
+        'BinanceWrapper': BinanceWrapper,
+        'YFinanceWrapper': YFinanceWrapper,
+        'CoinBaseWrapper': CoinBaseWrapper,
+        'CryptoCompareWrapper': CryptoCompareWrapper,
+    }
 
     def __init__(self):
         """
-        Initialize the MarketAPIsTool with multiple market API wrappers.
-        The following wrappers are included in this order:
-        - BinanceWrapper
-        - YFinanceWrapper
-        - CoinBaseWrapper
-        - CryptoCompareWrapper
+        Initialize the MarketAPIsTool with market API wrappers configured in configs.yaml.
+        The order of wrappers is determined by the api.market_providers list in the configuration.
         """
-        wrappers: list[type[MarketWrapper]] = [BinanceWrapper, YFinanceWrapper, CoinBaseWrapper, CryptoCompareWrapper]
-        self.handler = WrapperHandler.build_wrappers(wrappers)
+        config = AppConfig()
+        
+        # Get wrapper classes based on configuration
+        wrappers: list[type[MarketWrapper]] = []
+        for provider_name in config.api.market_providers:
+            if provider_name in self._WRAPPER_MAP:
+                wrappers.append(self._WRAPPER_MAP[provider_name])
+        
+        # Fallback to all wrappers if none configured
+        if not wrappers:
+            wrappers = [BinanceWrapper, YFinanceWrapper, CoinBaseWrapper, CryptoCompareWrapper]
+        
+        self.handler = WrapperHandler.build_wrappers(
+            wrappers,
+            try_per_wrapper=config.api.retry_attempts,
+            retry_delay=config.api.retry_delay_seconds
+        )
 
         Toolkit.__init__( # type: ignore
             self,
