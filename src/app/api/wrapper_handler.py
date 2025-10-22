@@ -160,8 +160,6 @@ class WrapperHandler(Generic[WrapperType]):
 
         result: list[WrapperClassType] = []
         for wrapper_class in constructors:
-            if filters and wrapper_class.__name__ not in filters:
-                continue
             try:
                 wrapper = wrapper_class(**(kwargs or {}))
                 result.append(wrapper)
