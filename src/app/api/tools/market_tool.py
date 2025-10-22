@@ -27,15 +27,12 @@ class MarketAPIsTool(MarketWrapper, Toolkit):
         """
         config = AppConfig()
         
-        # Get wrapper classes based on configuration
-        wrappers: list[type[MarketWrapper]] = []
-        for provider_name in config.api.market_providers:
-            if provider_name in self._WRAPPER_MAP:
-                wrappers.append(self._WRAPPER_MAP[provider_name])
-        
-        # Fallback to all wrappers if none configured
-        if not wrappers:
-            wrappers = [BinanceWrapper, YFinanceWrapper, CoinBaseWrapper, CryptoCompareWrapper]
+        # Get wrapper classes based on configuration using the helper function
+        wrappers = WrapperHandler.filter_wrappers_by_config(
+            wrapper_map=self._WRAPPER_MAP,
+            provider_names=config.api.market_providers,
+            fallback_wrappers=[BinanceWrapper, YFinanceWrapper, CoinBaseWrapper, CryptoCompareWrapper]
+        )
         
         self.handler = WrapperHandler.build_wrappers(
             wrappers,

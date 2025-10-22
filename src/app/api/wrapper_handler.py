@@ -131,6 +131,34 @@ class WrapperHandler(Generic[WrapperType]):
         return f"{e} [\"{last_frame.filename}\", line {last_frame.lineno}]"
 
     @staticmethod
+    def filter_wrappers_by_config(
+        wrapper_map: dict[str, type[WrapperClassType]],
+        provider_names: list[str],
+        fallback_wrappers: list[type[WrapperClassType]] | None = None
+    ) -> list[type[WrapperClassType]]:
+        """
+        Filters wrapper classes based on a list of provider names from configuration.
+        
+        Args:
+            wrapper_map (dict[str, type[W]]): Dictionary mapping provider names to wrapper classes.
+            provider_names (list[str]): List of provider names from configuration.
+            fallback_wrappers (list[type[W]] | None): Optional fallback list if no providers configured.
+        
+        Returns:
+            list[type[W]]: List of wrapper classes in the order specified by provider_names.
+        """
+        wrappers: list[type[WrapperClassType]] = []
+        for provider_name in provider_names:
+            if provider_name in wrapper_map:
+                wrappers.append(wrapper_map[provider_name])
+        
+        # Fallback to all wrappers if none configured
+        if not wrappers and fallback_wrappers:
+            wrappers = fallback_wrappers
+        
+        return wrappers
+
+    @staticmethod
     def build_wrappers(constructors: list[type[WrapperClassType]], try_per_wrapper: int = 3, retry_delay: int = 2, kwargs: dict[str, Any] | None = None) -> 'WrapperHandler[WrapperClassType]':
         """
         Builds a WrapperHandler instance with the given wrapper constructors.

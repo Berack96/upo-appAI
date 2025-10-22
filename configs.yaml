@@ -32,8 +32,8 @@ models:
 api:
   retry_attempts: 3
   retry_delay_seconds: 2
-  market_providers: [BinanceWrapper, YFinanceWrapper, CoinBaseWrapper, CryptoCompareWrapper]
-  news_providers: [GoogleNewsWrapper, DuckDuckGoWrapper, NewsApiWrapper, CryptoPanicWrapper]
+  market_providers: [YFinanceWrapper, BinanceWrapper, CoinBaseWrapper, CryptoCompareWrapper]
+  news_providers: [DuckDuckGoWrapper, GoogleNewsWrapper, NewsApiWrapper, CryptoPanicWrapper]
   social_providers: [RedditWrapper, XWrapper, ChanWrapper]
 
 agents:

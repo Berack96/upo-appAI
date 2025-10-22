@@ -30,15 +30,12 @@ class NewsAPIsTool(NewsWrapper, Toolkit):
         """
         config = AppConfig()
         
-        # Get wrapper classes based on configuration
-        wrappers: list[type[NewsWrapper]] = []
-        for provider_name in config.api.news_providers:
-            if provider_name in self._WRAPPER_MAP:
-                wrappers.append(self._WRAPPER_MAP[provider_name])
-        
-        # Fallback to all wrappers if none configured
-        if not wrappers:
-            wrappers = [GoogleNewsWrapper, DuckDuckGoWrapper, NewsApiWrapper, CryptoPanicWrapper]
+        # Get wrapper classes based on configuration using the helper function
+        wrappers = WrapperHandler.filter_wrappers_by_config(
+            wrapper_map=self._WRAPPER_MAP,
+            provider_names=config.api.news_providers,
+            fallback_wrappers=[GoogleNewsWrapper, DuckDuckGoWrapper, NewsApiWrapper, CryptoPanicWrapper]
+        )
         
         self.handler = WrapperHandler.build_wrappers(
             wrappers,
