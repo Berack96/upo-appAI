@@ -15,30 +15,16 @@ class NewsAPIsTool(NewsWrapper, Toolkit):
     If no wrapper succeeds, an exception is raised.
     """
 
-    # Mapping of wrapper names to wrapper classes
-    _WRAPPER_MAP = {
-        'GoogleNewsWrapper': GoogleNewsWrapper,
-        'DuckDuckGoWrapper': DuckDuckGoWrapper,
-        'NewsApiWrapper': NewsApiWrapper,
-        'CryptoPanicWrapper': CryptoPanicWrapper,
-    }
-
     def __init__(self):
         """
         Initialize the NewsAPIsTool with news API wrappers configured in configs.yaml.
         The order of wrappers is determined by the api.news_providers list in the configuration.
         """
         config = AppConfig()
-        
-        # Get wrapper classes based on configuration using the helper function
-        wrappers = WrapperHandler.filter_wrappers_by_config(
-            wrapper_map=self._WRAPPER_MAP,
-            provider_names=config.api.news_providers,
-            fallback_wrappers=[GoogleNewsWrapper, DuckDuckGoWrapper, NewsApiWrapper, CryptoPanicWrapper]
-        )
-        
+
         self.handler = WrapperHandler.build_wrappers(
-            wrappers,
+            constructors=[NewsApiWrapper, GoogleNewsWrapper, CryptoPanicWrapper, DuckDuckGoWrapper],
+            filters=config.api.news_providers,
             try_per_wrapper=config.api.retry_attempts,
             retry_delay=config.api.retry_delay_seconds
         )

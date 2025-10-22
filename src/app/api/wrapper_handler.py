@@ -131,41 +131,19 @@ class WrapperHandler(Generic[WrapperType]):
         return f"{e} [\"{last_frame.filename}\", line {last_frame.lineno}]"
 
     @staticmethod
-    def filter_wrappers_by_config(
-        wrapper_map: dict[str, type[WrapperClassType]],
-        provider_names: list[str],
-        fallback_wrappers: list[type[WrapperClassType]] | None = None
-    ) -> list[type[WrapperClassType]]:
-        """
-        Filters wrapper classes based on a list of provider names from configuration.
-        
-        Args:
-            wrapper_map (dict[str, type[W]]): Dictionary mapping provider names to wrapper classes.
-            provider_names (list[str]): List of provider names from configuration.
-            fallback_wrappers (list[type[W]] | None): Optional fallback list if no providers configured.
-        
-        Returns:
-            list[type[W]]: List of wrapper classes in the order specified by provider_names.
-        """
-        wrappers: list[type[WrapperClassType]] = []
-        for provider_name in provider_names:
-            if provider_name in wrapper_map:
-                wrappers.append(wrapper_map[provider_name])
-        
-        # Fallback to all wrappers if none configured
-        if not wrappers and fallback_wrappers:
-            wrappers = fallback_wrappers
-        
-        return wrappers
-
-    @staticmethod
-    def build_wrappers(constructors: list[type[WrapperClassType]], try_per_wrapper: int = 3, retry_delay: int = 2, kwargs: dict[str, Any] | None = None) -> 'WrapperHandler[WrapperClassType]':
+    def build_wrappers(
+        constructors: list[type[WrapperClassType]],
+        filters: list[str] | None = None,
+        try_per_wrapper: int = 3,
+        retry_delay: int = 2,
+        kwargs: dict[str, Any] | None = None) -> 'WrapperHandler[WrapperClassType]':
         """
         Builds a WrapperHandler instance with the given wrapper constructors.
         It attempts to initialize each wrapper and logs a warning if any cannot be initialized.
         Only successfully initialized wrappers are included in the handler.
         Args:
             constructors (list[type[W]]): An iterable of wrapper classes to instantiate. e.g. [WrapperA, WrapperB]
+            filters (list[str] | None): Optional list of provider names to filter the constructors.
             try_per_wrapper (int): Number of retries per wrapper before switching to the next.
             retry_delay (int): Delay in seconds between retries.
             kwargs (dict | None): Optional dictionary with keyword arguments common to all wrappers.
@@ -176,8 +154,14 @@ class WrapperHandler(Generic[WrapperType]):
         """
         assert WrapperHandler.__check(constructors), f"All constructors must be classes. Received: {constructors}"
 
+        # Order of wrappers is now determined by the order in filters
+        filters = filters or [c.__name__ for c in constructors]
+        wrappers = [c for name in filters for c in constructors if c.__name__ == name]
+
         result: list[WrapperClassType] = []
-        for wrapper_class in constructors:
+        for wrapper_class in wrappers:
+            if filters and wrapper_class.__name__ not in filters:
+                continue
             try:
                 wrapper = wrapper_class(**(kwargs or {}))
                 result.append(wrapper)
