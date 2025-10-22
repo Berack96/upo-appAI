@@ -2,6 +2,7 @@ import os
 import json
 import subprocess
 from shutil import which
+from datetime import datetime
 from app.api.core.social import SocialWrapper, SocialPost
 
 
@@ -28,19 +29,20 @@ class XWrapper(SocialWrapper):
 
 
     def get_top_crypto_posts(self, limit:int = 5) -> list[SocialPost]:
-        social_posts: list[SocialPost] = []
+        posts: list[SocialPost] = []
 
         for user in X_USERS:
-            process = subprocess.run(f"rettiwt -k {self.api_key} tweet search -f {str(user)}", capture_output=True)
+            cmd = f"rettiwt -k {self.api_key} tweet search {limit} -f {str(user)}"
+            process = subprocess.run(cmd, capture_output=True, shell=True)
             results = process.stdout.decode()
             json_result = json.loads(results)
 
-            tweets = json_result['list']
-            for tweet in tweets[:limit]:
+            for tweet in json_result.get('list', []):
+                time = datetime.fromisoformat(tweet['createdAt'])
                 social_post = SocialPost()
-                social_post.time = tweet['createdAt']
-                social_post.title = str(user) + " tweeted: "
+                social_post.set_timestamp(timestamp_s=int(time.timestamp()))
+                social_post.title = f"{user} tweeted: "
                 social_post.description = tweet['fullText']
-                social_posts.append(social_post)
+                posts.append(social_post)
 
-        return social_posts
+        return posts

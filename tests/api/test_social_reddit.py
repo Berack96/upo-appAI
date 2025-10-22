@@ -19,7 +19,7 @@ class TestRedditWrapper:
         assert len(posts) == 2
         for post in posts:
             assert post.title != ""
-            assert re.match(r'\d{4}-\d{2}-\d{2}', post.time)
+            assert re.match(r'\d{4}-\d{2}-\d{2}', post.timestamp)
 
             assert isinstance(post.comments, list)
             assert len(post.comments) <= MAX_COMMENTS

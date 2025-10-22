@@ -1,20 +1,4 @@
-#!/usr/bin/env python3
-"""
-Demo di Ollama (Python) – mostra:
-    1. Elenco dei modelli disponibili
-    2. Generazione di testo semplice
-    3. Chat con streaming
-    4. Calcolo di embeddings
-    5. Esempio (opzionale) di function calling / tools
-
-Uso:
-    python ollama_demo.py
-
-Requisiti:
-    pip install ollama
-    Avviare il server Ollama (es. 'ollama serve' o l'app desktop) e avere i modelli già pullati.
-"""
-
+from typing import Any
 import ollama
 
 # Configurazione modelli
@@ -33,8 +17,8 @@ def list_models():
             print("  (Nessun modello trovato)")
             return
         for m in models:
-            name = getattr(m, 'model', None) or (m.get('model') if isinstance(m, dict) else 'sconosciuto')
-            details = getattr(m, 'details', None)
+            name = getattr(m, 'model', None) or (m.get('model') if isinstance(m, dict) else 'sconosciuto')  # type: ignore
+            details = getattr(m, 'details', None)  # type: ignore
             fmt = getattr(details, 'format', None) if details else 'unknown'
             print(f"  • {name} – {fmt}")
     except Exception as e:
@@ -46,7 +30,7 @@ def list_models():
 def generate_text(model: str, prompt: str, max_tokens: int = 200) -> str:
     """Genera testo dal modello indicato."""
     print(f"\n[2] Generazione testo con '{model}'")
-    response = ollama.chat(
+    response = ollama.chat(  # type: ignore
         model=model,
         messages=[{"role": "user", "content": prompt}]
     )
@@ -57,10 +41,10 @@ def generate_text(model: str, prompt: str, max_tokens: int = 200) -> str:
 
 # 3. Chat con streaming --------------------------------------------------------
 
-def chat_streaming(model: str, messages: list) -> str:
+def chat_streaming(model: str, messages: list[dict[str, str]]) -> str:
     """Esegue una chat mostrando progressivamente la risposta."""
     print(f"\n[3] Chat (streaming) con '{model}'")
-    stream = ollama.chat(model=model, messages=messages, stream=True)
+    stream = ollama.chat(model=model, messages=messages, stream=True)  # type: ignore
     full = ""
     for chunk in stream:
         if 'message' in chunk and 'content' in chunk['message']:
@@ -91,7 +75,7 @@ def get_embedding(model: str, text: str):
 def try_tools(model: str):
     """Esempio di function calling; se non supportato mostra messaggio informativo."""
     print(f"\n[5] Function calling / tools con '{model}'")
-    tools = [
+    tools: list[dict[str, Any]] = [
         {
             "type": "function",
             "function": {
@@ -109,7 +93,7 @@ def try_tools(model: str):
         }
     ]
     try:
-        response = ollama.chat(
+        response = ollama.chat(  # type: ignore
             model=model,
             messages=[{"role": "user", "content": "Che tempo fa a Milano?"}],
             tools=tools
