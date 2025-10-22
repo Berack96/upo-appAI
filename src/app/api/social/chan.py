@@ -2,12 +2,12 @@ import re
 import html
 import requests
 import warnings
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, MarkupResemblesLocatorWarning
 from datetime import datetime
 from app.api.core.social import *
 
 # Ignora i warning di BeautifulSoup quando incontra HTML malformato o un link, mentre si aspetta un HTML completo
-warnings.filterwarnings("ignore")
+warnings.filterwarnings("ignore", category=MarkupResemblesLocatorWarning)
 
 
 class ChanWrapper(SocialWrapper):
