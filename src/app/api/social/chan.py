@@ -1,15 +1,20 @@
-'''
-Usiamo le API di 4chan per ottenere un catalogo di threads dalla board /biz/
-'''
 import re
 import html
 import requests
+import warnings
 from bs4 import BeautifulSoup
 from datetime import datetime
 from app.api.core.social import *
 
+# Ignora i warning di BeautifulSoup quando incontra HTML malformato o un link, mentre si aspetta un HTML completo
+warnings.filterwarnings("ignore")
+
 
 class ChanWrapper(SocialWrapper):
+    """
+    Wrapper per l'API di 4chan, in particolare per la board /biz/ (Business & Finance)
+    Fonte API: https://a.4cdn.org/biz/catalog.json
+    """
     def __init__(self):
         super().__init__()
 

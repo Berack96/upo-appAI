@@ -23,13 +23,13 @@ SUBREDDITS = [
 
 def extract_post(post: Submission) -> SocialPost:
     social = SocialPost()
-    social.set_timestamp(timestamp_ms=post.created)
+    social.set_timestamp(timestamp_s=post.created)
     social.title = post.title
     social.description = post.selftext
 
     for top_comment in post.comments:
         comment = SocialComment()
-        comment.set_timestamp(timestamp_ms=top_comment.created)
+        comment.set_timestamp(timestamp_s=top_comment.created)
         comment.description = top_comment.body
         social.comments.append(comment)
 
