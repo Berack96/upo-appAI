@@ -57,7 +57,6 @@ class AppModel(BaseModel):
 class APIConfig(BaseModel):
     retry_attempts: int = 3
     retry_delay_seconds: int = 2
-    currency: str = "USD"
 
 class Strategy(BaseModel):
     name: str = "Conservative"
@@ -76,7 +75,8 @@ class AgentsConfigs(BaseModel):
     strategy: str = "Conservative"
     team_model: str = "gemini-2.0-flash"
     team_leader_model: str = "gemini-2.0-flash"
-    predictor_model: str = "gemini-2.0-flash"
+    query_analyzer_model: str = "gemini-2.0-flash"
+    report_generation_model: str = "gemini-2.0-flash"
 
 class AppConfig(BaseModel):
     port: int = 8000

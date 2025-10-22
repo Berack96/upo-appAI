@@ -32,7 +32,6 @@ models:
 api:
   retry_attempts: 3
   retry_delay_seconds: 2
-  currency: USD
   # TODO Magari implementare un sistema per settare i providers
   market_providers: [BinanceWrapper, YFinanceWrapper]
   news_providers: [GoogleNewsWrapper, DuckDuckGoWrapper]
@@ -41,5 +40,6 @@ api:
 agents:
   strategy: Conservative
   team_model: qwen3:1.7b
-  team_leader_model: qwen3:4b
-  predictor_model: qwen3:4b
+  team_leader_model: qwen3:8b
+  query_analyzer_model: qwen3:4b
+  report_generation_model: qwen3:8b
