@@ -155,11 +155,11 @@ class WrapperHandler(Generic[WrapperType]):
         assert WrapperHandler.__check(constructors), f"All constructors must be classes. Received: {constructors}"
 
         # Order of wrappers is now determined by the order in filters
-        filters = filters or [c.__name__ for c in constructors]
-        wrappers = [c for name in filters for c in constructors if c.__name__ == name]
+        if filters:
+            constructors = [c for name in filters for c in constructors if c.__name__ == name]
 
         result: list[WrapperClassType] = []
-        for wrapper_class in wrappers:
+        for wrapper_class in constructors:
             if filters and wrapper_class.__name__ not in filters:
                 continue
             try:
