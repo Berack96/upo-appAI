@@ -9,14 +9,14 @@ class SocialPost(BaseModel):
     """
     Represents a social media post with time, title, description, and comments.
     """
-    time: str = ""
+    timestamp: str = ""
     title: str = ""
     description: str = ""
     comments: list["SocialComment"] = []
 
     def set_timestamp(self, timestamp_ms: int | None = None, timestamp_s: int | None = None) -> None:
         """ Use the unified_timestamp function to set the time."""
-        self.time = unified_timestamp(timestamp_ms, timestamp_s)
+        self.timestamp = unified_timestamp(timestamp_ms, timestamp_s)
 
 class SocialComment(BaseModel):
     """
