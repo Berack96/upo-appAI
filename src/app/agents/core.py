@@ -146,7 +146,26 @@ class PipelineInputs:
 
 
 class RunMessage:
+    """
+    Classe per gestire i messaggi di stato durante l'esecuzione della pipeline.
+    Inizializza il messaggio con gli step e aggiorna lo stato, permettendo di ottenere
+    il messaggio più recente da inviare all'utente.
+    """
+
     def __init__(self, inputs: PipelineInputs, prefix: str = "", suffix: str = ""):
+        """
+        Inizializza il messaggio di esecuzione con gli step iniziali.
+        Tre stati possibili per ogni step:
+        - In corso (🔳)
+        - In esecuzione (➡️)
+        - Completato (✅)
+
+        Lo stato di esecuzione può essere assegnato solo ad uno step alla volta.
+        Args:
+            inputs (PipelineInputs): Input della pipeline per mostrare la configurazione.
+            prefix (str, optional): Prefisso del messaggio. Defaults to "".
+            suffix (str, optional): Suffisso del messaggio. Defaults to "".
+        """
         self.base_message = f"Running configurations: \n{prefix}{inputs}{suffix}\n\n"
         self.emojis = ['🔳', '➡️', '✅']
         self.placeholder = '<<<>>>'
@@ -158,6 +177,12 @@ class RunMessage:
         ]
 
     def update(self) -> 'RunMessage':
+        """
+        Sposta lo stato di esecuzione al passo successivo.
+        Lo step precedente completato viene marcato come completato.
+        Returns:
+            RunMessage: L'istanza aggiornata di RunMessage.
+        """
         text_curr, state_curr = self.steps_total[self.current]
         self.steps_total[self.current] = (text_curr, state_curr + 1)
         self.current = min(self.current + 1, len(self.steps_total))
@@ -167,6 +192,11 @@ class RunMessage:
         return self
 
     def update_step(self, text_extra: str = "") -> 'RunMessage':
+        """
+        Aggiorna il messaggio per lo step corrente.
+        Args:
+            text_extra (str, optional): Testo aggiuntivo da includere nello step. Defaults to "".
+        """
         text_curr, state_curr = self.steps_total[self.current]
         if text_extra:
             text_curr = f"{text_curr.replace('╚', '╠')}\n╚═ {text_extra}"
@@ -174,5 +204,10 @@ class RunMessage:
         return self
 
     def get_latest(self) -> str:
+        """
+        Restituisce il messaggio di esecuzione più recente.
+        Returns:
+            str: Messaggio di esecuzione aggiornato.
+        """
         steps = [msg.replace(self.placeholder, self.emojis[state]) for msg, state in self.steps_total]
         return self.base_message + "\n".join(steps)
