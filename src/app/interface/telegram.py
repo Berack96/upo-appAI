@@ -52,16 +52,14 @@ class ConfigsChat(Enum):
         return InlineKeyboardButton(display, callback_data=self.name)
 
     def change_value(self, inputs: PipelineInputs, new_value:int) -> None:
-        if self.name == self.MODEL_CHECK.name:
-            inputs.choose_query_checker(new_value)
-        elif self.name == self.MODEL_TEAM_LEADER.name:
-            inputs.choose_team_leader(new_value)
-        elif self.name == self.MODEL_TEAM.name:
-            inputs.choose_team(new_value)
-        elif self.name == self.MODEL_REPORT.name:
-            inputs.choose_report_generator(new_value)
-        elif self.name == self.STRATEGY.name:
-            inputs.choose_strategy(new_value)
+        functions_map = {
+            self.MODEL_CHECK.name: inputs.choose_query_checker,
+            self.MODEL_TEAM_LEADER.name: inputs.choose_team_leader,
+            self.MODEL_TEAM.name: inputs.choose_team,
+            self.MODEL_REPORT.name: inputs.choose_report_generator,
+            self.STRATEGY.name: inputs.choose_strategy,
+        }
+        functions_map[self.name](new_value)
 
 
 class TelegramApp:
@@ -272,9 +270,11 @@ class TelegramApp:
         # Remove user query and bot message
         await bot.delete_message(chat_id=chat_id, message_id=update.message.id)
 
-        def update_user(update: bool = True, extra: str = "") -> None:
-            if update: run_message.update()
-            message = run_message.get_latest(extra)
+        def update_user(update_step: str = "") -> None:
+            if update_step: run_message.update_step(update_step)
+            else: run_message.update()
+
+            message = run_message.get_latest()
             if msg.text != message:
                 asyncio.create_task(msg.edit_text(message, parse_mode='MarkdownV2'))
 
@@ -282,7 +282,7 @@ class TelegramApp:
         pipeline = Pipeline(inputs)
         report_content = await pipeline.interact_async(listeners=[
             (PipelineEvent.QUERY_CHECK, lambda _: update_user()),
-            (PipelineEvent.TOOL_USED, lambda e: update_user(False, f"`{e.agent_name} {e.tool.tool_name}`")),
+            (PipelineEvent.TOOL_USED, lambda e: update_user(e.tool.tool_name.replace('get_', '').replace("_", "\\_"))),
             (PipelineEvent.INFO_RECOVERY, lambda _: update_user()),
             (PipelineEvent.REPORT_GENERATION, lambda _: update_user()),
         ])

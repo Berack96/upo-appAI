@@ -160,14 +160,19 @@ class RunMessage:
     def update(self) -> 'RunMessage':
         text_curr, state_curr = self.steps_total[self.current]
         self.steps_total[self.current] = (text_curr, state_curr + 1)
-        self.current += 1
+        self.current = min(self.current + 1, len(self.steps_total))
         if self.current < len(self.steps_total):
             text_curr, state_curr = self.steps_total[self.current]
             self.steps_total[self.current] = (text_curr, state_curr + 1)
         return self
 
-    def get_latest(self, extra: str = "") -> str:
+    def update_step(self, text_extra: str = "") -> 'RunMessage':
+        text_curr, state_curr = self.steps_total[self.current]
+        if text_extra:
+            text_curr = f"{text_curr.replace('╚', '╠')}\n╚═ {text_extra}"
+        self.steps_total[self.current] = (text_curr, state_curr)
+        return self
+
+    def get_latest(self) -> str:
         steps = [msg.replace(self.placeholder, self.emojis[state]) for msg, state in self.steps_total]
-        if extra:
-            steps[self.current] = f"{steps[self.current]}: {extra}"
         return self.base_message + "\n".join(steps)
