@@ -133,3 +133,41 @@ class PipelineInputs:
         social_tool = SocialAPIsTool()
         social_tool.handler.set_retries(api.retry_attempts, api.retry_delay_seconds)
         return market_tool, news_tool, social_tool
+
+    def __str__(self) -> str:
+        return "\n".join([
+            f"Query Check:  {self.query_analyzer_model.label}",
+            f"Team Leader:  {self.team_leader_model.label}",
+            f"Team:         {self.team_model.label}",
+            f"Report:       {self.report_generation_model.label}",
+            f"Strategy:     {self.strategy.label}",
+            f"User Query:   \"{self.user_query}\"",
+        ])
+
+
+class RunMessage:
+    def __init__(self, inputs: PipelineInputs, prefix: str = "", suffix: str = ""):
+        self.base_message = f"Running configurations: \n{prefix}{inputs}{suffix}\n\n"
+        self.emojis = ['🔳', '➡️', '✅']
+        self.placeholder = '<<<>>>'
+        self.current = 0
+        self.steps_total = [
+            (f"{self.placeholder} Query Check", 1),
+            (f"{self.placeholder} Info Recovery", 0),
+            (f"{self.placeholder} Report Generation", 0),
+        ]
+
+    def update(self) -> 'RunMessage':
+        text_curr, state_curr = self.steps_total[self.current]
+        self.steps_total[self.current] = (text_curr, state_curr + 1)
+        self.current += 1
+        if self.current < len(self.steps_total):
+            text_curr, state_curr = self.steps_total[self.current]
+            self.steps_total[self.current] = (text_curr, state_curr + 1)
+        return self
+
+    def get_latest(self, extra: str = "") -> str:
+        steps = [msg.replace(self.placeholder, self.emojis[state]) for msg, state in self.steps_total]
+        if extra:
+            steps[self.current] = f"{steps[self.current]}: {extra}"
+        return self.base_message + "\n".join(steps)

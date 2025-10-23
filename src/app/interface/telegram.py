@@ -1,3 +1,4 @@
+import asyncio
 import io
 import os
 import json
@@ -10,7 +11,7 @@ from markdown_pdf import MarkdownPdf, Section
 from telegram import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message, Update, User
 from telegram.constants import ChatAction
 from telegram.ext import Application, CallbackQueryHandler, CommandHandler, ContextTypes, ConversationHandler, MessageHandler, filters
-from app.agents.pipeline import Pipeline, PipelineInputs
+from app.agents.pipeline import Pipeline, PipelineEvent, PipelineInputs, RunMessage
 
 # per per_message di ConversationHandler che rompe sempre qualunque input tu metta
 warnings.filterwarnings("ignore")
@@ -233,7 +234,7 @@ class TelegramApp:
 
     async def __select_config(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         query, user = await self.handle_callbackquery(update)
-        logging.info(f"@{user.username} --> {query.data}")
+        logging.debug(f"@{user.username} --> {query.data}")
 
         req = self.user_requests[user]
         _, state, index = str(query.data).split(QUERY_SEP)
@@ -264,36 +265,33 @@ class TelegramApp:
         msg_id = update.message.message_id - 1
         chat_id = update.message.chat_id
 
-        configs_str = [
-            'Running with configurations:   ',
-            f'Check:     {inputs.query_analyzer_model.label}',
-            f'Leader:    {inputs.team_leader_model.label}',
-            f'Team:      {inputs.team_model.label}',
-            f'Report:    {inputs.report_generation_model.label}',
-            f'Strategy:  {inputs.strategy.label}',
-            f'Query:     "{inputs.user_query}"'
-        ]
-        full_message = f"""```\n{'\n'.join(configs_str)}\n```\n\n"""
-        first_message = full_message + "Generating report, please wait"
-        msg = await bot.edit_message_text(chat_id=chat_id, message_id=msg_id, text=first_message, parse_mode='MarkdownV2')
+        run_message = RunMessage(inputs, prefix="```\n", suffix="\n```")
+        msg = await bot.edit_message_text(chat_id=chat_id, message_id=msg_id, text=run_message.get_latest(), parse_mode='MarkdownV2')
         if isinstance(msg, bool): return
 
         # Remove user query and bot message
         await bot.delete_message(chat_id=chat_id, message_id=update.message.id)
 
-        # TODO migliorare messaggi di attesa
+        def update_user(update: bool = True, extra: str = "") -> None:
+            if update: run_message.update()
+            message = run_message.get_latest(extra)
+            if msg.text != message:
+                asyncio.create_task(msg.edit_text(message, parse_mode='MarkdownV2'))
+
         await bot.send_chat_action(chat_id=chat_id, action=ChatAction.TYPING)
         pipeline = Pipeline(inputs)
-        report_content = await pipeline.interact_async()
-        await msg.delete()
+        report_content = await pipeline.interact_async(listeners=[
+            (PipelineEvent.QUERY_CHECK, lambda _: update_user()),
+            (PipelineEvent.TOOL_USED, lambda e: update_user(False, f"`{e.agent_name} {e.tool.tool_name}`")),
+            (PipelineEvent.INFO_RECOVERY, lambda _: update_user()),
+            (PipelineEvent.REPORT_GENERATION, lambda _: update_user()),
+        ])
 
         # attach report file to the message
         pdf = MarkdownPdf(toc_level=2, optimize=True)
         pdf.add_section(Section(report_content, toc=False))
 
-        # TODO vedere se ha senso dare il pdf o solo il messaggio
         document = io.BytesIO()
         pdf.save_bytes(document)
         document.seek(0)
-        await bot.send_document(chat_id=chat_id, document=document, filename="report.pdf", parse_mode='MarkdownV2', caption=full_message)
-
+        await msg.reply_document(document=document, filename="report.pdf")
