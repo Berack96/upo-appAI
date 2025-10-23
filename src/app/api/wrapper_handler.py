@@ -87,7 +87,7 @@ class WrapperHandler(Generic[WrapperType]):
             Exception: If all wrappers fail after retries.
         """
 
-        logging.info(f"{inspect.getsource(func).strip()} {inspect.getclosurevars(func).nonlocals}")
+        logging.debug(f"{inspect.getsource(func).strip()} {inspect.getclosurevars(func).nonlocals}")
         results: dict[str, OutputType] = {}
         starting_index = self.index
 
