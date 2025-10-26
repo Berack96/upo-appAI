@@ -85,7 +85,7 @@ class ModelsConfig(BaseModel):
 
     @property
     def all_models(self) -> list[AppModel]:
-        return self.gemini + self.ollama
+        return self.gemini + self.ollama + self.gpt + self.mistral + self.deepseek + self.xai
 
     def validate_models(self) -> None:
         """
