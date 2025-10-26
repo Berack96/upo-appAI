@@ -32,8 +32,8 @@ class XWrapper(SocialWrapper):
         posts: list[SocialPost] = []
 
         for user in X_USERS:
-            cmd = f"rettiwt -k {self.api_key} tweet search {limit} -f {str(user)}"
-            process = subprocess.run(cmd, capture_output=True, shell=True)
+            cmd = ['rettiwt', '-k', self.api_key, 'tweet', 'search', str(limit), '-f', str(user)]
+            process = subprocess.run(cmd, capture_output=True)
             results = process.stdout.decode()
             json_result = json.loads(results)
 
