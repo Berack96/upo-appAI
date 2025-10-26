@@ -10,6 +10,10 @@ from agno.tools import Toolkit
 from agno.models.base import Model
 from agno.models.google import Gemini
 from agno.models.ollama import Ollama
+from agno.models.openai import OpenAIChat
+from agno.models.mistral import MistralChat
+from agno.models.deepseek import DeepSeek
+from agno.models.xai import xAI
 
 log = logging.getLogger(__name__)
 
@@ -19,7 +23,6 @@ class AppModel(BaseModel):
     name: str = "gemini-2.0-flash"
     label: str = "Gemini"
     model: type[Model] | None = None
-
     def get_model(self, instructions: str) -> Model:
         """
         Restituisce un'istanza del modello specificato.
@@ -71,6 +74,10 @@ class Strategy(BaseModel):
 
 class ModelsConfig(BaseModel):
     gemini: list[AppModel] = [AppModel()]
+    gpt: list[AppModel] = [AppModel(name="gpt-4o", label="OpenAIChat")]
+    mistral: list[AppModel] = [AppModel(name="mistral-large-latest", label="Mistral")]
+    deepseek: list[AppModel] = [AppModel(name="deepseek-chat", label="DeepSeek")]
+    xai: list[AppModel] = [AppModel(name="grok-3", label="xAI")]
     ollama: list[AppModel] = []
 
     @property
@@ -82,6 +89,11 @@ class ModelsConfig(BaseModel):
         Validate the configured models for each provider.
         """
         self.__validate_online_models(self.gemini, clazz=Gemini, key="GOOGLE_API_KEY")
+        self.__validate_online_models(self.gpt, clazz=OpenAIChat, key="OPENAI_API_KEY")
+        self.__validate_online_models(self.mistral, clazz=MistralChat, key="MISTRAL_API_KEY")
+        self.__validate_online_models(self.deepseek, clazz=DeepSeek, key="DEEPSEEK_API_KEY")
+        self.__validate_online_models(self.xai, clazz=xAI, key="XAI_API_KEY")
+
         self.__validate_ollama_models()
 
     def __validate_online_models(self, models: list[AppModel], clazz: type[Model], key: str | None = None) -> None:
