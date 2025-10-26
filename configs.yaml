@@ -19,6 +19,18 @@ models:
       label: Gemini
     # - name: gemini-2.0-pro # TODO Non funziona, ha un nome diverso
     #   label: Gemini Pro
+  gpt:
+    - name: gpt-4o
+      label: OpenAIChat
+  deepseek:
+    - name: deepseek-chat
+      label: DeepSeek
+  xai:
+    - name: grok-3
+      label: xAI
+  mistral:
+    - name: mistral-large-latest
+      label: Mistral
   ollama:
     - name: gpt-oss:latest
       label: Ollama GPT
