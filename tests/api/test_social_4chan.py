@@ -16,7 +16,7 @@ class TestChanWrapper:
         assert len(posts) == 2
         for post in posts:
             assert post.title != ""
-            assert post.time != ""
-            assert re.match(r'\d{4}-\d{2}-\d{2}', post.time)
+            assert post.timestamp != ""
+            assert re.match(r'\d{4}-\d{2}-\d{2}', post.timestamp)
             assert isinstance(post.comments, list)
 
