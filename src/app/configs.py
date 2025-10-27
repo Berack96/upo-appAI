@@ -109,7 +109,7 @@ class ModelsConfig(BaseModel):
             key: API key required for the provider (optional)
         """
         if key and os.getenv(key) is None:
-            log.warning(f"No {key} set in environment variables for provider.")
+            log.warning(f"No {key} set in environment variables for {clazz.__name__}.")
             models.clear()
             return
 
