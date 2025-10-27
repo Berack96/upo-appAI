@@ -1,4 +1,4 @@
 from app.interface.chat import ChatManager
-from app.interface.telegram_app import TelegramApp
+from app.interface.telegram import TelegramApp
 
 __all__ = ["ChatManager", "TelegramApp"]
