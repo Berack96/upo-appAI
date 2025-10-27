@@ -24,10 +24,6 @@ dependencies = [
     # Modelli supportati e installati (aggiungere qui sotto quelli che si vogliono usare)
     "google-genai",
     "ollama",
-    "openai",
-    "mistralai",
-    "deepseek",
-    "xai",
 
     # API di exchange di criptovalute
     "coinbase-advanced-py",
