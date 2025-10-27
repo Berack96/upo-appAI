@@ -103,10 +103,9 @@ class PipelineInputs:
     # Agent getters
     # ======================
     def get_agent_team(self) -> Team:
-        market, news, social = self.get_tools()
-        market_agent = self.team_model.get_agent(MARKET_INSTRUCTIONS, "Market Agent", tools=[market])
-        news_agent = self.team_model.get_agent(NEWS_INSTRUCTIONS, "News Agent", tools=[news])
-        social_agent = self.team_model.get_agent(SOCIAL_INSTRUCTIONS, "Socials Agent", tools=[social])
+        market_agent = self.team_model.get_agent(MARKET_INSTRUCTIONS, "Market Agent", tools=[MarketAPIsTool()])
+        news_agent = self.team_model.get_agent(NEWS_INSTRUCTIONS, "News Agent", tools=[NewsAPIsTool()])
+        social_agent = self.team_model.get_agent(SOCIAL_INSTRUCTIONS, "Socials Agent", tools=[SocialAPIsTool()])
         return Team(
             model=self.team_leader_model.get_model(TEAM_LEADER_INSTRUCTIONS),
             name="CryptoAnalysisTeam",
@@ -119,20 +118,6 @@ class PipelineInputs:
 
     def get_agent_report_generator(self) -> Agent:
         return self.report_generation_model.get_agent(REPORT_GENERATION_INSTRUCTIONS, "Report Generator Agent")
-
-    def get_tools(self) -> tuple[MarketAPIsTool, NewsAPIsTool, SocialAPIsTool]:
-        """
-        Restituisce la lista di tools disponibili per gli agenti.
-        """
-        api = self.configs.api
-
-        market_tool = MarketAPIsTool()
-        market_tool.handler.set_retries(api.retry_attempts, api.retry_delay_seconds)
-        news_tool = NewsAPIsTool()
-        news_tool.handler.set_retries(api.retry_attempts, api.retry_delay_seconds)
-        social_tool = SocialAPIsTool()
-        social_tool.handler.set_retries(api.retry_attempts, api.retry_delay_seconds)
-        return market_tool, news_tool, social_tool
 
     def __str__(self) -> str:
         return "\n".join([

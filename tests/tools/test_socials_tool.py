@@ -19,7 +19,7 @@ class TestSocialAPIsTool:
             assert post.title is not None
             assert post.timestamp is not None
 
-    def test_social_api_tool_get_top__all_results(self):
+    def test_social_api_tool_get_top_all_results(self):
         tool = SocialAPIsTool()
         result = tool.handler.try_call_all(lambda w: w.get_top_crypto_posts(limit=2))
         assert isinstance(result, dict)

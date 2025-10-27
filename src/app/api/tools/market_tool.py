@@ -2,30 +2,29 @@ from agno.tools import Toolkit
 from app.api.wrapper_handler import WrapperHandler
 from app.api.core.markets import MarketWrapper, Price, ProductInfo
 from app.api.markets import BinanceWrapper, CoinBaseWrapper, CryptoCompareWrapper, YFinanceWrapper
+from app.configs import AppConfig
 
 class MarketAPIsTool(MarketWrapper, Toolkit):
     """
     Class that aggregates multiple market API wrappers and manages them using WrapperHandler.
     This class supports retrieving product information and historical prices.
     This class can also aggregate data from multiple sources to provide a more comprehensive view of the market.
-    The following wrappers are included in this order:
-    - BinanceWrapper
-    - YFinanceWrapper
-    - CoinBaseWrapper
-    - CryptoCompareWrapper
+    Providers can be configured in configs.yaml under api.market_providers.
     """
 
     def __init__(self):
         """
-        Initialize the MarketAPIsTool with multiple market API wrappers.
-        The following wrappers are included in this order:
-        - BinanceWrapper
-        - YFinanceWrapper
-        - CoinBaseWrapper
-        - CryptoCompareWrapper
+        Initialize the MarketAPIsTool with market API wrappers configured in configs.yaml.
+        The order of wrappers is determined by the api.market_providers list in the configuration.
         """
-        wrappers: list[type[MarketWrapper]] = [BinanceWrapper, YFinanceWrapper, CoinBaseWrapper, CryptoCompareWrapper]
-        self.handler = WrapperHandler.build_wrappers(wrappers)
+        config = AppConfig()
+
+        self.handler = WrapperHandler.build_wrappers(
+            constructors=[BinanceWrapper, YFinanceWrapper, CoinBaseWrapper, CryptoCompareWrapper],
+            filters=config.api.market_providers,
+            try_per_wrapper=config.api.retry_attempts,
+            retry_delay=config.api.retry_delay_seconds
+        )
 
         Toolkit.__init__( # type: ignore
             self,
