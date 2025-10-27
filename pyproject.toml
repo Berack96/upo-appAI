@@ -10,7 +10,6 @@ requires-python = "==3.12.*"
 # Per ogni roba ho fatto un commento per evitare di dimenticarmi cosa fa chi.
 # Inoltre ho messo una emoji per indicare se è raccomandato o meno.
 dependencies = [
-    
     "pytest", # Test
     "dotenv", # Gestire variabili d'ambiente (generalmente API keys od opzioni)
     "gradio", # UI web semplice con user_input e output
@@ -29,8 +28,6 @@ dependencies = [
     "mistralai",
     "deepseek",
 
-
-
     # API di exchange di criptovalute
     "coinbase-advanced-py",
     "python-binance",
@@ -47,8 +44,6 @@ dependencies = [
     # Per telegram bot
     "python-telegram-bot", # Interfaccia Telegram Bot
     "markdown-pdf", # Per convertire markdown in pdf
-
-    
 ]
 
 [tool.pytest.ini_options]

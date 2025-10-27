@@ -23,6 +23,7 @@ class AppModel(BaseModel):
     name: str = "gemini-2.0-flash"
     label: str = "Gemini"
     model: type[Model] | None = None
+
     def get_model(self, instructions: str) -> Model:
         """
         Restituisce un'istanza del modello specificato.
