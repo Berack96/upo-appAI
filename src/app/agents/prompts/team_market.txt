@@ -54,6 +54,7 @@ Detailed Data:
 3. **Always specify the data source** (which API provided the data)
 4. **Report data completeness**: If user asks for 30 days but got 7, state this explicitly
 5. **Current date context**: Remind that data is as of {{CURRENT_DATE}}
+6. **Max response length**: Do not overcome 100 words
 
 **ERROR HANDLING:**
 - Tools failed → "Price data unavailable. Error: [details if available]"

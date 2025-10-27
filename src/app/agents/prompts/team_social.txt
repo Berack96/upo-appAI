@@ -70,6 +70,7 @@ Sample Posts (representative):
 3. **Report data staleness**: If newest post is >2 days old, flag this
 4. **Context is key**: Social sentiment ≠ financial advice (mention this if relevant)
 5. **Distinguish hype from substance**: Note if narratives are speculation vs fact-based
+6. **Max response length**: Do not overcome 100 words
 
 **ERROR HANDLING:**
 - No posts found → "No relevant social discussions found for [QUERY]"

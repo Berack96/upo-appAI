@@ -64,6 +64,7 @@ Notable Headlines:
 3. **Report data staleness**: If newest article is >3 days old, flag this
 4. **Cite sources**: Mention which news APIs provided the data
 5. **Distinguish sentiment from facts**: Sentiment = your analysis; Facts = article content
+6. **Max response length**: Do not overcome 100 words
 
 **ERROR HANDLING:**
 - No articles found → "No relevant news articles found for [QUERY]"
