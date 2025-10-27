@@ -1,14 +1,15 @@
 from agno.tools import Toolkit
 from app.api.wrapper_handler import WrapperHandler
 from app.api.core.social import SocialPost, SocialWrapper
-from app.api.social import RedditWrapper
+from app.api.social import *
+from app.configs import AppConfig
 
 
 class SocialAPIsTool(SocialWrapper, Toolkit):
     """
     Aggregates multiple social media API wrappers and manages them using WrapperHandler.
-    This class supports retrieving top crypto-related posts by querying multiple sources:
-    - RedditWrapper
+    This class supports retrieving top crypto-related posts by querying multiple sources.
+    Providers can be configured in configs.yaml under api.social_providers.
 
     By default, it returns results from the first successful wrapper. 
     Optionally, it can be configured to collect posts from all wrappers.
@@ -17,14 +18,17 @@ class SocialAPIsTool(SocialWrapper, Toolkit):
 
     def __init__(self):
         """
-        Initialize the SocialAPIsTool with multiple social media API wrappers.
-        The tool uses WrapperHandler to manage and invoke the different social media API wrappers.
-        The following wrappers are included in this order:
-        - RedditWrapper.
+        Initialize the SocialAPIsTool with social media API wrappers configured in configs.yaml.
+        The order of wrappers is determined by the api.social_providers list in the configuration.
         """
+        config = AppConfig()
 
-        wrappers: list[type[SocialWrapper]] = [RedditWrapper]
-        self.handler = WrapperHandler.build_wrappers(wrappers)
+        self.handler = WrapperHandler.build_wrappers(
+            constructors=[RedditWrapper, XWrapper, ChanWrapper],
+            filters=config.api.social_providers,
+            try_per_wrapper=config.api.retry_attempts,
+            retry_delay=config.api.retry_delay_seconds
+        )
 
         Toolkit.__init__( # type: ignore
             self,

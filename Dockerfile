@@ -1,6 +1,10 @@
 # Utilizziamo Debian slim invece di Alpine per migliore compatibilità
 FROM debian:bookworm-slim
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
+# Installiamo le dipendenze di sistema
+RUN apt update && \
+    apt install -y curl && \
+    rm -rf /var/lib/apt/lists/*
 
 # Installiamo uv
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -14,6 +18,11 @@ COPY pyproject.toml ./
 COPY uv.lock ./
 RUN uv sync --frozen --no-dev
 ENV PYTHONPATH="./src"
+
+# Installiamo le dipendenze per X (rettiwt, nodejs e npm)
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
+RUN apt install -y nodejs && rm -rf /var/lib/apt/lists/*
+RUN npm install -g rettiwt-api
 
 # Copiamo i file del progetto
 COPY LICENSE ./

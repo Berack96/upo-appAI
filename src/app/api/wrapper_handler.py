@@ -87,7 +87,7 @@ class WrapperHandler(Generic[WrapperType]):
             Exception: If all wrappers fail after retries.
         """
 
-        logging.info(f"{inspect.getsource(func).strip()} {inspect.getclosurevars(func).nonlocals}")
+        logging.debug(f"{inspect.getsource(func).strip()} {inspect.getclosurevars(func).nonlocals}")
         results: dict[str, OutputType] = {}
         starting_index = self.index
 
@@ -97,12 +97,12 @@ class WrapperHandler(Generic[WrapperType]):
             wrapper_name = wrapper.__class__.__name__
 
             if not try_all:
-                logging.info(f"try_call {wrapper_name}")
+                logging.debug(f"try_call {wrapper_name}")
 
             for try_count in range(1, self.retry_per_wrapper + 1):
                 try:
                     result = func(wrapper)
-                    logging.info(f"{wrapper_name} succeeded")
+                    logging.debug(f"{wrapper_name} succeeded")
                     results[wrapper_name] = result
                     break
 
@@ -131,13 +131,19 @@ class WrapperHandler(Generic[WrapperType]):
         return f"{e} [\"{last_frame.filename}\", line {last_frame.lineno}]"
 
     @staticmethod
-    def build_wrappers(constructors: list[type[WrapperClassType]], try_per_wrapper: int = 3, retry_delay: int = 2, kwargs: dict[str, Any] | None = None) -> 'WrapperHandler[WrapperClassType]':
+    def build_wrappers(
+        constructors: list[type[WrapperClassType]],
+        filters: list[str] | None = None,
+        try_per_wrapper: int = 3,
+        retry_delay: int = 2,
+        kwargs: dict[str, Any] | None = None) -> 'WrapperHandler[WrapperClassType]':
         """
         Builds a WrapperHandler instance with the given wrapper constructors.
         It attempts to initialize each wrapper and logs a warning if any cannot be initialized.
         Only successfully initialized wrappers are included in the handler.
         Args:
             constructors (list[type[W]]): An iterable of wrapper classes to instantiate. e.g. [WrapperA, WrapperB]
+            filters (list[str] | None): Optional list of provider names to filter the constructors.
             try_per_wrapper (int): Number of retries per wrapper before switching to the next.
             retry_delay (int): Delay in seconds between retries.
             kwargs (dict | None): Optional dictionary with keyword arguments common to all wrappers.
@@ -147,6 +153,10 @@ class WrapperHandler(Generic[WrapperType]):
             Exception: If no wrappers could be initialized.
         """
         assert WrapperHandler.__check(constructors), f"All constructors must be classes. Received: {constructors}"
+
+        # Order of wrappers is now determined by the order in filters
+        if filters:
+            constructors = [c for name in filters for c in constructors if c.__name__ == name]
 
         result: list[WrapperClassType] = []
         for wrapper_class in constructors:

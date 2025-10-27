@@ -17,9 +17,9 @@ class TestSocialAPIsTool:
         assert len(result) > 0
         for post in result:
             assert post.title is not None
-            assert post.time is not None
+            assert post.timestamp is not None
 
-    def test_social_api_tool_get_top__all_results(self):
+    def test_social_api_tool_get_top_all_results(self):
         tool = SocialAPIsTool()
         result = tool.handler.try_call_all(lambda w: w.get_top_crypto_posts(limit=2))
         assert isinstance(result, dict)
@@ -27,4 +27,4 @@ class TestSocialAPIsTool:
         for _provider, posts in result.items():
             for post in posts:
                 assert post.title is not None
-                assert post.time is not None
+                assert post.timestamp is not None

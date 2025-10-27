@@ -19,6 +19,15 @@ models:
       label: Gemini
     # - name: gemini-2.0-pro # TODO Non funziona, ha un nome diverso
     #   label: Gemini Pro
+  gpt:
+    - name: gpt-4o
+      label: OpenAIChat
+  deepseek:
+    - name: deepseek-chat
+      label: DeepSeek
+  mistral:
+    - name: mistral-large-latest
+      label: Mistral
   ollama:
     - name: gpt-oss:latest
       label: Ollama GPT
@@ -32,14 +41,13 @@ models:
 api:
   retry_attempts: 3
   retry_delay_seconds: 2
-  currency: USD
-  # TODO Magari implementare un sistema per settare i providers
-  market_providers: [BinanceWrapper, YFinanceWrapper]
-  news_providers: [GoogleNewsWrapper, DuckDuckGoWrapper]
-  social_providers: [RedditWrapper]
+  market_providers: [YFinanceWrapper, BinanceWrapper, CoinBaseWrapper, CryptoCompareWrapper]
+  news_providers: [DuckDuckGoWrapper, GoogleNewsWrapper, NewsApiWrapper, CryptoPanicWrapper]
+  social_providers: [RedditWrapper, XWrapper, ChanWrapper]
 
 agents:
   strategy: Conservative
   team_model: qwen3:1.7b
-  team_leader_model: qwen3:4b
-  predictor_model: qwen3:4b
+  team_leader_model: qwen3:8b
+  query_analyzer_model: qwen3:4b
+  report_generation_model: qwen3:8b

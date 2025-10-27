@@ -1,6 +1,6 @@
 import statistics
-from datetime import datetime
 from pydantic import BaseModel
+from app.api.core import unified_timestamp
 
 
 class ProductInfo(BaseModel):
@@ -64,24 +64,8 @@ class Price(BaseModel):
     """Timestamp in format YYYY-MM-DD HH:MM"""
 
     def set_timestamp(self, timestamp_ms: int | None = None, timestamp_s: int | None = None) -> None:
-        """
-        Sets the timestamp from milliseconds or seconds.
-        The timestamp is saved as a formatted string 'YYYY-MM-DD HH:MM'.
-        Args:
-            timestamp_ms: Timestamp in milliseconds.
-            timestamp_s: Timestamp in seconds.
-        Raises:
-            ValueError: If neither timestamp_ms nor timestamp_s is provided.
-        """
-        if timestamp_ms is not None:
-            timestamp = timestamp_ms // 1000
-        elif timestamp_s is not None:
-            timestamp = timestamp_s
-        else:
-            raise ValueError("Either timestamp_ms or timestamp_s must be provided")
-        assert timestamp > 0, "Invalid timestamp data received"
-
-        self.timestamp = datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M')
+        """ Use the unified_timestamp function to set the timestamp."""
+        self.timestamp = unified_timestamp(timestamp_ms, timestamp_s)
 
     @staticmethod
     def aggregate(prices: dict[str, list['Price']]) -> list['Price']:
