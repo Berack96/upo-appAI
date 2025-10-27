@@ -79,6 +79,7 @@ class ChatManager:
             with gr.Row():
                 provider = gr.Dropdown(
                     choices=self.inputs.list_models_names(),
+                    value=self.inputs.team_leader_model.label,
                     type="index",
                     label="Modello da usare"
                 )
@@ -86,6 +87,7 @@ class ChatManager:
 
                 style = gr.Dropdown(
                     choices=self.inputs.list_strategies_names(),
+                    value=self.inputs.strategy.label,
                     type="index",
                     label="Stile di investimento"
                 )

@@ -8,9 +8,7 @@ try:
 
     reasoning_agent = Agent(
         model=Gemini(),
-        tools=[
-            ReasoningTools(),
-        ],
+        tools=[ReasoningTools()],
         instructions="Use tables to display data.",
         markdown=True,
     )

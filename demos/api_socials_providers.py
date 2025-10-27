@@ -8,7 +8,7 @@ def main():
         print("===================================")
         print(f"Provider: {provider}")
         for post in posts:
-            print(f"== [{post.timestamp}] - {post.title} ==")
+            print(f"== [{post.time}] - {post.title} ==")
             print(f"   {post.description}")
             print(f"   {len(post.comments)}")
 
