@@ -83,15 +83,13 @@ class ChatManager:
                     label="Modello da usare"
                 )
                 provider.change(fn=self.inputs.choose_team_leader, inputs=provider, outputs=None)
-                provider.value = self.inputs.team_leader_model.label
 
-                strategy = gr.Dropdown(
+                style = gr.Dropdown(
                     choices=self.inputs.list_strategies_names(),
                     type="index",
                     label="Stile di investimento"
                 )
-                strategy.change(fn=self.inputs.choose_strategy, inputs=strategy, outputs=None)
-                strategy.value = self.inputs.strategy.label
+                style.change(fn=self.inputs.choose_strategy, inputs=style, outputs=None)
 
             chat = gr.ChatInterface(
                 fn=self.gradio_respond
