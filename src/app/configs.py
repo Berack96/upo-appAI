@@ -13,7 +13,7 @@ from agno.models.ollama import Ollama
 from agno.models.openai import OpenAIChat
 from agno.models.mistral import MistralChat
 from agno.models.deepseek import DeepSeek
-from agno.models.xai import xAI
+# from agno.models.xai import xAI
 
 log = logging.getLogger(__name__)
 
@@ -80,12 +80,12 @@ class ModelsConfig(BaseModel):
     gpt: list[AppModel] = [AppModel(name="gpt-4o", label="OpenAIChat")]
     mistral: list[AppModel] = [AppModel(name="mistral-large-latest", label="Mistral")]
     deepseek: list[AppModel] = [AppModel(name="deepseek-chat", label="DeepSeek")]
-    xai: list[AppModel] = [AppModel(name="grok-3", label="xAI")]
+    # xai: list[AppModel] = [AppModel(name="grok-3", label="xAI")]
     ollama: list[AppModel] = []
 
     @property
     def all_models(self) -> list[AppModel]:
-        return self.gemini + self.ollama + self.gpt + self.mistral + self.deepseek + self.xai
+        return self.gemini + self.ollama + self.gpt + self.mistral + self.deepseek # + self.xai
 
     def validate_models(self) -> None:
         """
@@ -95,7 +95,7 @@ class ModelsConfig(BaseModel):
         self.__validate_online_models(self.gpt, clazz=OpenAIChat, key="OPENAI_API_KEY")
         self.__validate_online_models(self.mistral, clazz=MistralChat, key="MISTRAL_API_KEY")
         self.__validate_online_models(self.deepseek, clazz=DeepSeek, key="DEEPSEEK_API_KEY")
-        self.__validate_online_models(self.xai, clazz=xAI, key="XAI_API_KEY")
+        # self.__validate_online_models(self.xai, clazz=xAI, key="XAI_API_KEY")
 
         self.__validate_ollama_models()
 

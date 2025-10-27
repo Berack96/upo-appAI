@@ -25,9 +25,6 @@ models:
   deepseek:
     - name: deepseek-chat
       label: DeepSeek
-  xai:
-    - name: grok-3
-      label: xAI
   mistral:
     - name: mistral-large-latest
       label: Mistral
