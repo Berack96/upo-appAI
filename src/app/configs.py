@@ -152,9 +152,12 @@ class AgentsConfigs(BaseModel):
     def validate_defaults(self, configs: 'AppConfig') -> None:
         """
         Validate that the default models and strategy exist in the provided configurations.
+        If any default is not found, a ValueError is raised.
         Args:
             models: ModelsConfig instance containing all available models.
             strategies: list of Strategy instances containing all available strategies.
+        Raises:
+            ValueError if any default model or strategy is not found.
         """
         try:
             configs.get_strategy_by_name(self.strategy)
