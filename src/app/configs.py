@@ -154,8 +154,7 @@ class AgentsConfigs(BaseModel):
         Validate that the default models and strategy exist in the provided configurations.
         If any default is not found, a ValueError is raised.
         Args:
-            models: ModelsConfig instance containing all available models.
-            strategies: list of Strategy instances containing all available strategies.
+            configs: the AppConfig instance containing models and strategies.
         Raises:
             ValueError if any default model or strategy is not found.
         """

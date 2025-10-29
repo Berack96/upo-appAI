@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import sys
 from dotenv import load_dotenv
 from app.configs import AppConfig
 from app.interface import *
@@ -34,3 +35,4 @@ if __name__ == "__main__":
 
     except Exception as e:
         logging.error(f"Application failed to start: {e}")
+        sys.exit(1)
