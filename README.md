@@ -31,10 +31,22 @@ L'installazione di questo progetto richiede 3 passaggi totali (+1 se si vuole sv
 
 ### **1. Configurazioni**
 
-Ci sono due file di configurazione principali che l'app utilizza: `config.yaml` e `.env`.\
-Il primo contiene le configurazioni generali dell'applicazione e può essere modificato a piacimento, mentre il secondo è utilizzato per le variabili d'ambiente.
+Ci sono due file di configurazione principali che l'app utilizza: `configs.yaml` e `.env`.
 
-Per il secondo, bisogna copiare il file `.env.example` in `.env` e successivamente modificalo con le tue API keys:
+#### **1.1 File di Configurazione dell'Applicazione**
+
+Il file `configs.yaml` contiene le configurazioni generali dell'applicazione (modelli, strategie, provider API, ecc.) e deve essere creato localmente copiando il file di esempio:
+
+```sh
+cp configs.yaml.example configs.yaml
+nano configs.yaml  # esempio di modifica del file
+```
+
+Il file `configs.yaml.example` include tutte le configurazioni disponibili con tutti i wrapper e modelli abilitati. Puoi personalizzare il tuo `configs.yaml` locale in base ai modelli che hai scaricato con Ollama e ai provider API che intendi utilizzare. **Questo file non verrà tracciato da git**, quindi ogni sviluppatore può mantenere la propria configurazione locale senza interferire con gli altri.
+
+#### **1.2 Variabili d'Ambiente**
+
+Per le variabili d'ambiente, bisogna copiare il file `.env.example` in `.env` e successivamente modificarlo con le tue API keys:
 ```sh
 cp .env.example .env
 nano .env  # esempio di modifica del file
@@ -45,6 +57,9 @@ Nel file [.env.example](.env.example) sono presenti tutte le variabili da compil
 
 Le chiavi non sono necessarie per far partire l'applicazione, ma senza di esse alcune funzionalità non saranno disponibili o saranno limitate. Per esempio senza la chiave di NewsAPI non si potranno recuperare le ultime notizie sul mercato delle criptovalute. Ciononostante, l'applicazione usa anche degli strumenti che non richiedono chiavi API, come Yahoo Finance e GNews, che permettono di avere comunque un'analisi di base del mercato.
 
+> [!NOTE]\
+> Entrambi i file `.env` e `configs.yaml` non vengono tracciati da git, quindi puoi modificarli liberamente senza preoccuparti di fare commit accidentali delle tue configurazioni personali.
+
 ### **2. Ollama**
 Per utilizzare modelli AI localmente, è necessario installare Ollama, un gestore di modelli LLM che consente di eseguire modelli direttamente sul proprio hardware. Si consiglia di utilizzare Ollama con il supporto GPU per prestazioni ottimali, ma è possibile eseguirlo anche solo con la CPU.
 
@@ -52,7 +67,7 @@ Per l'installazione scaricare Ollama dal loro [sito ufficiale](https://ollama.co
 
 Dopo l'installazione, si possono iniziare a scaricare i modelli desiderati tramite il comando `ollama pull <model>:<tag>`.
 
-I modelli usati dall'applicazione sono quelli specificati nel file [config.yaml](config.yaml) alla voce `model`. Se in locale si hanno dei modelli diversi, è possibile modificare questa voce per usare quelli disponibili.
+I modelli usati dall'applicazione sono quelli specificati nella sezione `models` del file di configurazione `configs.yaml` (ad esempio `models.ollama`). Se in locale si hanno dei modelli diversi, è possibile modificare il file `configs.yaml` per usare quelli disponibili.
 I modelli consigliati per questo progetto sono `qwen3:4b` e `qwen3:1.7b`.
 
 ### **3. Docker**
