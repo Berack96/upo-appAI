@@ -127,3 +127,28 @@ class TestMarketDataAggregator:
         assert aggregated[1].timestamp == timestamp_2h_ago
         assert aggregated[1].high == pytest.approx(50250.0, rel=1e-3) # type: ignore
         assert aggregated[1].low == pytest.approx(49850.0, rel=1e-3) # type: ignore
+
+    def test_aggregate_product_info_different_currencies(self):
+        products: dict[str, list[ProductInfo]] = {
+            "Provider1": [self.__product("BTC", 100000.0, 1000.0, "USD")],
+            "Provider2": [self.__product("BTC", 70000.0, 800.0, "EUR")],
+        }
+
+        aggregated = ProductInfo.aggregate(products)
+        assert len(aggregated) == 1
+
+        info = aggregated[0]
+        assert info is not None
+        assert info.id == "BTC-USD_AGGREGATED"
+        assert info.symbol == "BTC"
+        assert info.currency == "USD"
+        assert info.price == pytest.approx(100000.0, rel=1e-3) # type: ignore
+        assert info.volume_24h == pytest.approx(1000.0, rel=1e-3) # type: ignore
+
+        info = aggregated[1]
+        assert info is not None
+        assert info.id == "BTC-EUR_AGGREGATED"
+        assert info.symbol == "BTC"
+        assert info.currency == "EUR"
+        assert info.price == pytest.approx(70000.0, rel=1e-3) # type: ignore
+        assert info.volume_24h == pytest.approx(800.0, rel=1e-3) # type: ignore
