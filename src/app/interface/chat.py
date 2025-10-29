@@ -75,19 +75,30 @@ class ChatManager:
         with gr.Blocks() as interface:
             gr.Markdown("# 🤖 Agente di Analisi e Consulenza Crypto (Chat)")
 
+            # --- Prepara le etichette di default per i dropdown
+            model_labels = self.inputs.list_models_names()
+            default_model_label = self.inputs.team_leader_model.label
+            if default_model_label not in model_labels:
+                default_model_label = model_labels[0] if model_labels else None
+
+            strategy_labels = self.inputs.list_strategies_names()
+            default_strategy_label = self.inputs.strategy.label
+            if default_strategy_label not in strategy_labels:
+                default_strategy_label = strategy_labels[0] if strategy_labels else None
+
             # Dropdown provider e stile
             with gr.Row():
                 provider = gr.Dropdown(
-                    choices=self.inputs.list_models_names(),
-                    value=self.inputs.team_leader_model.label,
+                    choices=model_labels,
+                    value=default_model_label,
                     type="index",
                     label="Modello da usare"
                 )
                 provider.change(fn=self.inputs.choose_team_leader, inputs=provider, outputs=None)
 
                 style = gr.Dropdown(
-                    choices=self.inputs.list_strategies_names(),
-                    value=self.inputs.strategy.label,
+                    choices=strategy_labels,
+                    value=default_strategy_label,
                     type="index",
                     label="Stile di investimento"
                 )
