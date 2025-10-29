@@ -30,6 +30,8 @@ models:
       label: Qwen 3 (1.7B)
     - name: qwen3:32b
       label: Qwen 3 (32B)
+    - name: qwen3:14b
+      label: Qwen 3 (14B)
     - name: phi4-mini:3.8b
       label: Phi 4 mini (3.8b)
 
@@ -44,7 +46,7 @@ api:
 
 agents:
   strategy: Conservative
-  team_model: qwen3:32b # the agents
-  team_leader_model: qwen3:32b # the team leader
-  query_analyzer_model: qwen3:32b # query check
+  team_model: qwen3:14b # the agents
+  team_leader_model: gemini-2.0-flash # the team leader
+  query_analyzer_model: qwen3:14b # query check
   report_generation_model: qwen3:32b # ex predictor

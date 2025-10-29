@@ -42,31 +42,73 @@ class NewsAPIsTool(NewsWrapper, Toolkit):
         )
 
     def get_top_headlines(self, limit: int = 100) -> list[Article]:
+        """
+        Retrieves top headlines from the *first available* news provider.
+
+        This method sequentially queries multiple sources (e.g., Google, DuckDuckGo)
+        and returns results from the first one that responds successfully.
+        Use this for a fast, general overview of the news.
+
+        Args:
+            limit (int): The maximum number of articles to retrieve. Defaults to 100.
+
+        Returns:
+            list[Article]: A list of Article objects from the single successful provider.
+        """
         return self.handler.try_call(lambda w: w.get_top_headlines(limit))
+
     def get_latest_news(self, query: str, limit: int = 100) -> list[Article]:
+        """
+        Searches for the latest news on a specific topic from the *first available* provider.
+
+        This method sequentially queries multiple sources using the query
+        and returns results from the first one that responds successfully.
+        Use this for a fast, specific search.
+
+        Args:
+            query (str): The search topic to find relevant articles.
+            limit (int): The maximum number of articles to retrieve. Defaults to 100.
+
+        Returns:
+            list[Article]: A list of Article objects from the single successful provider.
+        """
         return self.handler.try_call(lambda w: w.get_latest_news(query, limit))
 
     def get_top_headlines_aggregated(self, limit: int = 100) -> dict[str, list[Article]]:
         """
-        Calls get_top_headlines on all wrappers/providers and returns a dictionary mapping their names to their articles.
+        Retrieves top headlines from *all available providers* and aggregates the results.
+
+        This method queries all configured sources and returns a dictionary
+        mapping each provider's name to its list of articles.
+        Use this when you need a comprehensive report or to compare sources.
+
         Args:
-            limit (int): Maximum number of articles to retrieve from each provider.
+            limit (int): The maximum number of articles to retrieve *from each* provider. Defaults to 100.
+
         Returns:
-            dict[str, list[Article]]: A dictionary mapping providers names to their list of Articles
+            dict[str, list[Article]]: A dictionary mapping provider names (str) to their list of Articles.
+
         Raises:
-            Exception: If all wrappers fail to provide results.
+            Exception: If all providers fail to return results.
         """
         return self.handler.try_call_all(lambda w: w.get_top_headlines(limit))
 
     def get_latest_news_aggregated(self, query: str, limit: int = 100) -> dict[str, list[Article]]:
         """
-        Calls get_latest_news on all wrappers/providers and returns a dictionary mapping their names to their articles.
+        Searches for news on a specific topic from *all available providers* and aggregates the results.
+
+        This method queries all configured sources using the query and returns a dictionary
+        mapping each provider's name to its list of articles.
+        Use this when you need a comprehensive report or to compare sources.
+
         Args:
-            query (str): The search query to find relevant news articles.
-            limit (int): Maximum number of articles to retrieve from each provider.
+            query (str): The search topic to find relevant articles.
+            limit (int): The maximum number of articles to retrieve *from each* provider. Defaults to 100.
+
         Returns:
-            dict[str, list[Article]]: A dictionary mapping providers names to their list of Articles
+            dict[str, list[Article]]: A dictionary mapping provider names (str) to their list of Articles.
+
         Raises:
-            Exception: If all wrappers fail to provide results.
+            Exception: If all providers fail to return results.
         """
         return self.handler.try_call_all(lambda w: w.get_latest_news(query, limit))

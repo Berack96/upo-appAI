@@ -36,16 +36,36 @@ class SocialAPIsTool(SocialWrapper, Toolkit):
         )
 
     def get_top_crypto_posts(self, limit: int = 5) -> list[SocialPost]:
+        """
+        Retrieves top cryptocurrency-related posts from the *first available* social media provider.
+
+        This method sequentially queries multiple sources (e.g., Reddit, X)
+        and returns results from the first one that responds successfully.
+        Use this for a fast, general overview of top social posts.
+
+        Args:
+            limit (int): The maximum number of posts to retrieve. Defaults to 5.
+
+        Returns:
+            list[SocialPost]: A list of SocialPost objects from the single successful provider.
+        """
         return self.handler.try_call(lambda w: w.get_top_crypto_posts(limit))
 
     def get_top_crypto_posts_aggregated(self, limit_per_wrapper: int = 5) -> dict[str, list[SocialPost]]:
         """
-        Calls get_top_crypto_posts on all wrappers/providers and returns a dictionary mapping their names to their posts.
+        Retrieves top cryptocurrency-related posts from *all available providers* and aggregates the results.
+
+        This method queries all configured social media sources and returns a dictionary
+        mapping each provider's name to its list of posts.
+        Use this when you need a comprehensive report or to compare sources.
+
         Args:
-            limit_per_wrapper (int): Maximum number of posts to retrieve from each provider.
+            limit_per_wrapper (int): The maximum number of posts to retrieve *from each* provider. Defaults to 5.
+
         Returns:
-            dict[str, list[SocialPost]]: A dictionary where keys are wrapper names and values are lists of SocialPost objects.
+            dict[str, list[SocialPost]]: A dictionary mapping provider names (str) to their list of SocialPost objects.
+
         Raises:
-            Exception: If all wrappers fail to provide results.
+            Exception: If all providers fail to return results.
         """
         return self.handler.try_call_all(lambda w: w.get_top_crypto_posts(limit_per_wrapper))
