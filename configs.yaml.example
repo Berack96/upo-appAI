@@ -27,8 +27,6 @@ models:
     - name: mistral-large-latest
       label: Mistral
   ollama:
-    - name: gpt-oss:latest
-      label: Ollama GPT
     - name: qwen3:8b
       label: Qwen 3 (8B)
     - name: qwen3:4b

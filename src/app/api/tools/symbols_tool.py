@@ -13,48 +13,79 @@ logging = logging.getLogger("crypto_symbols")
 
 BASE_URL = "https://finance.yahoo.com/markets/crypto/all/"
 
+
 class CryptoSymbolsTools(Toolkit):
     """
-    Classe per ottenere i simboli delle criptovalute tramite Yahoo Finance.
+    Class for obtaining cryptocurrency symbols via Yahoo Finance.
+    (This class-level docstring is for developers).
     """
 
     def __init__(self, cache_file: str = 'resources/cryptos.csv'):
         self.cache_file = cache_file
-        self.final_table = pd.read_csv(self.cache_file) if os.path.exists(self.cache_file) else pd.DataFrame() # type: ignore
-        Toolkit.__init__(self, # type: ignore
-            name="Crypto Symbols Tool",
-            instructions="Tool to get cryptocurrency symbols and search them by name.",
-            tools=[
-                self.get_all_symbols,
-                self.get_symbols_by_name,
-            ],
-        )
+        try:
+            self.final_table = pd.read_csv(self.cache_file) if os.path.exists(self.cache_file) else pd.DataFrame(
+                columns=['Symbol', 'Name'])
+        except Exception:
+            self.final_table = pd.DataFrame(columns=['Symbol', 'Name'])
+
+        Toolkit.__init__(self,  # type: ignore
+                         name="Crypto Symbols Tool",
+                         instructions="A utility tool to find and verify the correct cryptocurrency symbols (tickers). " \
+                                      "Use this to translate a cryptocurrency name (e.g., 'Bitcoin') into its official symbol " \
+                                      "(e.g., 'BTC-USD') *before* delegating tasks to the MarketAgent.",
+                         tools=[
+                             self.get_all_symbols,
+                             self.get_symbols_by_name,
+                         ],
+                         )
 
     def get_all_symbols(self) -> list[str]:
         """
-        Restituisce tutti i simboli delle criptovalute.
+        Returns a complete list of all available cryptocurrency symbols (tickers).
+
+        Warning: This list can be very long. Prefer 'get_symbols_by_name'
+        if you are searching for a specific asset.
+
         Returns:
-            list[str]: Lista di tutti i simboli delle criptovalute.
+            list[str]: A comprehensive list of all supported crypto symbols (e.g., "BTC-USD", "ETH-USD").
         """
         return self.final_table['Symbol'].tolist() if not self.final_table.empty else []
 
     def get_symbols_by_name(self, query: str) -> list[tuple[str, str]]:
         """
-        Cerca i simboli che contengono la query.
+        Searches the cryptocurrency database for assets matching a name or symbol.
+
+        Use this to find the exact, correct symbol for a cryptocurrency name.
+        (e.g., query="Bitcoin" might return [("BTC-USD", "Bitcoin USD")]).
+
         Args:
-            query (str): Query di ricerca.
+            query (str): The name, partial name, or symbol to search for (e.g., "Bitcoin", "ETH").
+
         Returns:
-            list[tuple[str, str]]: Lista di tuple (simbolo, nome) che contengono la query.
+            list[tuple[str, str]]: A list of tuples, where each tuple contains
+                                  the (symbol, full_name) of a matching asset.
+                                  Returns an empty list if no matches are found.
         """
-        query_lower = query.lower()
-        positions = self.final_table['Name'].str.lower().str.contains(query_lower)
-        return self.final_table[positions][['Symbol', 'Name']].apply(tuple, axis=1).tolist()
+        if self.final_table.empty or 'Name' not in self.final_table.columns or 'Symbol' not in self.final_table.columns:
+            return []
+
+        try:
+            # Cerca sia nel nome che nel simbolo, ignorando maiuscole/minuscole
+            mask = self.final_table['Name'].str.contains(query, case=False, na=False) | \
+                   self.final_table['Symbol'].str.contains(query, case=False, na=False)
+
+            filtered_df = self.final_table[mask]
+
+            # Converte il risultato in una lista di tuple
+            return list(zip(filtered_df['Symbol'], filtered_df['Name']))
+        except Exception:
+            return []
 
     async def fetch_crypto_symbols(self, force_refresh: bool = False) -> None:
         """
-        Recupera tutti i simboli delle criptovalute da Yahoo Finance e li memorizza in cache.
+        It retrieves all cryptocurrency symbols from Yahoo Finance and caches them.
         Args:
-            force_refresh (bool): Se True, forza il recupero anche se i dati sono già in cache.
+            force_refresh (bool): If True, it forces the retrieval even if the data are already in the cache.
         """
         if not force_refresh and not self.final_table.empty:
             return

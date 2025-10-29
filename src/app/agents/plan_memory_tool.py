@@ -4,6 +4,18 @@ from typing import TypedDict, Literal
 
 
 class Task(TypedDict):
+    """
+    Represents a single task in the execution plan.
+
+    Attributes:
+        name (str): The unique name of the task.
+        status (Literal["pending", "completed", "failed"]): The current status of the task.
+            - "pending": The task is yet to be executed.
+            - "completed": The task has been successfully executed.
+            - "failed": The task execution was unsuccessful.
+        result (str | None): An optional field to store the result or outcome of the task.
+            This could be a summary, an error message, or any relevant information.
+    """
     name: str
     status: Literal["pending", "completed", "failed"]
     result: str | None
@@ -13,6 +25,7 @@ class PlanMemoryTool(Toolkit):
     def __init__(self):
         self.tasks: list[Task] = []
         Toolkit.__init__(self, # type: ignore[call-arg]
+            name="Plan Memory Tool",
             instructions="Provides stateful, persistent memory for the Team Leader. " \
                  "This is your primary to-do list and state tracker. " \
                  "Use it to create, execute step-by-step, and record the results of your execution plan.",
