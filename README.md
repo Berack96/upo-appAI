@@ -67,7 +67,7 @@ Per l'installazione scaricare Ollama dal loro [sito ufficiale](https://ollama.co
 
 Dopo l'installazione, si possono iniziare a scaricare i modelli desiderati tramite il comando `ollama pull <model>:<tag>`.
 
-I modelli usati dall'applicazione sono quelli specificati nel file `configs.yaml` alla voce `models`. Se in locale si hanno dei modelli diversi, è possibile modificare il file `configs.yaml` per usare quelli disponibili.
+I modelli usati dall'applicazione sono quelli specificati nella sezione `models` del file di configurazione `configs.yaml` (ad esempio `models.ollama`). Se in locale si hanno dei modelli diversi, è possibile modificare il file `configs.yaml` per usare quelli disponibili.
 I modelli consigliati per questo progetto sono `qwen3:4b` e `qwen3:1.7b`.
 
 ### **3. Docker**
