@@ -17,8 +17,6 @@ models:
   gemini:
     - name: gemini-2.0-flash
       label: Gemini
-    - name: gemini-2.0-pro
-      label: Gemini Pro
   gpt:
     - name: gpt-4o
       label: OpenAIChat
