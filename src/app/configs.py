@@ -149,6 +149,26 @@ class AgentsConfigs(BaseModel):
     query_analyzer_model: str = "gemini-2.0-flash"
     report_generation_model: str = "gemini-2.0-flash"
 
+    def validate_defaults(self, configs: 'AppConfig') -> None:
+        """
+        Validate that the default models and strategy exist in the provided configurations.
+        Args:
+            models: ModelsConfig instance containing all available models.
+            strategies: list of Strategy instances containing all available strategies.
+        """
+        try:
+            configs.get_strategy_by_name(self.strategy)
+        except ValueError as e:
+            log.error(f"Default strategy '{self.strategy}' not found in configurations.")
+            raise e
+
+        for model_name in [self.team_model, self.team_leader_model, self.query_analyzer_model, self.report_generation_model]:
+            try:
+                configs.get_model_by_name(model_name)
+            except ValueError as e:
+                log.error(f"Default agent model '{model_name}' not found in configurations.")
+                raise e
+
 class AppConfig(BaseModel):
     port: int = 8000
     gradio_share: bool = False
@@ -190,6 +210,7 @@ class AppConfig(BaseModel):
         super().__init__(*args, **kwargs)
         self.set_logging_level()
         self.models.validate_models()
+        self.agents.validate_defaults(self)
         self._initialized = True
 
     def get_model_by_name(self, name: str) -> AppModel:
