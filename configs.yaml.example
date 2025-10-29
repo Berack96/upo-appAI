@@ -27,12 +27,20 @@ models:
     - name: mistral-large-latest
       label: Mistral
   ollama:
+    - name: gpt-oss:latest
+      label: Ollama GPT
     - name: qwen3:8b
       label: Qwen 3 (8B)
     - name: qwen3:4b
       label: Qwen 3 (4B)
     - name: qwen3:1.7b
       label: Qwen 3 (1.7B)
+    - name: qwen3:32b
+      label: Qwen 3 (32B)
+    - name: qwen3:14b
+      label: Qwen 3 (14B)
+    - name: phi4-mini:3.8b
+      label: Phi 4 mini (3.8b)
 
 api:
   retry_attempts: 3
