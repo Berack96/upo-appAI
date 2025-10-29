@@ -5,7 +5,6 @@ from app.api.core.news import Article, NewsWrapper
 
 def extract_article(result: dict[str, Any]) -> Article:
     article = Article()
-    print(result)
     article.source = result.get("source", "")
     article.time = result.get("date", "")
     article.title = result.get("title", "")
