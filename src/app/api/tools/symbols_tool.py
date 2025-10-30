@@ -4,6 +4,7 @@ import asyncio
 import logging
 import pandas as pd
 from io import StringIO
+from pathlib import Path
 from agno.tools.toolkit import Toolkit
 
 logging.basicConfig(level=logging.INFO)
@@ -18,12 +19,23 @@ class CryptoSymbolsTools(Toolkit):
     Classe per ottenere i simboli delle criptovalute tramite Yahoo Finance.
     """
 
+    @staticmethod
+    def _load_instructions() -> str:
+        """
+        Load the toolkit instructions from the external markdown file.
+        
+        Returns:
+            str: The content of the instructions file.
+        """
+        instructions_path = Path(__file__).parent / "instructions" / "symbols_instructions.md"
+        return instructions_path.read_text(encoding="utf-8")
+
     def __init__(self, cache_file: str = 'resources/cryptos.csv'):
         self.cache_file = cache_file
         self.final_table = pd.read_csv(self.cache_file) if os.path.exists(self.cache_file) else pd.DataFrame() # type: ignore
         Toolkit.__init__(self, # type: ignore
             name="Crypto Symbols Tool",
-            instructions="Tool to get cryptocurrency symbols and search them by name.",
+            instructions=self._load_instructions(),
             tools=[
                 self.get_all_symbols,
                 self.get_symbols_by_name,

@@ -1,3 +1,4 @@
+from pathlib import Path
 from agno.tools.toolkit import Toolkit
 from typing import TypedDict, Literal
 
@@ -10,12 +11,21 @@ class Task(TypedDict):
 
 
 class PlanMemoryTool(Toolkit):
+    @staticmethod
+    def _load_instructions() -> str:
+        """
+        Load the toolkit instructions from the external markdown file.
+        
+        Returns:
+            str: The content of the instructions file.
+        """
+        instructions_path = Path(__file__).parent / "instructions" / "plan_memory_instructions.md"
+        return instructions_path.read_text(encoding="utf-8")
+
     def __init__(self):
         self.tasks: list[Task] = []
         Toolkit.__init__(self, # type: ignore[call-arg]
-            instructions="Provides stateful, persistent memory for the Team Leader. " \
-                 "This is your primary to-do list and state tracker. " \
-                 "Use it to create, execute step-by-step, and record the results of your execution plan.",
+            instructions=self._load_instructions(),
             tools=[
                 self.add_tasks,
                 self.get_next_pending_task,

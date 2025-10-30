@@ -1,3 +1,4 @@
+from pathlib import Path
 from agno.tools import Toolkit
 from app.api.wrapper_handler import WrapperHandler
 from app.api.core.news import NewsWrapper, Article
@@ -14,6 +15,17 @@ class NewsAPIsTool(NewsWrapper, Toolkit):
     Optionally, it can be configured to collect articles from all wrappers.
     If no wrapper succeeds, an exception is raised.
     """
+
+    @staticmethod
+    def _load_instructions() -> str:
+        """
+        Load the toolkit instructions from the external text file.
+        
+        Returns:
+            str: The content of the instructions file.
+        """
+        instructions_path = Path(__file__).parent / "instructions" / "news_instructions.md"
+        return instructions_path.read_text(encoding="utf-8")
 
     def __init__(self):
         """
@@ -38,6 +50,7 @@ class NewsAPIsTool(NewsWrapper, Toolkit):
                 self.get_top_headlines_aggregated,
                 self.get_latest_news_aggregated,
             ],
+            instructions=self._load_instructions(),
         )
 
     def get_top_headlines(self, limit: int = 100) -> list[Article]:

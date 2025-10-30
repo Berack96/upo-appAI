@@ -21,7 +21,7 @@ class MarketAPIsTool(MarketWrapper, Toolkit):
         Returns:
             str: The content of the instructions file.
         """
-        instructions_path = Path(__file__).parent / "instructions" / "market_instructions.txt"
+        instructions_path = Path(__file__).parent / "instructions" / "market_instructions.md"
         return instructions_path.read_text(encoding="utf-8")
 
     def __init__(self):
