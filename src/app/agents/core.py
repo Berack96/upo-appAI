@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from agno.agent import Agent
 from agno.team import Team
 from agno.tools.reasoning import ReasoningTools
-from app.agents.plan_memory_tool import PlanMemoryTool
+from app.api.tools.plan_memory_tool import PlanMemoryTool
 from app.api.tools import *
 from app.configs import AppConfig
 from app.agents.prompts import *

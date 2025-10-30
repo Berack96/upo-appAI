@@ -1,4 +1,5 @@
 from agno.tools import Toolkit
+from app.api.tools.instructions import NEWS_TOOL_INSTRUCTIONS
 from app.api.wrapper_handler import WrapperHandler
 from app.api.core.news import NewsWrapper, Article
 from app.api.news import NewsApiWrapper, GoogleNewsWrapper, CryptoPanicWrapper, DuckDuckGoWrapper
@@ -32,6 +33,7 @@ class NewsAPIsTool(NewsWrapper, Toolkit):
         Toolkit.__init__( # type: ignore
             self,
             name="News APIs Toolkit",
+            instructions=NEWS_TOOL_INSTRUCTIONS,
             tools=[
                 self.get_top_headlines,
                 self.get_latest_news,
