@@ -12,6 +12,7 @@ class Task(TypedDict):
 class PlanMemoryTool(Toolkit):
     def __init__(self):
         self.tasks: list[Task] = []
+
         Toolkit.__init__(self, # type: ignore[call-arg]
             instructions="Provides stateful, persistent memory for the Team Leader. " \
                  "This is your primary to-do list and state tracker. " \
