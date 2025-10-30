@@ -45,28 +45,28 @@ class PipelineInputs:
         """
         Sceglie il modello LLM da usare per l'analizzatore di query.
         """
-        assert index >= 0 and index < len(self.configs.models.all_models), "Index out of range for models list."
+        assert 0 <= index < len(self.configs.models.all_models), "Index out of range for models list."
         self.query_analyzer_model = self.configs.models.all_models[index]
 
     def choose_team_leader(self, index: int):
         """
         Sceglie il modello LLM da usare per il Team Leader.
         """
-        assert index >= 0 and index < len(self.configs.models.all_models), "Index out of range for models list."
+        assert 0 <= index < len(self.configs.models.all_models), "Index out of range for models list."
         self.team_leader_model = self.configs.models.all_models[index]
 
     def choose_team(self, index: int):
         """
         Sceglie il modello LLM da usare per il Team.
         """
-        assert index >= 0 and index < len(self.configs.models.all_models), "Index out of range for models list."
+        assert 0 <= index < len(self.configs.models.all_models), "Index out of range for models list."
         self.team_model = self.configs.models.all_models[index]
 
     def choose_report_generator(self, index: int):
         """
         Sceglie il modello LLM da usare per il generatore di report.
         """
-        assert index >= 0 and index < len(self.configs.models.all_models), "Index out of range for models list."
+        assert 0 <= index < len(self.configs.models.all_models), "Index out of range for models list."
         self.report_generation_model = self.configs.models.all_models[index]
 
     def choose_strategy(self, index: int):
@@ -111,6 +111,7 @@ class PipelineInputs:
             name="CryptoAnalysisTeam",
             tools=[ReasoningTools(), PlanMemoryTool(), CryptoSymbolsTools()],
             members=[market_agent, news_agent, social_agent],
+            stream_intermediate_steps=True
         )
 
     def get_agent_query_checker(self) -> Agent:

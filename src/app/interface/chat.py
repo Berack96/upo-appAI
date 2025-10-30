@@ -49,13 +49,23 @@ class ChatManager:
     ########################################
     # Funzioni Gradio
     ########################################
-    def gradio_respond(self, message: str, history: list[tuple[str, str]]) -> str:
+    async def gradio_respond(self, message: str, history: list[tuple[str, str]]):
+        """
+        Versione asincrona in streaming.
+        Produce (yield) aggiornamenti di stato e la risposta finale.
+        """
         self.inputs.user_query = message
         pipeline = Pipeline(self.inputs)
-        response = pipeline.interact()
 
-        self.history.append((message, response))
-        return response
+        response = None
+        # Itera sul nuovo generatore asincrono
+        async for chunk in pipeline.interact_stream():
+            response = chunk  # Salva l'ultimo chunk (che sarà la risposta finale)
+            yield response  # Restituisce l'aggiornamento (o la risposta finale) a Gradio
+
+        # Dopo che il generatore è completo, salva l'ultima risposta nello storico
+        if response:
+            self.history.append((message, response))
 
     def gradio_save(self) -> str:
         self.save_chat("chat.json")
