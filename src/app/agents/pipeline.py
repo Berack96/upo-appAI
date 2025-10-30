@@ -174,33 +174,16 @@ class Pipeline:
                 elif step_name == PipelineEvent.REPORT_GENERATION.value:
                     yield "✍️ Sto scrivendo il report finale..."
 
-            # Gestisce i tool usati da agenti singoli (come Query Check)
-            elif event.event == WorkflowRunEvent.step_output.value:
-                agent_event = event.content
-                if hasattr(agent_event, 'event') and agent_event.event == RunEvent.tool_call_completed.value:
-                    tool_name = getattr(agent_event.tool, 'tool_name', 'uno strumento')
-                    yield f"🛠️ Sto usando lo strumento: {tool_name}..."
-
-            # Gestisce i tool usati da agenti interni al team (come CustomEvent)
-            elif event.event == WorkflowRunEvent.custom_event.value:
-                custom_content = getattr(event, 'content', None)
-                if custom_content and hasattr(custom_content, 'event'):
-                    agent_event = custom_content
-                    if agent_event.event == RunEvent.tool_call_completed.value:
-                        if step_name == PipelineEvent.INFO_RECOVERY.value:
-                            tool_name = getattr(agent_event.tool, 'tool_name', 'uno strumento')
-                            yield f"🛠️ (Team) Sto usando lo strumento: {tool_name}..."
-
             # Gestisce gli eventi di tool promossi dal Team
             elif event.event == PipelineEvent.TOOL_USED.value:
-                # Ci assicuriamo che l'evento provenga dallo step corretto
                 if current_active_step == PipelineEvent.INFO_RECOVERY.value:
                     tool_object = getattr(event, 'tool', None)
                     if tool_object:
-                        tool_name = getattr(tool_object, 'tool_name', 'uno strumento')
-                        yield f"🛠️ (Team) Sto usando lo strumento: {tool_name}..."
+                        tool_name = getattr(tool_object, 'tool_name', 'uno strumento sconosciuto')
+                        user_message = _get_user_friendly_action(tool_name)
+                        yield f"{user_message}"
                     else:
-                        yield f"🛠️ (Team) Sto usando uno strumento sconosciuto..."
+                        yield f"Sto usando uno strumento sconosciuto..."
 
             # 3. Salva il contenuto finale quando uno step è completato
             elif event.event == WorkflowRunEvent.step_completed.value:
@@ -218,3 +201,31 @@ class Pipeline:
         else:
             logging.error(f"No output from workflow: {content}")
             yield "Nessun output dal workflow, qualcosa è andato storto."
+
+# Funzione di utilità per messaggi user-friendly
+def _get_user_friendly_action(tool_name: str) -> str:
+    """
+    Restituisce un messaggio leggibile e descrittivo per l'utente
+    in base al nome dello strumento o funzione invocata.
+    """
+    descriptions = {
+        # --- MarketAPIsTool ---
+        "get_product": "🔍 Recupero le informazioni sul prodotto richiesto...",
+        "get_products": "📦 Recupero i dati su più asset...",
+        "get_historical_prices": "📊 Recupero i dati storici dei prezzi...",
+        "get_products_aggregated": "🧩 Aggrego le informazioni da più fonti...",
+        "get_historical_prices_aggregated": "📈 Creo uno storico aggregato dei prezzi...",
+
+        # --- NewsAPIsTool (Aggiunto) ---
+        "get_top_headlines": "📰 Cerco le notizie principali...",
+        "get_latest_news": "🔎 Cerco notizie recenti su un argomento...",
+        "get_top_headlines_aggregated": "🗞️ Raccolgo le notizie principali da tutte le fonti...",
+        "get_latest_news_aggregated": "📚 Raccolgo notizie specifiche da tutte le fonti...",
+
+        # --- SocialAPIsTool (Aggiunto) ---
+        "get_top_crypto_posts": "📱 Cerco i post più popolari sui social...",
+        "get_top_crypto_posts_aggregated": "🌐 Raccolgo i post da tutte le piattaforme social...",
+    }
+
+    # Messaggio di fallback generico
+    return descriptions.get(tool_name, f"⚙️ Eseguo l'operazione: {tool_name}...")
