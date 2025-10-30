@@ -13,6 +13,7 @@ def extract_product(stock_data: dict[str, str]) -> ProductInfo:
     product.price = float(stock_data.get('Current Stock Price', f"0.0 USD").split(" ")[0]) # prende solo il numero
     product.volume_24h = 0.0 # YFinance non fornisce il volume 24h direttamente
     product.currency = product.id.split('-')[1]  # La valuta è la parte dopo il '-'
+    product.provider = "YFinance"
     return product
 
 def extract_price(hist_data: dict[str, str]) -> Price:

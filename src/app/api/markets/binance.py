@@ -11,6 +11,7 @@ def extract_product(currency: str, ticker_data: dict[str, Any]) -> ProductInfo:
     product.price = float(ticker_data.get('price', 0))
     product.volume_24h = float(ticker_data.get('volume', 0))
     product.currency = currency
+    product.provider = "Binance"
     return product
 
 def extract_price(kline_data: list[Any]) -> Price:

@@ -14,12 +14,9 @@ class ProductInfo(BaseModel):
     volume_24h: float = 0.0
     currency: str = ""
     provider: str = ""
-    
-    def init(self, provider:str):
-        self.provider = provider
 
     @staticmethod
-    def aggregate(products: dict[str, list['ProductInfo']]) -> list['ProductInfo']:
+    def aggregate_multi_assets(products: dict[str, list['ProductInfo']]) -> list['ProductInfo']:
         """
         Aggregates a list of ProductInfo by symbol across different providers.
         Args:
@@ -65,6 +62,68 @@ class ProductInfo(BaseModel):
 
             aggregated_products.append(product)
         return aggregated_products
+    
+    @staticmethod
+    def aggregate_single_asset(assets: list['ProductInfo'] | dict[str, 'ProductInfo'] | dict[str, list['ProductInfo']]) -> 'ProductInfo':
+        """
+        Aggregates an asset across different exchanges.
+        Args:
+            assets: Can be:
+                - list[ProductInfo]: Direct list of products
+                - dict[str, ProductInfo]: Map provider -> ProductInfo (from WrapperHandler.try_call_all)
+                - dict[str, list[ProductInfo]]: Map provider -> list of ProductInfo
+        Returns:
+            ProductInfo: Aggregated ProductInfo combining data from all exchanges
+        """
+
+        # Defensive handling: normalize to a flat list of ProductInfo
+        if not assets:
+            raise ValueError("aggregate_single_asset requires at least one ProductInfo")
+
+        # Normalize to a flat list of ProductInfo
+        if isinstance(assets, dict):
+            # Check if dict values are ProductInfo or list[ProductInfo]
+            first_value = next(iter(assets.values())) if assets else None
+            if first_value and isinstance(first_value, list):
+                # dict[str, list[ProductInfo]] -> flatten
+                assets_list = [product for product_list in assets.values() for product in product_list]
+            else:
+                # dict[str, ProductInfo] -> extract values
+                assets_list = list(assets.values())
+        elif isinstance(assets, list) and assets and isinstance(assets[0], list):
+            # Flatten list[list[ProductInfo]] -> list[ProductInfo]
+            assets_list = [product for sublist in assets for product in sublist]
+        else:
+            # Already a flat list of ProductInfo
+            assets_list = list(assets)
+
+        if not assets_list:
+            raise ValueError("aggregate_single_asset requires at least one ProductInfo")
+
+        # Aggregazione per ogni Exchange
+        aggregated: ProductInfo = ProductInfo()
+        first = assets_list[0]
+        aggregated.id = f"{first.symbol}_AGGREGATED"
+        aggregated.symbol = first.symbol
+        aggregated.currency = next((p.currency for p in assets_list if p.currency), "")
+        
+        # Raccogliamo i provider che hanno fornito dati
+        providers = [p.provider for p in assets_list if p.provider]
+        aggregated.provider = ", ".join(set(providers)) if providers else "AGGREGATED"
+        
+        # Calcolo del volume medio
+        volume_sum = sum(p.volume_24h for p in assets_list if p.volume_24h > 0)
+        aggregated.volume_24h = volume_sum / len(assets_list) if assets_list else 0.0
+        # Calcolo del prezzo pesato per volume (VWAP - Volume Weighted Average Price)
+        if volume_sum > 0:
+            prices_weighted = sum(p.price * p.volume_24h for p in assets_list if p.volume_24h > 0)
+            aggregated.price = prices_weighted / volume_sum
+        else:
+            # Se non c'è volume, facciamo una media semplice dei prezzi
+            valid_prices = [p.price for p in assets_list if p.price > 0]
+            aggregated.price = sum(valid_prices) / len(valid_prices) if valid_prices else 0.0
+
+        return aggregated
 
 
 

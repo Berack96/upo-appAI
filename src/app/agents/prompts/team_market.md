@@ -17,11 +17,52 @@
 - **Interval**: Determine granularity (hourly, daily, weekly) from context
 - **Defaults**: If not specified, use current price or last 24h data
 
-**TOOL DESCRIPTIONS:**
-- get_product: Fetches current price for a specific cryptocurrency from a single source.
-- get_historical_price: Retrieves historical price data for a cryptocurrency over a specified time range from a single source.
-- get_products_aggregated: Fetches current prices by aggregating data from multiple sources. Use this if user requests more specific or reliable data.
-- get_historical_prices_aggregated: Retrieves historical price data by aggregating multiple sources. Use this if user requests more specific or reliable data.
+**AVAILABLE TOOLS (6 total):**
+
+**Single-Source Tools (FAST - use first available provider):**
+1. `get_product(asset_id: str)` → ProductInfo
+   - Fetches current price for ONE asset from the first available provider
+   - Example: `get_product("BTC")` → returns BTC price from Binance/YFinance/Coinbase/CryptoCompare
+   - Use for: Quick single asset lookup
+
+2. `get_products(asset_ids: list[str])` → list[ProductInfo]
+   - Fetches current prices for MULTIPLE assets from the first available provider
+   - Example: `get_products(["BTC", "ETH", "SOL"])` → returns 3 prices from same provider
+   - Use for: Quick multi-asset lookup
+
+3. `get_historical_prices(asset_id: str, limit: int = 100)` → list[Price]
+   - Fetches historical price data for ONE asset from the first available provider
+   - Example: `get_historical_prices("BTC", limit=30)` → last 30 price points
+   - Use for: Quick historical data lookup
+
+**Multi-Source Aggregated Tools (COMPREHENSIVE - queries ALL providers and merges results):**
+4. `get_product_aggregated(asset_id: str)` → ProductInfo
+   - Queries ALL providers (Binance, YFinance, Coinbase, CryptoCompare) for ONE asset and aggregates
+   - Returns most reliable price using volume-weighted average (VWAP)
+   - Example: `get_product_aggregated("BTC")` → BTC price from all 4 providers, merged
+   - Use for: When user requests "reliable", "accurate", or "comprehensive" data for ONE asset
+   - Warning: Uses more API calls (4x)
+
+5. `get_products_aggregated(asset_ids: list[str])` → list[ProductInfo]
+   - Queries ALL providers for MULTIPLE assets and aggregates results
+   - Returns more reliable data with multiple sources and confidence scores
+   - Example: `get_products_aggregated(["BTC", "ETH"])` → prices from all 4 providers, merged
+   - Use for: When user requests "comprehensive" or "detailed" data for MULTIPLE assets
+   - Warning: Uses more API calls (4x per asset)
+
+6. `get_historical_prices_aggregated(asset_id: str = "BTC", limit: int = 100)` → list[Price]
+   - Queries ALL providers for historical data and aggregates results
+   - Returns more complete historical dataset with multiple sources
+   - Example: `get_historical_prices_aggregated("BTC", limit=50)` → 50 points from each provider
+   - Use for: When user requests "comprehensive" or "detailed" historical analysis
+   - Warning: Uses more API calls (4x)
+
+**TOOL SELECTION STRATEGY:**
+- **Simple queries** ("What's BTC price?") → Use `get_product()` (tool #1)
+- **Reliable single asset** ("Get me the most accurate BTC price") → Use `get_product_aggregated()` (tool #4)
+- **Multiple assets quick** ("Compare BTC, ETH prices") → Use `get_products()` (tool #2)
+- **Multiple assets comprehensive** ("Detailed analysis of BTC and ETH") → Use `get_products_aggregated()` (tool #5)
+- **Historical data** → Specify appropriate `limit` parameter (7 for week, 30 for month, etc.)
 
 **OUTPUT FORMAT JSON:**
 

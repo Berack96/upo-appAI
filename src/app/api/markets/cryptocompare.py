@@ -11,6 +11,7 @@ def extract_product(asset_data: dict[str, Any]) -> ProductInfo:
     product.price = float(asset_data.get('PRICE', 0))
     product.volume_24h = float(asset_data.get('VOLUME24HOUR', 0))
     assert product.price > 0, "Invalid price data received from CryptoCompare"
+    product.provider = "CryptoCompare"
     return product
 
 def extract_price(price_data: dict[str, Any]) -> Price:
