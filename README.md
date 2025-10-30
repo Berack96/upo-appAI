@@ -106,22 +106,30 @@ uv run src/app
 
 # **Applicazione**
 
-> [!CAUTION]\
-> ***L'applicazione è attualmente in fase di sviluppo.***
-
-L'applicazione viene fatta partire tramite il file [src/app/\_\_main\_\_.py](src/app/__main__.py) che inizializza l'agente principale e gli agenti secondari.
-
+L'applicazione viene fatta partire tramite il file [src/app/\_\_main\_\_.py](src/app/__main__.py) che contiene il codice principale per l'inizializzazione e l'esecuzione del sistema di consulenza finanziaria basato su LLM Agents.
 In esso viene creato il server `gradio` per l'interfaccia web e viene anche inizializzato il bot di Telegram (se è stata inserita la chiave nel file `.env` ottenuta da [BotFather](https://core.telegram.org/bots/features#creating-a-new-bot)).
 
 L'interazione è guidata, sia tramite l'interfaccia web che tramite il bot di Telegram; l'utente può scegliere prima di tutto delle opzioni generali (come il modello e la strategia di investimento), dopodiché può inviare un messaggio di testo libero per chiedere consigli o informazioni specifiche. Per esempio: "Qual è l'andamento attuale di Bitcoin?" o "Consigliami quali sono le migliori criptovalute in cui investire questo mese".
 
-L'applicazione, una volta ricevuta la richiesta, la passa al [Team](src/app/agents/team.py) di agenti che si occupano di raccogliere i dati necessari per rispondere in modo completo e ragionato.
+L'applicazione, una volta ricevuta la richiesta, procede a fare le seguenti operazioni:
+1. Analizza la richiesta dell'utente per controllare che la query sia valida.
+2. Inizializza il Team di agenti per l'analisi del mercato.
+3. Ogni agente del Team recupera i dati necessari dalle API esterne (dati di mercato, notizie, social media) se richiesto.
+4. Il Leader recupera le risposte dagli altri agenti e genera una risposta finale.
+5. La risposta viene poi impaginata da un agente dedicato e inviata all'utente tramite l'interfaccia web o allegato dal bot di Telegram.
 
-Gli agenti coinvolti nel Team sono:
-- **Leader**: Coordina gli altri agenti e fornisce la risposta finale all'utente.
-- **Market Agent**: Recupera i dati di mercato attuali delle criptovalute da Binance e Yahoo Finance.
-- **News Agent**: Recupera le ultime notizie sul mercato delle criptovalute da NewsAPI e GNews.
-- **Social Agent**: Recupera i dati dai social media (Reddit) per analizzare il sentiment del mercato.
+Gli agenti coinvolti in questo processo sono:
+- **Query Check**: Verifica che la richiesta dell'utente sia valida e coerente con le funzionalità dell'applicazione.
+- **Team Leader**: Coordina gli agenti del team e fornisce una risposta finale basata sui dati raccolti.
+- **Market Agent**: Membro del Team, recupera i dati di mercato attuali delle criptovalute da Binance e Yahoo Finance.
+- **News Agent**: Membro del Team, recupera le ultime notizie sul mercato delle criptovalute da NewsAPI e GNews.
+- **Social Agent**: Membro del Team, recupera i dati dai social media (Reddit) per analizzare il sentiment del mercato.
+- **Report Generator**: Si occupa di impaginare la risposta finale in un formato leggibile e comprensibile per l'utente.
+
+L'interazione di questa applicazione con l'utente finisce nell'istante in cui viene inviata la risposta finale.
+Se l'utente vuole fare una nuova richiesta, deve inviarla nuovamente tramite l'interfaccia web o il bot di Telegram.
+Ogni richiesta viene trattata come una nuova sessione, senza memoria delle interazioni precedenti, questo per garantire che ogni analisi sia basata esclusivamente sui dati attuali del mercato, siccome questo è un requisito fondamentale per un sistema di consulenza finanziaria affidabile.
+Per quanto riguarda Telegram, all'utente vengono inviati i risultati tramite allegati che rimangono disponibili all'utente indefinitamente nella chat con il bot.
 
 ## Struttura del codice del Progetto
 
