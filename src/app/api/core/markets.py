@@ -34,33 +34,28 @@ class ProductInfo(BaseModel):
                     product.provider = provider_name
                 symbols_infos.setdefault(product.symbol, []).append(product)
 
-        # Aggregazione per ogni symbol
+        # Aggregazione per ogni symbol usando aggregate_single_asset
         aggregated_products: list[ProductInfo] = []
         for symbol, product_list in symbols_infos.items():
-            product = ProductInfo()
-
-            product.id = f"{symbol}_AGGREGATED"
-            product.symbol = symbol
-            product.currency = next((p.currency for p in product_list if p.currency), "")
-            
-            # Raccogliamo i provider che hanno fornito dati
-            providers = [p.provider for p in product_list if p.provider]
-            product.provider = ", ".join(set(providers)) if providers else "AGGREGATED"
-
-            # Calcolo del volume medio
-            volume_sum = sum(p.volume_24h for p in product_list if p.volume_24h > 0)
-            product.volume_24h = volume_sum / len(product_list) if product_list else 0.0
-
-            # Calcolo del prezzo pesato per volume (VWAP - Volume Weighted Average Price)
-            if volume_sum > 0:
-                prices_weighted = sum(p.price * p.volume_24h for p in product_list if p.volume_24h > 0)
-                product.price = prices_weighted / volume_sum
-            else:
-                # Se non c'è volume, facciamo una media semplice dei prezzi
-                valid_prices = [p.price for p in product_list if p.price > 0]
-                product.price = sum(valid_prices) / len(valid_prices) if valid_prices else 0.0
-
-            aggregated_products.append(product)
+            try:
+                # Usa aggregate_single_asset per aggregare ogni simbolo
+                aggregated = ProductInfo.aggregate_single_asset(product_list)
+                
+                # aggregate_single_asset calcola il volume medio, ma per multi_assets
+                # vogliamo il volume totale. Ricalcoliamo il volume come somma dopo il filtro USD
+                # Dobbiamo rifare il filtro USD per contare correttamente
+                currencies = set(p.currency for p in product_list if p.currency)
+                if len(currencies) > 1:
+                    product_list = [p for p in product_list if p.currency.upper() == "USD"]
+                
+                # Volume totale
+                aggregated.volume_24h = sum(p.volume_24h for p in product_list if p.volume_24h > 0)
+                
+                aggregated_products.append(aggregated)
+            except ValueError:
+                # Se aggregate_single_asset fallisce (es. no USD when currencies differ), salta
+                continue
+        
         return aggregated_products
     
     @staticmethod
@@ -99,6 +94,14 @@ class ProductInfo(BaseModel):
 
         if not assets_list:
             raise ValueError("aggregate_single_asset requires at least one ProductInfo")
+
+        # Controllo valuta: se non sono tutte uguali, filtra solo USD
+        currencies = set(p.currency for p in assets_list if p.currency)
+        if len(currencies) > 1:
+            # Valute diverse: filtra solo USD
+            assets_list = [p for p in assets_list if p.currency.upper() == "USD"]
+            if not assets_list:
+                raise ValueError("aggregate_single_asset: no USD products available when currencies differ")
 
         # Aggregazione per ogni Exchange
         aggregated: ProductInfo = ProductInfo()

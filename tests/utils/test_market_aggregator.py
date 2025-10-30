@@ -66,13 +66,13 @@ class TestMarketDataAggregator:
         assert btc_info is not None
         avg_weighted_price_btc = (50000.0 * 1000.0 + 50100.0 * 1100.0) / (1000.0 + 1100.0)
         assert btc_info.price == pytest.approx(avg_weighted_price_btc, rel=1e-3) # type: ignore
-        assert btc_info.volume_24h == pytest.approx(1050.0, rel=1e-3) # type: ignore
+        assert btc_info.volume_24h == pytest.approx(2100.0, rel=1e-3) # type: ignore  # Total volume (1000 + 1100)
         assert btc_info.currency == "USD"
 
         assert eth_info is not None
         avg_weighted_price_eth = (4000.0 * 2000.0 + 4050.0 * 2100.0) / (2000.0 + 2100.0)
         assert eth_info.price == pytest.approx(avg_weighted_price_eth, rel=1e-3) # type: ignore
-        assert eth_info.volume_24h == pytest.approx(2050.0, rel=1e-3) # type: ignore
+        assert eth_info.volume_24h == pytest.approx(4100.0, rel=1e-3) # type: ignore  # Total volume (2000 + 2100)
         assert eth_info.currency == "USD"
 
     def test_aggregate_product_info_with_no_data(self):
@@ -141,12 +141,10 @@ class TestMarketDataAggregator:
         assert info is not None
         assert info.id == "BTC_AGGREGATED"
         assert info.symbol == "BTC"
-        assert info.currency in ["USD", "EUR"]  # Can be either, depending on which is found first
-        # When aggregating different currencies, VWAP is calculated
-        # (100000.0 * 1000.0 + 70000.0 * 800.0) / (1000.0 + 800.0)
-        expected_price = (100000.0 * 1000.0 + 70000.0 * 800.0) / (1000.0 + 800.0)
-        assert info.price == pytest.approx(expected_price, rel=1e-3) # type: ignore
-        assert info.volume_24h == pytest.approx(900.0, rel=1e-3) # type: ignore  # Average of volumes
+        assert info.currency == "USD"  # Only USD products are kept
+        # When currencies differ, only USD is aggregated (only Provider1 in this case)
+        assert info.price == pytest.approx(100000.0, rel=1e-3) # type: ignore
+        assert info.volume_24h == pytest.approx(1000.0, rel=1e-3) # type: ignore  # Only USD volume
 
     # ===== Tests for aggregate_single_asset =====
 
