@@ -1,4 +1,6 @@
 from agno.tools import Toolkit
+
+from app.agents.action_registry import register_friendly_actions
 from app.api.wrapper_handler import WrapperHandler
 from app.api.core.news import NewsWrapper, Article
 from app.api.news import NewsApiWrapper, GoogleNewsWrapper, CryptoPanicWrapper, DuckDuckGoWrapper
@@ -111,3 +113,10 @@ class NewsAPIsTool(NewsWrapper, Toolkit):
             Exception: If all providers fail to return results.
         """
         return self.handler.try_call_all(lambda w: w.get_latest_news(query, limit))
+
+register_friendly_actions({
+    "get_top_headlines": "📰 Cerco le notizie principali...",
+    "get_latest_news": "🔎 Cerco notizie recenti su un argomento...",
+    "get_top_headlines_aggregated": "🗞️ Raccolgo le notizie principali da tutte le fonti...",
+    "get_latest_news_aggregated": "📚 Raccolgo notizie specifiche da tutte le fonti...",
+})

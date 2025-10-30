@@ -8,10 +8,20 @@ from agno.run.workflow import WorkflowRunEvent
 from agno.workflow.types import StepInput, StepOutput
 from agno.workflow.step import Step
 from agno.workflow.workflow import Workflow
+
+from app.agents.action_registry import ACTION_DESCRIPTIONS
 from app.agents.core import *
 
 logging = logging.getLogger("pipeline")
 
+
+def _get_user_friendly_action(tool_name: str) -> str:
+    """
+    Restituisce un messaggio leggibile e descrittivo per l'utente
+    leggendo dal registro globale.
+    """
+    # Usa il dizionario ACTION_DESCRIPTIONS importato
+    return ACTION_DESCRIPTIONS.get(tool_name, f"⚙️ Eseguo l'operazione: {tool_name}...")
 
 
 class PipelineEvent(str, Enum):
@@ -201,31 +211,3 @@ class Pipeline:
         else:
             logging.error(f"No output from workflow: {content}")
             yield "Nessun output dal workflow, qualcosa è andato storto."
-
-# Funzione di utilità per messaggi user-friendly
-def _get_user_friendly_action(tool_name: str) -> str:
-    """
-    Restituisce un messaggio leggibile e descrittivo per l'utente
-    in base al nome dello strumento o funzione invocata.
-    """
-    descriptions = {
-        # --- MarketAPIsTool ---
-        "get_product": "🔍 Recupero le informazioni sul prodotto richiesto...",
-        "get_products": "📦 Recupero i dati su più asset...",
-        "get_historical_prices": "📊 Recupero i dati storici dei prezzi...",
-        "get_products_aggregated": "🧩 Aggrego le informazioni da più fonti...",
-        "get_historical_prices_aggregated": "📈 Creo uno storico aggregato dei prezzi...",
-
-        # --- NewsAPIsTool (Aggiunto) ---
-        "get_top_headlines": "📰 Cerco le notizie principali...",
-        "get_latest_news": "🔎 Cerco notizie recenti su un argomento...",
-        "get_top_headlines_aggregated": "🗞️ Raccolgo le notizie principali da tutte le fonti...",
-        "get_latest_news_aggregated": "📚 Raccolgo notizie specifiche da tutte le fonti...",
-
-        # --- SocialAPIsTool (Aggiunto) ---
-        "get_top_crypto_posts": "📱 Cerco i post più popolari sui social...",
-        "get_top_crypto_posts_aggregated": "🌐 Raccolgo i post da tutte le piattaforme social...",
-    }
-
-    # Messaggio di fallback generico
-    return descriptions.get(tool_name, f"⚙️ Eseguo l'operazione: {tool_name}...")

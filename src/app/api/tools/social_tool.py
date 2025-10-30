@@ -1,4 +1,6 @@
 from agno.tools import Toolkit
+
+from app.agents.action_registry import register_friendly_actions
 from app.api.wrapper_handler import WrapperHandler
 from app.api.core.social import SocialPost, SocialWrapper
 from app.api.social import *
@@ -73,3 +75,8 @@ class SocialAPIsTool(SocialWrapper, Toolkit):
             Exception: If all providers fail to return results.
         """
         return self.handler.try_call_all(lambda w: w.get_top_crypto_posts(limit_per_wrapper))
+
+register_friendly_actions({
+    "get_top_crypto_posts": "📱 Cerco i post più popolari sui social...",
+    "get_top_crypto_posts_aggregated": "🌐 Raccolgo i post da tutte le piattaforme social...",
+})

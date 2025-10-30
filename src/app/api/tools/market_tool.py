@@ -1,4 +1,6 @@
 from agno.tools import Toolkit
+
+from app.agents.action_registry import register_friendly_actions
 from app.api.wrapper_handler import WrapperHandler
 from app.api.core.markets import MarketWrapper, Price, ProductInfo
 from app.api.markets import BinanceWrapper, CoinBaseWrapper, CryptoCompareWrapper, YFinanceWrapper
@@ -127,3 +129,11 @@ class MarketAPIsTool(MarketWrapper, Toolkit):
         """
         all_prices = self.handler.try_call_all(lambda w: w.get_historical_prices(asset_id, limit))
         return Price.aggregate(all_prices)
+
+register_friendly_actions({
+    "get_product": "🔍 Recupero le informazioni sul prodotto richiesto...",
+    "get_products": "📦 Recupero i dati su più asset...",
+    "get_historical_prices": "📊 Recupero i dati storici dei prezzi...",
+    "get_products_aggregated": "🧩 Aggrego le informazioni da più fonti...",
+    "get_historical_prices_aggregated": "📈 Creo uno storico aggregato dei prezzi...",
+})
