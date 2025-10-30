@@ -72,7 +72,7 @@ class ChatManager:
 
 
     def gradio_build_interface(self) -> gr.Blocks:
-        with gr.Blocks() as interface:
+        with gr.Blocks(fill_height=True, fill_width=True) as interface:
             gr.Markdown("# 🤖 Agente di Analisi e Consulenza Crypto (Chat)")
 
             # --- Prepara le etichette di default per i dropdown
