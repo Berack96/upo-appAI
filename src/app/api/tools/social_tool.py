@@ -1,5 +1,5 @@
-from pathlib import Path
 from agno.tools import Toolkit
+from app.api.tools.instructions import SOCIAL_TOOL_INSTRUCTIONS
 from app.api.wrapper_handler import WrapperHandler
 from app.api.core.social import SocialPost, SocialWrapper
 from app.api.social import *
@@ -17,17 +17,6 @@ class SocialAPIsTool(SocialWrapper, Toolkit):
     If no wrapper succeeds, an exception is raised.
     """
 
-    @staticmethod
-    def _load_instructions() -> str:
-        """
-        Load the toolkit instructions from the external text file.
-        
-        Returns:
-            str: The content of the instructions file.
-        """
-        instructions_path = Path(__file__).parent / "instructions" / "social_instructions.md"
-        return instructions_path.read_text(encoding="utf-8")
-
     def __init__(self):
         """
         Initialize the SocialAPIsTool with social media API wrappers configured in configs.yaml.
@@ -44,12 +33,12 @@ class SocialAPIsTool(SocialWrapper, Toolkit):
 
         Toolkit.__init__( # type: ignore
             self,
-            name="Socials Toolkit",
+            name="Socials APIs Toolkit",
+            instructions=SOCIAL_TOOL_INSTRUCTIONS,
             tools=[
                 self.get_top_crypto_posts,
                 self.get_top_crypto_posts_aggregated,
             ],
-            instructions=self._load_instructions(),
         )
 
     def get_top_crypto_posts(self, limit: int = 5) -> list[SocialPost]:

@@ -1,6 +1,6 @@
-from pathlib import Path
 from agno.tools.toolkit import Toolkit
 from typing import TypedDict, Literal
+from app.api.tools.instructions import PLAN_MEMORY_TOOL_INSTRUCTIONS
 
 
 
@@ -11,21 +11,12 @@ class Task(TypedDict):
 
 
 class PlanMemoryTool(Toolkit):
-    @staticmethod
-    def _load_instructions() -> str:
-        """
-        Load the toolkit instructions from the external markdown file.
-        
-        Returns:
-            str: The content of the instructions file.
-        """
-        instructions_path = Path(__file__).parent / "instructions" / "plan_memory_instructions.md"
-        return instructions_path.read_text(encoding="utf-8")
 
     def __init__(self):
         self.tasks: list[Task] = []
         Toolkit.__init__(self, # type: ignore[call-arg]
-            instructions=self._load_instructions(),
+            name="Plan Memory Toolkit",
+            instructions=PLAN_MEMORY_TOOL_INSTRUCTIONS,
             tools=[
                 self.add_tasks,
                 self.get_next_pending_task,

@@ -1,5 +1,5 @@
-from pathlib import Path
 from agno.tools import Toolkit
+from app.api.tools.instructions import MARKET_TOOL_INSTRUCTIONS
 from app.api.wrapper_handler import WrapperHandler
 from app.api.core.markets import MarketWrapper, Price, ProductInfo
 from app.api.markets import BinanceWrapper, CoinBaseWrapper, CryptoCompareWrapper, YFinanceWrapper
@@ -12,17 +12,6 @@ class MarketAPIsTool(MarketWrapper, Toolkit):
     This class can also aggregate data from multiple sources to provide a more comprehensive view of the market.
     Providers can be configured in configs.yaml under api.market_providers.
     """
-
-    @staticmethod
-    def _load_instructions() -> str:
-        """
-        Load the toolkit instructions from the external text file.
-        
-        Returns:
-            str: The content of the instructions file.
-        """
-        instructions_path = Path(__file__).parent / "instructions" / "market_instructions.md"
-        return instructions_path.read_text(encoding="utf-8")
 
     def __init__(self):
         """
@@ -41,6 +30,7 @@ class MarketAPIsTool(MarketWrapper, Toolkit):
         Toolkit.__init__( # type: ignore
             self,
             name="Market APIs Toolkit",
+            instructions=MARKET_TOOL_INSTRUCTIONS,
             tools=[
                 self.get_product,
                 self.get_products,
@@ -48,7 +38,6 @@ class MarketAPIsTool(MarketWrapper, Toolkit):
                 self.get_products_aggregated,
                 self.get_historical_prices_aggregated,
             ],
-            instructions=self._load_instructions(),
         )
 
     def get_product(self, asset_id: str) -> ProductInfo:
