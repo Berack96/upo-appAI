@@ -271,7 +271,7 @@ class TelegramApp:
         await bot.delete_message(chat_id=chat_id, message_id=update.message.id)
 
         def update_user(update_step: str = "") -> None:
-            if update_step: run_message.update_step(update_step)
+            if update_step: run_message.update_step_with_tool(update_step)
             else: run_message.update()
 
             message = run_message.get_latest()
@@ -280,11 +280,11 @@ class TelegramApp:
 
         await bot.send_chat_action(chat_id=chat_id, action=ChatAction.TYPING)
         pipeline = Pipeline(inputs)
-        report_content = await pipeline.interact_async(listeners=[
-            (PipelineEvent.QUERY_CHECK, lambda _: update_user()),
-            (PipelineEvent.TOOL_USED, lambda e: update_user(e.tool.tool_name.replace('get_', '').replace("_", "\\_"))),
-            (PipelineEvent.INFO_RECOVERY, lambda _: update_user()),
-            (PipelineEvent.REPORT_GENERATION, lambda _: update_user()),
+        report_content = await pipeline.interact(listeners=[
+            (PipelineEvent.QUERY_CHECK_END, lambda _: update_user()),
+            (PipelineEvent.TOOL_USED_END, lambda e: update_user(e.tool.tool_name.replace('get_', '').replace("_", "\\_"))),
+            (PipelineEvent.INFO_RECOVERY_END, lambda _: update_user()),
+            (PipelineEvent.REPORT_GENERATION_END, lambda _: update_user()),
         ])
 
         # attach report file to the message

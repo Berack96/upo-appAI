@@ -155,12 +155,20 @@ class RunMessage:
         self.base_message = f"Running configurations: \n{prefix}{inputs}{suffix}\n\n"
         self.emojis = ['🔳', '➡️', '✅']
         self.placeholder = '<<<>>>'
+        self.set_steps(["Query Check", "Info Recovery", "Report Generation"])
+
+    def set_steps(self, steps: list[str]) -> 'RunMessage':
+        """
+        Inizializza gli step di esecuzione con lo stato iniziale.
+        Args:
+            steps (list[str]): Lista degli step da includere nel messaggio.
+        Returns:
+            RunMessage: L'istanza aggiornata di RunMessage.
+        """
+        self.steps_total = [(f"{self.placeholder} {step}", 0) for step in steps]
+        self.steps_total[0] = (self.steps_total[0][0], 1)  # Primo step in esecuzione
         self.current = 0
-        self.steps_total = [
-            (f"{self.placeholder} Query Check", 1),
-            (f"{self.placeholder} Info Recovery", 0),
-            (f"{self.placeholder} Report Generation", 0),
-        ]
+        return self
 
     def update(self) -> 'RunMessage':
         """
@@ -177,15 +185,15 @@ class RunMessage:
             self.steps_total[self.current] = (text_curr, state_curr + 1)
         return self
 
-    def update_step(self, text_extra: str = "") -> 'RunMessage':
+    def update_step_with_tool(self, tool_used: str = "") -> 'RunMessage':
         """
         Aggiorna il messaggio per lo step corrente.
         Args:
-            text_extra (str, optional): Testo aggiuntivo da includere nello step. Defaults to "".
+            tool_used (str, optional): Testo aggiuntivo da includere nello step. Defaults to "".
         """
         text_curr, state_curr = self.steps_total[self.current]
-        if text_extra:
-            text_curr = f"{text_curr.replace('╚', '╠')}\n╚═ {text_extra}"
+        if tool_used:
+            text_curr = f"{text_curr.replace('╚', '╠')}\n╚═ {tool_used}"
         self.steps_total[self.current] = (text_curr, state_curr)
         return self
 
@@ -197,3 +205,4 @@ class RunMessage:
         """
         steps = [msg.replace(self.placeholder, self.emojis[state]) for msg, state in self.steps_total]
         return self.base_message + "\n".join(steps)
+

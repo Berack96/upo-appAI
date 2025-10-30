@@ -1,7 +1,9 @@
 import os
 import json
+from typing import Any, Callable
 import gradio as gr
-from app.agents.pipeline import Pipeline, PipelineInputs
+from app.agents.action_registry import get_user_friendly_action
+from app.agents.pipeline import Pipeline, PipelineEvent, PipelineInputs
 
 
 class ChatManager:
@@ -56,10 +58,15 @@ class ChatManager:
         """
         self.inputs.user_query = message
         pipeline = Pipeline(self.inputs)
+        listeners: list[tuple[PipelineEvent, Callable[[Any], str | None]]] = [
+            (PipelineEvent.QUERY_CHECK, lambda _: "🔍 Sto controllando la tua richiesta..."),
+            (PipelineEvent.INFO_RECOVERY, lambda _: "📊 Sto recuperando i dati (mercato, news, social)..."),
+            (PipelineEvent.REPORT_GENERATION, lambda _: "✍️ Sto scrivendo il report finale..."),
+            (PipelineEvent.TOOL_USED, lambda e:  get_user_friendly_action(e.tool.tool_name))
+        ]
 
         response = None
-        # Itera sul nuovo generatore asincrono
-        async for chunk in pipeline.interact_stream():
+        async for chunk in pipeline.interact_stream(listeners=listeners):
             response = chunk  # Salva l'ultimo chunk (che sarà la risposta finale)
             yield response  # Restituisce l'aggiornamento (o la risposta finale) a Gradio
 
