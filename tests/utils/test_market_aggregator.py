@@ -139,7 +139,7 @@ class TestMarketDataAggregator:
 
         info = aggregated[0]
         assert info is not None
-        assert info.id == "BTC-USD_AGGREGATED"
+        assert info.id == "BTC_AGGREGATED"
         assert info.symbol == "BTC"
         assert info.currency == "USD"
         assert info.price == pytest.approx(100000.0, rel=1e-3) # type: ignore

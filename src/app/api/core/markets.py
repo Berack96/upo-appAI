@@ -13,21 +13,28 @@ class ProductInfo(BaseModel):
     price: float = 0.0
     volume_24h: float = 0.0
     currency: str = ""
+    provider: str = ""
+    
+    def init(self, provider:str):
+        self.provider = provider
 
     @staticmethod
     def aggregate(products: dict[str, list['ProductInfo']]) -> list['ProductInfo']:
         """
-        Aggregates a list of ProductInfo by symbol.
+        Aggregates a list of ProductInfo by symbol across different providers.
         Args:
             products (dict[str, list[ProductInfo]]): Map provider -> list of ProductInfo
         Returns:
-            list[ProductInfo]: List of ProductInfo aggregated by symbol
+            list[ProductInfo]: List of ProductInfo aggregated by symbol, combining data from all providers
         """
 
-        # Costruzione mappa symbol -> lista di ProductInfo
+        # Costruzione mappa symbol -> lista di ProductInfo (da tutti i provider)
         symbols_infos: dict[str, list[ProductInfo]] = {}
-        for _, product_list in products.items():
+        for provider_name, product_list in products.items():
             for product in product_list:
+                # Assicuriamo che il provider sia impostato
+                if not product.provider:
+                    product.provider = provider_name
                 symbols_infos.setdefault(product.symbol, []).append(product)
 
         # Aggregazione per ogni symbol
@@ -37,13 +44,24 @@ class ProductInfo(BaseModel):
 
             product.id = f"{symbol}_AGGREGATED"
             product.symbol = symbol
-            product.currency = next(p.currency for p in product_list if p.currency)
+            product.currency = next((p.currency for p in product_list if p.currency), "")
+            
+            # Raccogliamo i provider che hanno fornito dati
+            providers = [p.provider for p in product_list if p.provider]
+            product.provider = ", ".join(set(providers)) if providers else "AGGREGATED"
 
-            volume_sum = sum(p.volume_24h for p in product_list)
+            # Calcolo del volume medio
+            volume_sum = sum(p.volume_24h for p in product_list if p.volume_24h > 0)
             product.volume_24h = volume_sum / len(product_list) if product_list else 0.0
 
-            prices = sum(p.price * p.volume_24h for p in product_list)
-            product.price = (prices / volume_sum) if volume_sum > 0 else 0.0
+            # Calcolo del prezzo pesato per volume (VWAP - Volume Weighted Average Price)
+            if volume_sum > 0:
+                prices_weighted = sum(p.price * p.volume_24h for p in product_list if p.volume_24h > 0)
+                product.price = prices_weighted / volume_sum
+            else:
+                # Se non c'è volume, facciamo una media semplice dei prezzi
+                valid_prices = [p.price for p in product_list if p.price > 0]
+                product.price = sum(valid_prices) / len(valid_prices) if valid_prices else 0.0
 
             aggregated_products.append(product)
         return aggregated_products
