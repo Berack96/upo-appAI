@@ -15,6 +15,6 @@
 
 **ERROR HANDLING:**
 - No articles: "No news found for [QUERY]. Try broader terms."
-- Old data: "Warning: Recent article [DATE], may not reflect current."
+- Old data: "Most recent article is from [DATE], may not reflect current sentiment."
 
 **NOTE:** Be concise (<100 words unless more needed). Include URLs when possible.
