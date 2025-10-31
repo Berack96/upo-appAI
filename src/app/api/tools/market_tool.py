@@ -1,6 +1,7 @@
 from agno.tools import Toolkit
 
 from app.agents.action_registry import friendly_action
+from app.api.tools.instructions import MARKET_TOOL_INSTRUCTIONS
 from app.api.wrapper_handler import WrapperHandler
 from app.api.core.markets import MarketWrapper, Price, ProductInfo
 from app.api.markets import BinanceWrapper, CoinBaseWrapper, CryptoCompareWrapper, YFinanceWrapper
@@ -31,6 +32,7 @@ class MarketAPIsTool(MarketWrapper, Toolkit):
         Toolkit.__init__( # type: ignore
             self,
             name="Market APIs Toolkit",
+            instructions=MARKET_TOOL_INSTRUCTIONS,
             tools=[
                 self.get_product,
                 self.get_products,

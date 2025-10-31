@@ -1,6 +1,7 @@
 from agno.tools import Toolkit
 
 from app.agents.action_registry import friendly_action
+from app.api.tools.instructions import SOCIAL_TOOL_INSTRUCTIONS
 from app.api.wrapper_handler import WrapperHandler
 from app.api.core.social import SocialPost, SocialWrapper
 from app.api.social import *
@@ -34,7 +35,8 @@ class SocialAPIsTool(SocialWrapper, Toolkit):
 
         Toolkit.__init__( # type: ignore
             self,
-            name="Socials Toolkit",
+            name="Socials APIs Toolkit",
+            instructions=SOCIAL_TOOL_INSTRUCTIONS,
             tools=[
                 self.get_top_crypto_posts,
                 self.get_top_crypto_posts_aggregated,
