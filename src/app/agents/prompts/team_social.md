@@ -26,7 +26,7 @@ Sample Posts: - "[EXCERPT]" - [PLATFORM] - [DATE] - [Engagement]
 
 **ERROR HANDLING:**
 - No posts: "No relevant discussions found."
-- Old data: "Warning: Recent post [DATE], may not reflect current."
+- Old data: "Warning: Most recent post is from [DATE], may not reflect current sentiment."
 
 **NOTES:**
 - Be VERY concise (<100 words) - posts are verbose
