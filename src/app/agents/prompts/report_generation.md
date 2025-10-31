@@ -23,6 +23,7 @@ Each section has: Analysis, Data Freshness, Sources, Raw Data (JSON or formatted
 
 # Cryptocurrency Analysis Report
 **Generated:** {{CURRENT_DATE}}
+----
 **Query:** [From input - MANDATORY]
 
 ## Executive Summary
