@@ -13,3 +13,5 @@
 - IS_CRYPTO: (empty)
 - NOT_CRYPTO: "I can only analyze cryptocurrency topics."
 - AMBIGUOUS: "Which cryptocurrency? (e.g., Bitcoin, Ethereum)"
+
+STOP instantly WHEN YOU CLASSIFY the query. DO NOT ANSWER the query.
