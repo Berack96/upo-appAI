@@ -26,6 +26,7 @@ RUN npm install -g rettiwt-api
 
 # Copiamo i file del progetto
 COPY LICENSE ./
+COPY resources/ ./resources/
 COPY src/ ./src/
 COPY configs.yaml ./
 
