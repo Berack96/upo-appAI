@@ -9,12 +9,12 @@ L'obiettivo è quello di creare un sistema di consulenza finanziaria basato su L
 
 # **Indice**
 - [Installazione](#installazione)
-  - [1. Variabili d'Ambiente](#1-variabili-dambiente)
+  - [1. Configurazioni](#1-configurazioni)
   - [2. Ollama](#2-ollama)
   - [3. Docker](#3-docker)
   - [4. UV (solo per sviluppo locale)](#4-uv-solo-per-sviluppo-locale)
 - [Applicazione](#applicazione)
-  - [Struttura del codice del Progetto](#struttura-del-codice-del-progetto)
+  - [Struttura del codice](#struttura-del-codice)
   - [Tests](#tests)
 
 # **Installazione**
@@ -150,7 +150,7 @@ Ogni richiesta viene trattata come una nuova sessione, senza memoria delle inter
 
 Per quanto riguarda Telegram, all'utente vengono inviati i risultati tramite allegati PDF che rimangono disponibili indefinitamente nella chat con il bot, permettendo di mantenere uno storico delle analisi passate.
 
-## Struttura del codice del Progetto
+## Struttura del codice
 
 ```
 src
