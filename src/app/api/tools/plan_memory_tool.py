@@ -14,6 +14,7 @@ class PlanMemoryTool(Toolkit):
 
     def __init__(self):
         self.tasks: list[Task] = []
+
         Toolkit.__init__(self, # type: ignore[call-arg]
             name="Plan Memory Toolkit",
             instructions=PLAN_MEMORY_TOOL_INSTRUCTIONS,

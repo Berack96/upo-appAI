@@ -45,28 +45,28 @@ class PipelineInputs:
         """
         Sceglie il modello LLM da usare per l'analizzatore di query.
         """
-        assert index >= 0 and index < len(self.configs.models.all_models), "Index out of range for models list."
+        assert 0 <= index < len(self.configs.models.all_models), "Index out of range for models list."
         self.query_analyzer_model = self.configs.models.all_models[index]
 
     def choose_team_leader(self, index: int):
         """
         Sceglie il modello LLM da usare per il Team Leader.
         """
-        assert index >= 0 and index < len(self.configs.models.all_models), "Index out of range for models list."
+        assert 0 <= index < len(self.configs.models.all_models), "Index out of range for models list."
         self.team_leader_model = self.configs.models.all_models[index]
 
     def choose_team(self, index: int):
         """
         Sceglie il modello LLM da usare per il Team.
         """
-        assert index >= 0 and index < len(self.configs.models.all_models), "Index out of range for models list."
+        assert 0 <= index < len(self.configs.models.all_models), "Index out of range for models list."
         self.team_model = self.configs.models.all_models[index]
 
     def choose_report_generator(self, index: int):
         """
         Sceglie il modello LLM da usare per il generatore di report.
         """
-        assert index >= 0 and index < len(self.configs.models.all_models), "Index out of range for models list."
+        assert 0 <= index < len(self.configs.models.all_models), "Index out of range for models list."
         self.report_generation_model = self.configs.models.all_models[index]
 
     def choose_strategy(self, index: int):
@@ -145,21 +145,31 @@ class RunMessage:
         - In esecuzione (➡️)
         - Completato (✅)
 
-        Lo stato di esecuzione può essere assegnato solo ad uno step alla volta.
+        Lo stato di esecuzione può essere assegnato solo a uno step alla volta.
         Args:
-            inputs (PipelineInputs): Input della pipeline per mostrare la configurazione.
-            prefix (str, optional): Prefisso del messaggio. Defaults to "".
-            suffix (str, optional): Suffisso del messaggio. Defaults to "".
+            inputs (PipelineInputs): Input della pipeline per mostrare la configurazione
+            prefix (str, optional): Prefisso del messaggio. Defaults to ""
+            suffix (str, optional): Suffisso del messaggio. Defaults to ""
         """
         self.base_message = f"Running configurations: \n{prefix}{inputs}{suffix}\n\n"
         self.emojis = ['🔳', '➡️', '✅']
         self.placeholder = '<<<>>>'
         self.current = 0
-        self.steps_total = [
-            (f"{self.placeholder} Query Check", 1),
-            (f"{self.placeholder} Info Recovery", 0),
-            (f"{self.placeholder} Report Generation", 0),
-        ]
+        self.steps_total: list[tuple[str, int]] = []
+        self.set_steps(["Query Check", "Info Recovery", "Report Generation"])
+
+    def set_steps(self, steps: list[str]) -> 'RunMessage':
+        """
+        Inizializza gli step di esecuzione con lo stato iniziale.
+        Args:
+            steps (list[str]): Lista degli step da includere nel messaggio.
+        Returns:
+            RunMessage: L'istanza aggiornata di RunMessage.
+        """
+        self.steps_total = [(f"{self.placeholder} {step}", 0) for step in steps]
+        self.steps_total[0] = (self.steps_total[0][0], 1)  # Primo step in esecuzione
+        self.current = 0
+        return self
 
     def update(self) -> 'RunMessage':
         """
@@ -176,15 +186,15 @@ class RunMessage:
             self.steps_total[self.current] = (text_curr, state_curr + 1)
         return self
 
-    def update_step(self, text_extra: str = "") -> 'RunMessage':
+    def update_step_with_tool(self, tool_used: str = "") -> 'RunMessage':
         """
         Aggiorna il messaggio per lo step corrente.
         Args:
-            text_extra (str, optional): Testo aggiuntivo da includere nello step. Defaults to "".
+            tool_used (str, optional): Testo aggiuntivo da includere nello step. Defaults to "".
         """
         text_curr, state_curr = self.steps_total[self.current]
-        if text_extra:
-            text_curr = f"{text_curr.replace('╚', '╠')}\n╚═ {text_extra}"
+        if tool_used:
+            text_curr = f"{text_curr.replace('╚', '╠')}\n╚═ {tool_used}"
         self.steps_total[self.current] = (text_curr, state_curr)
         return self
 
@@ -196,3 +206,4 @@ class RunMessage:
         """
         steps = [msg.replace(self.placeholder, self.emojis[state]) for msg, state in self.steps_total]
         return self.base_message + "\n".join(steps)
+
