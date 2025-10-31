@@ -107,7 +107,12 @@ class Pipeline:
         def condition_query_ok(step_input: StepInput) -> StepOutput:
             val = step_input.previous_step_content
             stop = (not val.is_crypto) if isinstance(val, QueryOutputs) else True
-            return StepOutput(stop=stop)
+            return StepOutput(stop=stop, content=step_input.input)
+
+        def sanitization_output(step_input: StepInput) -> StepOutput:
+            val = step_input.previous_step_content
+            content = f"Query: {step_input.input}\n\nRetrieved data: {self.remove_think(str(val))}"
+            return StepOutput(content=content)
 
         query_check = Step(name=PipelineEvent.QUERY_CHECK, agent=query_check)
         info_recovery = Step(name=PipelineEvent.INFO_RECOVERY, team=team)
@@ -118,6 +123,7 @@ class Pipeline:
             query_check,
             condition_query_ok,
             info_recovery,
+            sanitization_output,
             report_generation
         ])
 
@@ -150,11 +156,22 @@ class Pipeline:
 
         # Restituisce la risposta finale
         if content and isinstance(content, str):
-            think_str = "</think>"
-            think = content.rfind(think_str)
-            yield content[(think + len(think_str)):] if think != -1 else content
+            yield cls.remove_think(content)
         elif content and isinstance(content, QueryOutputs):
             yield content.response
         else:
             logging.error(f"No output from workflow: {content}")
             yield "Nessun output dal workflow, qualcosa è andato storto."
+
+    @classmethod
+    def remove_think(cls, text: str) -> str:
+        """
+        Rimuove la sezione di pensiero dal testo.
+        Args:
+            text: Il testo da pulire.
+        Returns:
+            Il testo senza la sezione di pensiero.
+        """
+        think_str = "</think>"
+        think = text.rfind(think_str)
+        return text[(think + len(think_str)):] if think != -1 else text
