@@ -1,3 +1,6 @@
+from typing import Any, Callable
+
+
 # Registro centrale popolato da tutti i file Toolkit all'avvio.
 ACTION_DESCRIPTIONS: dict[str, str] = {}
 
@@ -9,7 +12,7 @@ def get_user_friendly_action(tool_name: str) -> str:
     # Usa il dizionario ACTION_DESCRIPTIONS importato
     return ACTION_DESCRIPTIONS.get(tool_name, f"⚙️ Eseguo l'operazione: {tool_name}...")
 
-def friendly_action(description: str):
+def friendly_action(description: str) -> Callable[..., Any]:
     """
     Decoratore che registra automaticamente la descrizione "user-friendly"
     di un metodo nel registro globale.
@@ -20,7 +23,7 @@ def friendly_action(description: str):
     Restituisce la funzione originale non modificata.
     """
 
-    def decorator(func):
+    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         # Registra l'azione
         tool_name = func.__name__
         if tool_name in ACTION_DESCRIPTIONS:

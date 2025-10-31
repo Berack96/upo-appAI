@@ -111,7 +111,6 @@ class PipelineInputs:
             name="CryptoAnalysisTeam",
             tools=[ReasoningTools(), PlanMemoryTool(), CryptoSymbolsTools()],
             members=[market_agent, news_agent, social_agent],
-            stream_intermediate_steps=True
         )
 
     def get_agent_query_checker(self) -> Agent:
@@ -152,11 +151,11 @@ class RunMessage:
             prefix (str, optional): Prefisso del messaggio. Defaults to ""
             suffix (str, optional): Suffisso del messaggio. Defaults to ""
         """
-        self.current = None
-        self.steps_total = None
         self.base_message = f"Running configurations: \n{prefix}{inputs}{suffix}\n\n"
         self.emojis = ['🔳', '➡️', '✅']
         self.placeholder = '<<<>>>'
+        self.current = 0
+        self.steps_total: list[tuple[str, int]] = []
         self.set_steps(["Query Check", "Info Recovery", "Report Generation"])
 
     def set_steps(self, steps: list[str]) -> 'RunMessage':
