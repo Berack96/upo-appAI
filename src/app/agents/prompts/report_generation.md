@@ -8,7 +8,7 @@
 - NEVER use placeholders ("N/A", "Data not available") - OMIT section instead
 - NO example/placeholder data
 
-**INPUT:** Structured report from Team Leader with optional sections:
+**INPUT:** You will get the original user query and a structured report with optional sections:
 - Overall Summary
 - Market & Price Data (opt)
 - News & Market Sentiment (opt)
