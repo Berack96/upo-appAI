@@ -1,5 +1,6 @@
 from agno.tools.toolkit import Toolkit
 from typing import TypedDict, Literal
+from app.api.tools.instructions import PLAN_MEMORY_TOOL_INSTRUCTIONS
 
 
 
@@ -10,12 +11,13 @@ class Task(TypedDict):
 
 
 class PlanMemoryTool(Toolkit):
+
     def __init__(self):
         self.tasks: list[Task] = []
+
         Toolkit.__init__(self, # type: ignore[call-arg]
-            instructions="Provides stateful, persistent memory for the Team Leader. " \
-                 "This is your primary to-do list and state tracker. " \
-                 "Use it to create, execute step-by-step, and record the results of your execution plan.",
+            name="Plan Memory Toolkit",
+            instructions=PLAN_MEMORY_TOOL_INSTRUCTIONS,
             tools=[
                 self.add_tasks,
                 self.get_next_pending_task,

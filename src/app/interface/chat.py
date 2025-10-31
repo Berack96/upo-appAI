@@ -1,7 +1,9 @@
 import os
 import json
+from typing import Any, Callable
 import gradio as gr
-from app.agents.pipeline import Pipeline, PipelineInputs
+from app.agents.action_registry import get_user_friendly_action
+from app.agents.pipeline import Pipeline, PipelineEvent, PipelineInputs
 
 
 class ChatManager:
@@ -49,13 +51,28 @@ class ChatManager:
     ########################################
     # Funzioni Gradio
     ########################################
-    def gradio_respond(self, message: str, history: list[tuple[str, str]]) -> str:
+    async def gradio_respond(self, message: str, history: list[tuple[str, str]]):
+        """
+        Versione asincrona in streaming.
+        Produce (yield) aggiornamenti di stato e la risposta finale.
+        """
         self.inputs.user_query = message
         pipeline = Pipeline(self.inputs)
-        response = pipeline.interact()
+        listeners: list[tuple[PipelineEvent, Callable[[Any], str | None]]] = [ # type: ignore
+            (PipelineEvent.QUERY_CHECK, lambda _: "🔍 Sto controllando la tua richiesta..."),
+            (PipelineEvent.INFO_RECOVERY, lambda _: "📊 Sto recuperando i dati (mercato, news, social)..."),
+            (PipelineEvent.REPORT_GENERATION, lambda _: "✍️ Sto scrivendo il report finale..."),
+            (PipelineEvent.TOOL_USED, lambda e:  get_user_friendly_action(e.tool.tool_name))
+        ]
 
-        self.history.append((message, response))
-        return response
+        response = None
+        async for chunk in pipeline.interact_stream(listeners=listeners):
+            response = chunk  # Salva l'ultimo chunk (che sarà la risposta finale)
+            yield response  # Restituisce l'aggiornamento (o la risposta finale) a Gradio
+
+        # Dopo che il generatore è completo, salva l'ultima risposta nello storico
+        if response:
+            self.history.append((message, response))
 
     def gradio_save(self) -> str:
         self.save_chat("chat.json")
@@ -72,7 +89,7 @@ class ChatManager:
 
 
     def gradio_build_interface(self) -> gr.Blocks:
-        with gr.Blocks() as interface:
+        with gr.Blocks(fill_height=True, fill_width=True) as interface:
             gr.Markdown("# 🤖 Agente di Analisi e Consulenza Crypto (Chat)")
 
             # --- Prepara le etichette di default per i dropdown

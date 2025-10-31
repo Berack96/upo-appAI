@@ -1,4 +1,7 @@
 from agno.tools import Toolkit
+
+from app.agents.action_registry import friendly_action
+from app.api.tools.instructions import NEWS_TOOL_INSTRUCTIONS
 from app.api.wrapper_handler import WrapperHandler
 from app.api.core.news import NewsWrapper, Article
 from app.api.news import NewsApiWrapper, GoogleNewsWrapper, CryptoPanicWrapper, DuckDuckGoWrapper
@@ -32,6 +35,7 @@ class NewsAPIsTool(NewsWrapper, Toolkit):
         Toolkit.__init__( # type: ignore
             self,
             name="News APIs Toolkit",
+            instructions=NEWS_TOOL_INSTRUCTIONS,
             tools=[
                 self.get_top_headlines,
                 self.get_latest_news,
@@ -40,6 +44,7 @@ class NewsAPIsTool(NewsWrapper, Toolkit):
             ],
         )
 
+    @friendly_action("📰 Cerco le notizie principali...")
     def get_top_headlines(self, limit: int = 100) -> list[Article]:
         """
         Retrieves top headlines from the *first available* news provider.
@@ -56,6 +61,7 @@ class NewsAPIsTool(NewsWrapper, Toolkit):
         """
         return self.handler.try_call(lambda w: w.get_top_headlines(limit))
 
+    @friendly_action("🔎 Cerco notizie recenti sull'argomento...")
     def get_latest_news(self, query: str, limit: int = 100) -> list[Article]:
         """
         Searches for the latest news on a specific topic from the *first available* provider.
@@ -73,6 +79,7 @@ class NewsAPIsTool(NewsWrapper, Toolkit):
         """
         return self.handler.try_call(lambda w: w.get_latest_news(query, limit))
 
+    @friendly_action("🗞️ Raccolgo le notizie principali da tutte le fonti...")
     def get_top_headlines_aggregated(self, limit: int = 100) -> dict[str, list[Article]]:
         """
         Retrieves top headlines from *all available providers* and aggregates the results.
@@ -92,6 +99,7 @@ class NewsAPIsTool(NewsWrapper, Toolkit):
         """
         return self.handler.try_call_all(lambda w: w.get_top_headlines(limit))
 
+    @friendly_action("📚 Raccolgo notizie specifiche da tutte le fonti...")
     def get_latest_news_aggregated(self, query: str, limit: int = 100) -> dict[str, list[Article]]:
         """
         Searches for news on a specific topic from *all available providers* and aggregates the results.
