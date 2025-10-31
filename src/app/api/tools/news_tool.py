@@ -1,6 +1,6 @@
 from agno.tools import Toolkit
 
-from app.agents.action_registry import register_friendly_actions
+from app.agents.action_registry import friendly_action
 from app.api.wrapper_handler import WrapperHandler
 from app.api.core.news import NewsWrapper, Article
 from app.api.news import NewsApiWrapper, GoogleNewsWrapper, CryptoPanicWrapper, DuckDuckGoWrapper
@@ -42,6 +42,7 @@ class NewsAPIsTool(NewsWrapper, Toolkit):
             ],
         )
 
+    @friendly_action("📰 Cerco le notizie principali...")
     def get_top_headlines(self, limit: int = 100) -> list[Article]:
         """
         Retrieves top headlines from the *first available* news provider.
@@ -58,6 +59,7 @@ class NewsAPIsTool(NewsWrapper, Toolkit):
         """
         return self.handler.try_call(lambda w: w.get_top_headlines(limit))
 
+    @friendly_action("🔎 Cerco notizie recenti sull'argomento...")
     def get_latest_news(self, query: str, limit: int = 100) -> list[Article]:
         """
         Searches for the latest news on a specific topic from the *first available* provider.
@@ -75,6 +77,7 @@ class NewsAPIsTool(NewsWrapper, Toolkit):
         """
         return self.handler.try_call(lambda w: w.get_latest_news(query, limit))
 
+    @friendly_action("🗞️ Raccolgo le notizie principali da tutte le fonti...")
     def get_top_headlines_aggregated(self, limit: int = 100) -> dict[str, list[Article]]:
         """
         Retrieves top headlines from *all available providers* and aggregates the results.
@@ -94,6 +97,7 @@ class NewsAPIsTool(NewsWrapper, Toolkit):
         """
         return self.handler.try_call_all(lambda w: w.get_top_headlines(limit))
 
+    @friendly_action("📚 Raccolgo notizie specifiche da tutte le fonti...")
     def get_latest_news_aggregated(self, query: str, limit: int = 100) -> dict[str, list[Article]]:
         """
         Searches for news on a specific topic from *all available providers* and aggregates the results.
@@ -113,10 +117,3 @@ class NewsAPIsTool(NewsWrapper, Toolkit):
             Exception: If all providers fail to return results.
         """
         return self.handler.try_call_all(lambda w: w.get_latest_news(query, limit))
-
-register_friendly_actions({
-    "get_top_headlines": "📰 Cerco le notizie principali...",
-    "get_latest_news": "🔎 Cerco notizie recenti su un argomento...",
-    "get_top_headlines_aggregated": "🗞️ Raccolgo le notizie principali da tutte le fonti...",
-    "get_latest_news_aggregated": "📚 Raccolgo notizie specifiche da tutte le fonti...",
-})

@@ -1,6 +1,6 @@
 from agno.tools import Toolkit
 
-from app.agents.action_registry import register_friendly_actions
+from app.agents.action_registry import friendly_action
 from app.api.wrapper_handler import WrapperHandler
 from app.api.core.social import SocialPost, SocialWrapper
 from app.api.social import *
@@ -41,6 +41,7 @@ class SocialAPIsTool(SocialWrapper, Toolkit):
             ],
         )
 
+    @friendly_action("📱 Cerco i post più popolari sui social...")
     def get_top_crypto_posts(self, limit: int = 5) -> list[SocialPost]:
         """
         Retrieves top cryptocurrency-related posts from the *first available* social media provider.
@@ -57,6 +58,7 @@ class SocialAPIsTool(SocialWrapper, Toolkit):
         """
         return self.handler.try_call(lambda w: w.get_top_crypto_posts(limit))
 
+    @friendly_action("🌐 Raccolgo i post da tutte le piattaforme social...")
     def get_top_crypto_posts_aggregated(self, limit_per_wrapper: int = 5) -> dict[str, list[SocialPost]]:
         """
         Retrieves top cryptocurrency-related posts from *all available providers* and aggregates the results.
@@ -75,8 +77,3 @@ class SocialAPIsTool(SocialWrapper, Toolkit):
             Exception: If all providers fail to return results.
         """
         return self.handler.try_call_all(lambda w: w.get_top_crypto_posts(limit_per_wrapper))
-
-register_friendly_actions({
-    "get_top_crypto_posts": "📱 Cerco i post più popolari sui social...",
-    "get_top_crypto_posts_aggregated": "🌐 Raccolgo i post da tutte le piattaforme social...",
-})

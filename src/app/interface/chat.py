@@ -58,7 +58,7 @@ class ChatManager:
         """
         self.inputs.user_query = message
         pipeline = Pipeline(self.inputs)
-        listeners: list[tuple[PipelineEvent, Callable[[Any], str | None]]] = [
+        listeners: list[tuple[PipelineEvent, Callable[[Any], str | None]]] = [ # type: ignore
             (PipelineEvent.QUERY_CHECK, lambda _: "🔍 Sto controllando la tua richiesta..."),
             (PipelineEvent.INFO_RECOVERY, lambda _: "📊 Sto recuperando i dati (mercato, news, social)..."),
             (PipelineEvent.REPORT_GENERATION, lambda _: "✍️ Sto scrivendo il report finale..."),

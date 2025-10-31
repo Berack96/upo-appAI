@@ -125,8 +125,8 @@ class Pipeline:
         """
         Esegue il workflow e restituisce gli eventi di stato e il risultato finale.
         Args:
-            workflow: L'istanza di Workflow da eseguire.
-            query: Gli input della query.
+            workflow: L'istanza di Workflow da eseguire
+            query: Gli input della query
             events: La lista di eventi e callback da gestire durante l'esecuzione.
         Yields:
             Aggiornamenti di stato e la risposta finale generata dal workflow.

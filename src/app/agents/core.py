@@ -146,12 +146,14 @@ class RunMessage:
         - In esecuzione (➡️)
         - Completato (✅)
 
-        Lo stato di esecuzione può essere assegnato solo ad uno step alla volta.
+        Lo stato di esecuzione può essere assegnato solo a uno step alla volta.
         Args:
-            inputs (PipelineInputs): Input della pipeline per mostrare la configurazione.
-            prefix (str, optional): Prefisso del messaggio. Defaults to "".
-            suffix (str, optional): Suffisso del messaggio. Defaults to "".
+            inputs (PipelineInputs): Input della pipeline per mostrare la configurazione
+            prefix (str, optional): Prefisso del messaggio. Defaults to ""
+            suffix (str, optional): Suffisso del messaggio. Defaults to ""
         """
+        self.current = None
+        self.steps_total = None
         self.base_message = f"Running configurations: \n{prefix}{inputs}{suffix}\n\n"
         self.emojis = ['🔳', '➡️', '✅']
         self.placeholder = '<<<>>>'
