@@ -16,7 +16,7 @@ BASE_URL = "https://finance.yahoo.com/markets/crypto/all/"
 
 class CryptoSymbolsTools(Toolkit):
     """
-    Classe per ottenere i simboli delle criptovalute tramite Yahoo Finance.
+    Class for obtaining cryptocurrency symbols via Yahoo Finance.
     """
 
     def __init__(self, cache_file: str = 'resources/cryptos.csv'):
@@ -34,29 +34,36 @@ class CryptoSymbolsTools(Toolkit):
 
     def get_all_symbols(self) -> list[str]:
         """
-        Restituisce tutti i simboli delle criptovalute.
+        Returns a complete list of all available cryptocurrency symbols (tickers).
+        The list could be very long, prefer using 'get_symbols_by_name' for specific searches.
+
         Returns:
-            list[str]: Lista di tutti i simboli delle criptovalute.
+            list[str]: A comprehensive list of all supported crypto symbols (e.g., "BTC-USD", "ETH-USD").
         """
         return self.final_table['Symbol'].tolist() if not self.final_table.empty else []
 
     def get_symbols_by_name(self, query: str) -> list[tuple[str, str]]:
         """
-        Cerca i simboli che contengono la query.
+        Searches the cryptocurrency database for assets matching a name or symbol.
+        Use this to find the exact, correct symbol for a cryptocurrency name.
         Args:
-            query (str): Query di ricerca.
+            query (str): The name, partial name, or symbol to search for (e.g., "Bitcoin", "ETH").
         Returns:
-            list[tuple[str, str]]: Lista di tuple (simbolo, nome) che contengono la query.
+            list[tuple[str, str]]: A list of tuples, where each tuple contains
+                                  the (symbol, full_name) of a matching asset.
+                                  Returns an empty list if no matches are found.
         """
         query_lower = query.lower()
-        positions = self.final_table['Name'].str.lower().str.contains(query_lower)
-        return self.final_table[positions][['Symbol', 'Name']].apply(tuple, axis=1).tolist()
+        positions = self.final_table['Name'].str.lower().str.contains(query_lower) | \
+                    self.final_table['Symbol'].str.lower().str.contains(query_lower)
+        filtered_df = self.final_table[positions]
+        return list(zip(filtered_df['Symbol'], filtered_df['Name']))
 
     async def fetch_crypto_symbols(self, force_refresh: bool = False) -> None:
         """
-        Recupera tutti i simboli delle criptovalute da Yahoo Finance e li memorizza in cache.
+        It retrieves all cryptocurrency symbols from Yahoo Finance and caches them.
         Args:
-            force_refresh (bool): Se True, forza il recupero anche se i dati sono già in cache.
+            force_refresh (bool): If True, it forces the retrieval even if the data are already in the cache.
         """
         if not force_refresh and not self.final_table.empty:
             return

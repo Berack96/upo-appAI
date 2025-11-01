@@ -13,41 +13,54 @@ class ProductInfo(BaseModel):
     price: float = 0.0
     volume_24h: float = 0.0
     currency: str = ""
+    provider: str = ""
 
     @staticmethod
-    def aggregate(products: dict[str, list['ProductInfo']]) -> list['ProductInfo']:
+    def aggregate(products: dict[str, list['ProductInfo']], filter_currency: str="USD") -> list['ProductInfo']:
         """
         Aggregates a list of ProductInfo by symbol.
         Args:
             products (dict[str, list[ProductInfo]]): Map provider -> list of ProductInfo
+            filter_currency (str): If set, only products with this currency are considered. Defaults to "USD".
         Returns:
             list[ProductInfo]: List of ProductInfo aggregated by symbol
         """
 
-        # Costruzione mappa symbol -> lista di ProductInfo
-        symbols_infos: dict[str, list[ProductInfo]] = {}
-        for _, product_list in products.items():
+        # Costruzione mappa id -> lista di ProductInfo + lista di provider
+        id_infos: dict[str, tuple[list[ProductInfo], list[str]]] = {}
+        for provider, product_list in products.items():
             for product in product_list:
-                symbols_infos.setdefault(product.symbol, []).append(product)
+                if filter_currency and product.currency != filter_currency:
+                    continue
+                id_value = product.id.upper().replace("-", "") # Normalizzazione id per compatibilità (es. BTC-USD -> btcusd)
+                product_list, provider_list = id_infos.setdefault(id_value, ([], []) )
+                product_list.append(product)
+                provider_list.append(provider)
 
-        # Aggregazione per ogni symbol
+        # Aggregazione per ogni id
         aggregated_products: list[ProductInfo] = []
-        for symbol, product_list in symbols_infos.items():
+        for id_value, (product_list, provider_list) in id_infos.items():
             product = ProductInfo()
 
-            product.id = f"{symbol}_AGGREGATED"
-            product.symbol = symbol
+            product.id = f"{id_value}_AGGREGATED"
+            product.symbol = next(p.symbol for p in product_list if p.symbol)
             product.currency = next(p.currency for p in product_list if p.currency)
 
             volume_sum = sum(p.volume_24h for p in product_list)
             product.volume_24h = volume_sum / len(product_list) if product_list else 0.0
 
-            prices = sum(p.price * p.volume_24h for p in product_list)
-            product.price = (prices / volume_sum) if volume_sum > 0 else 0.0
+            if volume_sum > 0:
+                # Calcolo del prezzo pesato per volume (VWAP - Volume Weighted Average Price)
+                prices_weighted = sum(p.price * p.volume_24h for p in product_list if p.volume_24h > 0)
+                product.price = prices_weighted / volume_sum
+            else:
+                # Se non c'è volume, facciamo una media semplice dei prezzi
+                valid_prices = [p.price for p in product_list if p.price > 0]
+                product.price = sum(valid_prices) / len(valid_prices) if valid_prices else 0.0
 
+            product.provider = ",".join(provider_list)
             aggregated_products.append(product)
         return aggregated_products
-
 
 
 class Price(BaseModel):

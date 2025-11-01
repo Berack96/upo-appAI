@@ -37,6 +37,7 @@ class MarketAPIsTool(MarketWrapper, Toolkit):
                 self.get_product,
                 self.get_products,
                 self.get_historical_prices,
+                self.get_product_aggregated,
                 self.get_products_aggregated,
                 self.get_historical_prices_aggregated,
             ],
@@ -93,6 +94,27 @@ class MarketAPIsTool(MarketWrapper, Toolkit):
             list[Price]: A list of Price objects representing historical data.
         """
         return self.handler.try_call(lambda w: w.get_historical_prices(asset_id, limit))
+
+    @friendly_action("🧩 Aggrego le informazioni da più fonti...")
+    def get_product_aggregated(self, asset_id: str) -> ProductInfo:
+        """
+        Gets product information for a *single* asset from *all available providers* and *aggregates* the results.
+
+        This method queries all configured sources (Binance, YFinance, Coinbase, CryptoCompare) 
+        and combines the data using volume-weighted average price (VWAP) to provide 
+        the most accurate and comprehensive price data.
+
+        Args:
+            asset_id (str): The asset ID to retrieve information for (e.g., "BTC", "ETH").
+
+        Returns:
+            ProductInfo: A single ProductInfo object with aggregated data from all providers.
+                        The 'provider' field will list all sources used (e.g., "Binance, YFinance, Coinbase").
+
+        Raises:
+            Exception: If all providers fail to return results.
+        """
+        return self.get_products_aggregated([asset_id])[0]
 
     @friendly_action("🧩 Aggrego le informazioni da più fonti...")
     def get_products_aggregated(self, asset_ids: list[str]) -> list[ProductInfo]:

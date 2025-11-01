@@ -9,11 +9,11 @@ class TestMarketDataAggregator:
 
     def __product(self, symbol: str, price: float, volume: float, currency: str) -> ProductInfo:
         prod = ProductInfo()
-        prod.id=f"{symbol}-{currency}"
-        prod.symbol=symbol
-        prod.price=price
-        prod.volume_24h=volume
-        prod.currency=currency
+        prod.id = f"{symbol}-{currency}"
+        prod.symbol = symbol
+        prod.price = price
+        prod.volume_24h = volume
+        prod.currency = currency
         return prod
 
     def __price(self, timestamp_s: int, high: float, low: float, open: float, close: float, volume: float) -> Price:
@@ -38,12 +38,16 @@ class TestMarketDataAggregator:
 
         info = aggregated[0]
         assert info is not None
+        assert info.id == "BTCUSD_AGGREGATED"
         assert info.symbol == "BTC"
+        assert info.currency == "USD"
+        assert "Provider1" in info.provider
+        assert "Provider2" in info.provider
+        assert "Provider3" in info.provider
 
         avg_weighted_price = (50000.0 * 1000.0 + 50100.0 * 1100.0 + 49900.0 * 900.0) / (1000.0 + 1100.0 + 900.0)
         assert info.price == pytest.approx(avg_weighted_price, rel=1e-3) # type: ignore
         assert info.volume_24h == pytest.approx(1000.0, rel=1e-3) # type: ignore
-        assert info.currency == "USD"
 
     def test_aggregate_product_info_multiple_symbols(self):
         products = {
@@ -127,3 +131,80 @@ class TestMarketDataAggregator:
         assert aggregated[1].timestamp == timestamp_2h_ago
         assert aggregated[1].high == pytest.approx(50250.0, rel=1e-3) # type: ignore
         assert aggregated[1].low == pytest.approx(49850.0, rel=1e-3) # type: ignore
+
+    def test_aggregate_product_info_different_currencies(self):
+        products = {
+            "Provider1": [self.__product("BTC", 100000.0, 1000.0, "USD")],
+            "Provider2": [self.__product("BTC", 70000.0, 800.0, "EUR")],
+        }
+
+        aggregated = ProductInfo.aggregate(products)
+        assert len(aggregated) == 1
+
+        info = aggregated[0]
+        assert info is not None
+        assert info.id == "BTCUSD_AGGREGATED"
+        assert info.symbol == "BTC"
+        assert info.currency == "USD"  # Only USD products are kept
+        # When currencies differ, only USD is aggregated (only Provider1 in this case)
+        assert info.price == pytest.approx(100000.0, rel=1e-3) # type: ignore
+        assert info.volume_24h == pytest.approx(1000.0, rel=1e-3) # type: ignore  # Only USD volume
+
+    def test_aggregate_product_info_empty_providers(self):
+        """Test aggregate_product_info with some providers returning empty lists"""
+        products: dict[str, list[ProductInfo]] = {
+            "Provider1": [self.__product("BTC", 50000.0, 1000.0, "USD")],
+            "Provider2": [],
+            "Provider3": [self.__product("BTC", 50100.0, 1100.0, "USD")],
+        }
+
+        aggregated = ProductInfo.aggregate(products)
+        assert len(aggregated) == 1
+        info = aggregated[0]
+        assert info.symbol == "BTC"
+        assert "Provider1" in info.provider
+        assert "Provider2" not in info.provider
+        assert "Provider3" in info.provider
+
+    def test_aggregate_product_info_mixed_symbols(self):
+        """Test that aggregate_product_info correctly separates different symbols"""
+        products = {
+            "Provider1": [
+                self.__product("BTC", 50000.0, 1000.0, "USD"),
+                self.__product("ETH", 4000.0, 2000.0, "USD"),
+                self.__product("SOL", 100.0, 500.0, "USD"),
+            ],
+            "Provider2": [
+                self.__product("BTC", 50100.0, 1100.0, "USD"),
+                self.__product("ETH", 4050.0, 2100.0, "USD"),
+            ],
+        }
+
+        aggregated = ProductInfo.aggregate(products)
+        assert len(aggregated) == 3
+
+        symbols = {p.symbol for p in aggregated}
+        assert symbols == {"BTC", "ETH", "SOL"}
+
+        btc = next(p for p in aggregated if p.symbol == "BTC")
+        assert "Provider1" in btc.provider and "Provider2" in btc.provider
+
+        sol = next(p for p in aggregated if p.symbol == "SOL")
+        assert sol.provider == "Provider1"  # Only one provider
+
+    def test_aggregate_product_info_zero_volume(self):
+        """Test aggregazione quando tutti i prodotti hanno volume zero"""
+        products = {
+            "Provider1": [self.__product("BTC", 50000.0, 0.0, "USD")],
+            "Provider2": [self.__product("BTC", 50100.0, 0.0, "USD")],
+            "Provider3": [self.__product("BTC", 49900.0, 0.0, "USD")],
+        }
+
+        aggregated = ProductInfo.aggregate(products)
+        assert len(aggregated) == 1
+
+        info = aggregated[0]
+        # Con volume zero, dovrebbe usare la media semplice dei prezzi
+        expected_price = (50000.0 + 50100.0 + 49900.0) / 3
+        assert info.price == pytest.approx(expected_price, rel=1e-3) # type: ignore
+        assert info.volume_24h == 0.0
