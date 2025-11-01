@@ -1,4 +1,7 @@
 from agno.tools import Toolkit
+
+from app.agents.action_registry import friendly_action
+from app.api.tools.instructions import MARKET_TOOL_INSTRUCTIONS
 from app.api.wrapper_handler import WrapperHandler
 from app.api.core.markets import MarketWrapper, Price, ProductInfo
 from app.api.markets import BinanceWrapper, CoinBaseWrapper, CryptoCompareWrapper, YFinanceWrapper
@@ -29,6 +32,7 @@ class MarketAPIsTool(MarketWrapper, Toolkit):
         Toolkit.__init__( # type: ignore
             self,
             name="Market APIs Toolkit",
+            instructions=MARKET_TOOL_INSTRUCTIONS,
             tools=[
                 self.get_product,
                 self.get_products,
@@ -39,6 +43,7 @@ class MarketAPIsTool(MarketWrapper, Toolkit):
             ],
         )
 
+    @friendly_action("🔍 Recupero le informazioni sul prodotto richiesto...")
     def get_product(self, asset_id: str) -> ProductInfo:
         """
         Gets product information for a *single* asset from the *first available* provider.
@@ -55,6 +60,7 @@ class MarketAPIsTool(MarketWrapper, Toolkit):
         """
         return self.handler.try_call(lambda w: w.get_product(asset_id))
 
+    @friendly_action("📦 Recupero i dati su più asset...")
     def get_products(self, asset_ids: list[str]) -> list[ProductInfo]:
         """
         Gets product information for a *list* of assets from the *first available* provider.
@@ -71,6 +77,7 @@ class MarketAPIsTool(MarketWrapper, Toolkit):
         """
         return self.handler.try_call(lambda w: w.get_products(asset_ids))
 
+    @friendly_action("📊 Recupero i dati storici dei prezzi...")
     def get_historical_prices(self, asset_id: str, limit: int = 100) -> list[Price]:
         """
         Gets historical price data for a *single* asset from the *first available* provider.
@@ -88,6 +95,7 @@ class MarketAPIsTool(MarketWrapper, Toolkit):
         """
         return self.handler.try_call(lambda w: w.get_historical_prices(asset_id, limit))
 
+    @friendly_action("🧩 Aggrego le informazioni da più fonti...")
     def get_product_aggregated(self, asset_id: str) -> ProductInfo:
         """
         Gets product information for a *single* asset from *all available providers* and *aggregates* the results.
@@ -108,6 +116,7 @@ class MarketAPIsTool(MarketWrapper, Toolkit):
         """
         return self.get_products_aggregated([asset_id])[0]
 
+    @friendly_action("🧩 Aggrego le informazioni da più fonti...")
     def get_products_aggregated(self, asset_ids: list[str]) -> list[ProductInfo]:
         """
         Gets product information for multiple assets from *all available providers* and *aggregates* the results.
@@ -128,6 +137,7 @@ class MarketAPIsTool(MarketWrapper, Toolkit):
         all_products = self.handler.try_call_all(lambda w: w.get_products(asset_ids))
         return ProductInfo.aggregate(all_products)
 
+    @friendly_action("📈 Creo uno storico aggregato dei prezzi...")
     def get_historical_prices_aggregated(self, asset_id: str = "BTC", limit: int = 100) -> list[Price]:
         """
         Gets historical price data for a single asset from *all available providers* and *aggregates* the results.

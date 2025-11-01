@@ -1,0 +1,42 @@
+/* --- Contenitore Principale --- */
+#chat-wrapper-column {width: 40% !important; max-width: 1200px !important; margin: 0 auto !important;}
+
+/* --- Finestra Chat (Borderless) --- */
+.borderless-chat {border: none !important; box-shadow: none !important; background: none !important;}
+.borderless-chat .message.bot {border: none !important; box-shadow: none !important;}
+
+/* --- Scrollbar --- */
+.borderless-chat ::-webkit-scrollbar-button { display: none; }
+.borderless-chat ::-webkit-scrollbar-track { background: #1f2937; border-radius: 4px; }
+.borderless-chat ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+.borderless-chat ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+.borderless-chat ::-webkit-scrollbar, #chat-wrapper-column textarea::-webkit-scrollbar { display: none; }
+.borderless-chat, #chat-wrapper-column textarea {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge (vecchio) */
+}
+#chat-wrapper-column textarea::-webkit-scrollbar-button { display: none; }
+#chat-wrapper-column textarea::-webkit-scrollbar-track { background: #1f2937; border-radius: 4px; }
+#chat-wrapper-column textarea::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+#chat-wrapper-column textarea::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+
+/* Rimuove i bordi dal gr.Group usato da ChatInterface per la textbox */
+#chat-wrapper-column .gr-group {
+    border: none !important;
+    box-shadow: none !important;
+    background: none !important;
+}
+
+/* La SOLUZIONE per il separatore dei dropdown */
+#dropdown-row > div {
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* Stile "Pillola" per la Textbox interna (figlia del gr.Group di ChatInterface) */
+#chat-wrapper-column .gr-group textarea {
+    border: none !important;
+    box-shadow: none !important;
+    min-height: 56px !important;
+    padding: 18px 24px !important;
+}

@@ -5,6 +5,7 @@ import logging
 import pandas as pd
 from io import StringIO
 from agno.tools.toolkit import Toolkit
+from app.api.tools.instructions import SYMBOLS_TOOL_INSTRUCTIONS
 
 logging.basicConfig(level=logging.INFO)
 logging = logging.getLogger("crypto_symbols")
@@ -21,9 +22,10 @@ class CryptoSymbolsTools(Toolkit):
     def __init__(self, cache_file: str = 'resources/cryptos.csv'):
         self.cache_file = cache_file
         self.final_table = pd.read_csv(self.cache_file) if os.path.exists(self.cache_file) else pd.DataFrame() # type: ignore
+
         Toolkit.__init__(self, # type: ignore
             name="Crypto Symbols Tool",
-            instructions="Tool to get cryptocurrency symbols and search them by name.",
+            instructions=SYMBOLS_TOOL_INSTRUCTIONS,
             tools=[
                 self.get_all_symbols,
                 self.get_symbols_by_name,
