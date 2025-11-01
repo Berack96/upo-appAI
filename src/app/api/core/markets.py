@@ -23,7 +23,7 @@ class ProductInfo(BaseModel):
             products (dict[str, list[ProductInfo]]): Map provider -> list of ProductInfo
             filter_currency (str): If set, only products with this currency are considered. Defaults to "USD".
         Returns:
-            dict[ProductInfo, str]: Map of aggregated ProductInfo by symbol
+            list[ProductInfo]: List of ProductInfo aggregated by symbol
         """
 
         # Costruzione mappa id -> lista di ProductInfo + lista di provider

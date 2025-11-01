@@ -33,7 +33,6 @@ class TestMarketDataAggregator:
             "Provider3": [self.__product("BTC", 49900.0, 900.0, "USD")],
         }
 
-        # aggregate_single_asset returns a single ProductInfo, not a list
         aggregated = ProductInfo.aggregate(products)
         assert len(aggregated) == 1
 
