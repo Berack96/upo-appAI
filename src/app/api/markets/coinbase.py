@@ -12,7 +12,6 @@ def extract_product(product_data: GetProductResponse | Product) -> ProductInfo:
     product.symbol = product_data.base_currency_id or ""
     product.price = float(product_data.price) if product_data.price else 0.0
     product.volume_24h = float(product_data.volume_24h) if product_data.volume_24h else 0.0
-    product.provider = "Coinbase"
     return product
 
 def extract_price(candle_data: Candle) -> Price:
