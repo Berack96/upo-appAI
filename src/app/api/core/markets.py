@@ -16,118 +16,51 @@ class ProductInfo(BaseModel):
     provider: str = ""
 
     @staticmethod
-    def aggregate_multi_assets(products: dict[str, list['ProductInfo']]) -> list['ProductInfo']:
+    def aggregate(products: dict[str, list['ProductInfo']], filter_currency: str="USD") -> list['ProductInfo']:
         """
-        Aggregates a list of ProductInfo by symbol across different providers.
+        Aggregates a list of ProductInfo by symbol.
         Args:
             products (dict[str, list[ProductInfo]]): Map provider -> list of ProductInfo
+            filter_currency (str): If set, only products with this currency are considered. Defaults to "USD".
         Returns:
-            list[ProductInfo]: List of ProductInfo aggregated by symbol, combining data from all providers
+            dict[ProductInfo, str]: Map of aggregated ProductInfo by symbol
         """
 
-        # Costruzione mappa symbol -> lista di ProductInfo (da tutti i provider)
-        symbols_infos: dict[str, list[ProductInfo]] = {}
-        for provider_name, product_list in products.items():
+        # Costruzione mappa id -> lista di ProductInfo + lista di provider
+        id_infos: dict[str, tuple[list[ProductInfo], list[str]]] = {}
+        for provider, product_list in products.items():
             for product in product_list:
-                # Assicuriamo che il provider sia impostato
-                if not product.provider:
-                    product.provider = provider_name
-                symbols_infos.setdefault(product.symbol, []).append(product)
+                if filter_currency and product.currency != filter_currency:
+                    continue
+                id_value = product.id.upper().replace("-", "") # Normalizzazione id per compatibilità (es. BTC-USD -> btcusd)
+                product_list, provider_list = id_infos.setdefault(id_value, ([], []) )
+                product_list.append(product)
+                provider_list.append(provider)
 
-        # Aggregazione per ogni symbol usando aggregate_single_asset
+        # Aggregazione per ogni id
         aggregated_products: list[ProductInfo] = []
-        for symbol, product_list in symbols_infos.items():
-            try:
-                # Usa aggregate_single_asset per aggregare ogni simbolo
-                aggregated = ProductInfo.aggregate_single_asset(product_list)
-                
-                # aggregate_single_asset calcola il volume medio, ma per multi_assets
-                # vogliamo il volume totale. Ricalcoliamo il volume come somma dopo il filtro USD
-                # Dobbiamo rifare il filtro USD per contare correttamente
-                currencies = set(p.currency for p in product_list if p.currency)
-                if len(currencies) > 1:
-                    product_list = [p for p in product_list if p.currency.upper() == "USD"]
-                
-                # Volume totale
-                aggregated.volume_24h = sum(p.volume_24h for p in product_list if p.volume_24h > 0)
-                
-                aggregated_products.append(aggregated)
-            except ValueError:
-                # Se aggregate_single_asset fallisce (es. no USD when currencies differ), salta
-                continue
-        
-        return aggregated_products
-    
-    @staticmethod
-    def aggregate_single_asset(assets: list['ProductInfo'] | dict[str, 'ProductInfo'] | dict[str, list['ProductInfo']]) -> 'ProductInfo':
-        """
-        Aggregates an asset across different exchanges.
-        Args:
-            assets: Can be:
-                - list[ProductInfo]: Direct list of products
-                - dict[str, ProductInfo]: Map provider -> ProductInfo (from WrapperHandler.try_call_all)
-                - dict[str, list[ProductInfo]]: Map provider -> list of ProductInfo
-        Returns:
-            ProductInfo: Aggregated ProductInfo combining data from all exchanges
-        """
+        for id_value, (product_list, provider_list) in id_infos.items():
+            product = ProductInfo()
 
-        # Defensive handling: normalize to a flat list of ProductInfo
-        if not assets:
-            raise ValueError("aggregate_single_asset requires at least one ProductInfo")
+            product.id = f"{id_value}_AGGREGATED"
+            product.symbol = next(p.symbol for p in product_list if p.symbol)
+            product.currency = next(p.currency for p in product_list if p.currency)
 
-        # Normalize to a flat list of ProductInfo
-        if isinstance(assets, dict):
-            # Check if dict values are ProductInfo or list[ProductInfo]
-            first_value = next(iter(assets.values())) if assets else None
-            if first_value and isinstance(first_value, list):
-                # dict[str, list[ProductInfo]] -> flatten
-                assets_list = [product for product_list in assets.values() for product in product_list]
+            volume_sum = sum(p.volume_24h for p in product_list)
+            product.volume_24h = volume_sum / len(product_list) if product_list else 0.0
+
+            if volume_sum > 0:
+                # Calcolo del prezzo pesato per volume (VWAP - Volume Weighted Average Price)
+                prices_weighted = sum(p.price * p.volume_24h for p in product_list if p.volume_24h > 0)
+                product.price = prices_weighted / volume_sum
             else:
-                # dict[str, ProductInfo] -> extract values
-                assets_list = list(assets.values())
-        elif isinstance(assets, list) and assets and isinstance(assets[0], list):
-            # Flatten list[list[ProductInfo]] -> list[ProductInfo]
-            assets_list = [product for sublist in assets for product in sublist]
-        else:
-            # Already a flat list of ProductInfo
-            assets_list = list(assets)
+                # Se non c'è volume, facciamo una media semplice dei prezzi
+                valid_prices = [p.price for p in product_list if p.price > 0]
+                product.price = sum(valid_prices) / len(valid_prices) if valid_prices else 0.0
 
-        if not assets_list:
-            raise ValueError("aggregate_single_asset requires at least one ProductInfo")
-
-        # Controllo valuta: se non sono tutte uguali, filtra solo USD
-        currencies = set(p.currency for p in assets_list if p.currency)
-        if len(currencies) > 1:
-            # Valute diverse: filtra solo USD
-            assets_list = [p for p in assets_list if p.currency.upper() == "USD"]
-            if not assets_list:
-                raise ValueError("aggregate_single_asset: no USD products available when currencies differ")
-
-        # Aggregazione per ogni Exchange
-        aggregated: ProductInfo = ProductInfo()
-        first = assets_list[0]
-        aggregated.id = f"{first.symbol}_AGGREGATED"
-        aggregated.symbol = first.symbol
-        aggregated.currency = next((p.currency for p in assets_list if p.currency), "")
-        
-        # Raccogliamo i provider che hanno fornito dati
-        providers = [p.provider for p in assets_list if p.provider]
-        aggregated.provider = ", ".join(set(providers)) if providers else "AGGREGATED"
-        
-        # Calcolo del volume medio
-        volume_sum = sum(p.volume_24h for p in assets_list if p.volume_24h > 0)
-        aggregated.volume_24h = volume_sum / len(assets_list) if assets_list else 0.0
-        # Calcolo del prezzo pesato per volume (VWAP - Volume Weighted Average Price)
-        if volume_sum > 0:
-            prices_weighted = sum(p.price * p.volume_24h for p in assets_list if p.volume_24h > 0)
-            aggregated.price = prices_weighted / volume_sum
-        else:
-            # Se non c'è volume, facciamo una media semplice dei prezzi
-            valid_prices = [p.price for p in assets_list if p.price > 0]
-            aggregated.price = sum(valid_prices) / len(valid_prices) if valid_prices else 0.0
-
-        return aggregated
-
+            product.provider = ",".join(provider_list)
+            aggregated_products.append(product)
+        return aggregated_products
 
 
 class Price(BaseModel):

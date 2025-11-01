@@ -126,7 +126,7 @@ class MarketAPIsTool(MarketWrapper, Toolkit):
             Exception: If all providers fail to return results.
         """
         all_products = self.handler.try_call_all(lambda w: w.get_products(asset_ids))
-        return ProductInfo.aggregate_multi_assets(all_products)
+        return ProductInfo.aggregate(all_products)
 
     def get_historical_prices_aggregated(self, asset_id: str = "BTC", limit: int = 100) -> list[Price]:
         """
