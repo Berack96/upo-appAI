@@ -21,7 +21,7 @@ class CryptoSymbolsTools(Toolkit):
     def __init__(self, cache_file: str = 'resources/cryptos.csv'):
         self.cache_file = cache_file
         self.final_table = pd.read_csv(self.cache_file) if os.path.exists(self.cache_file) else pd.DataFrame() # type: ignore
-        Toolkit.__init__(self,  # type: ignore
+        Toolkit.__init__(self, # type: ignore
             name="Crypto Symbols Tool",
             instructions="Tool to get cryptocurrency symbols and search them by name.",
             tools=[

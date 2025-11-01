@@ -95,9 +95,6 @@ class MarketAPIsTool(MarketWrapper, Toolkit):
         This method queries all configured sources (Binance, YFinance, Coinbase, CryptoCompare) 
         and combines the data using volume-weighted average price (VWAP) to provide 
         the most accurate and comprehensive price data.
-        
-        Use this when you need highly reliable price data from multiple sources.
-        Warning: This uses more API calls (4x) than get_product().
 
         Args:
             asset_id (str): The asset ID to retrieve information for (e.g., "BTC", "ETH").
@@ -108,15 +105,8 @@ class MarketAPIsTool(MarketWrapper, Toolkit):
 
         Raises:
             Exception: If all providers fail to return results.
-
-        Example:
-            >>> tool.get_product_aggregated("BTC")
-            ProductInfo(symbol="BTC", price=45123.50, provider="Binance, YFinance, Coinbase", ...)
         """
-        # try_call_all returns dict[str, ProductInfo] where key is provider name
-        # We need list[ProductInfo] for aggregation, so we extract values
-        all_products = self.handler.try_call_all(lambda w: w.get_product(asset_id))
-        return ProductInfo.aggregate_single_asset(all_products)
+        return self.get_products_aggregated([asset_id])[0]
 
     def get_products_aggregated(self, asset_ids: list[str]) -> list[ProductInfo]:
         """
@@ -135,9 +125,7 @@ class MarketAPIsTool(MarketWrapper, Toolkit):
         Raises:
             Exception: If all providers fail to return results.
         """
-        all_products: dict[str, list[ProductInfo]] = {}
-        for asset in asset_ids:
-            all_products[asset] = self.handler.try_call_all(lambda w: w.get_product(asset))
+        all_products = self.handler.try_call_all(lambda w: w.get_products(asset_ids))
         return ProductInfo.aggregate_multi_assets(all_products)
 
     def get_historical_prices_aggregated(self, asset_id: str = "BTC", limit: int = 100) -> list[Price]:
