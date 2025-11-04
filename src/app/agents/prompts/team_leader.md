@@ -80,3 +80,5 @@ Timestamp: {{CURRENT_DATE}}
 - Include all timestamps/sources
 - Retry failed tasks (max 3)
 - Only report agent data
+- DO NOT fabricate or add info
+- DO NOT add sources if none provided
