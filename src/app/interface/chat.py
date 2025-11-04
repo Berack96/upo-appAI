@@ -1,5 +1,6 @@
 import os
 import json
+from pathlib import Path
 from typing import Any, Callable
 import gradio as gr
 from app.agents.action_registry import get_user_friendly_action
@@ -89,48 +90,61 @@ class ChatManager:
 
 
     def gradio_build_interface(self) -> gr.Blocks:
-        with gr.Blocks(fill_height=True, fill_width=True) as interface:
-            gr.Markdown("# 🤖 Agente di Analisi e Consulenza Crypto (Chat)")
+        css_file_path = Path(__file__).parent / "styles" / "chat.css"
 
-            # --- Prepara le etichette di default per i dropdown
-            model_labels = self.inputs.list_models_names()
-            default_model_label = self.inputs.team_leader_model.label
-            if default_model_label not in model_labels:
-                default_model_label = model_labels[0] if model_labels else None
+        with gr.Blocks(fill_height=True, fill_width=True, css_paths=[str(css_file_path)]) as interface:
+            with gr.Column(elem_id="chat-wrapper-column"):
+                gr.Markdown("# 🤖 Agente di Analisi e Consulenza Crypto")
 
-            strategy_labels = self.inputs.list_strategies_names()
-            default_strategy_label = self.inputs.strategy.label
-            if default_strategy_label not in strategy_labels:
-                default_strategy_label = strategy_labels[0] if strategy_labels else None
+                # --- Prepara le etichette di default per i dropdown
+                model_labels = self.inputs.list_models_names()
+                default_model_label = self.inputs.team_leader_model.label
+                if default_model_label not in model_labels:
+                    default_model_label = model_labels[0] if model_labels else None
 
-            # Dropdown provider e stile
-            with gr.Row():
-                provider = gr.Dropdown(
-                    choices=model_labels,
-                    value=default_model_label,
-                    type="index",
-                    label="Modello da usare"
+                strategy_labels = self.inputs.list_strategies_names()
+                default_strategy_label = self.inputs.strategy.label
+                if default_strategy_label not in strategy_labels:
+                    default_strategy_label = strategy_labels[0] if strategy_labels else None
+
+                # Dropdown provider e stile
+                with gr.Row(elem_id="dropdown-row"):
+                    provider = gr.Dropdown(
+                        choices=model_labels,
+                        value=default_model_label,
+                        type="index",
+                        label="Modello da usare"
+                    )
+                    provider.change(fn=self.inputs.choose_team_leader, inputs=provider, outputs=None)
+
+                    style = gr.Dropdown(
+                        choices=strategy_labels,
+                        value=default_strategy_label,
+                        type="index",
+                        label="Stile di investimento"
+                    )
+                    style.change(fn=self.inputs.choose_strategy, inputs=style, outputs=None)
+
+                chat = gr.ChatInterface(
+                    fn=self.gradio_respond,
+                    chatbot=gr.Chatbot(
+                        elem_classes=["borderless-chat"],  # Applica la classe CSS
+                        scale=1  # Mantiene l'altezza completa
+                    ),
+                    # Aggiungi un placeholder
+                    textbox=gr.Textbox(
+                        placeholder="Dimmi come posso aiutarti con le criptovalute...",
+                        scale=1,  # Assicura che la textbox si allinei correttamente
+                        render=False  # Importante: dice a Gradio di non renderizzarla due volte
+                    )
                 )
-                provider.change(fn=self.inputs.choose_team_leader, inputs=provider, outputs=None)
 
-                style = gr.Dropdown(
-                    choices=strategy_labels,
-                    value=default_strategy_label,
-                    type="index",
-                    label="Stile di investimento"
-                )
-                style.change(fn=self.inputs.choose_strategy, inputs=style, outputs=None)
+                with gr.Row():
+                    clear_btn = gr.Button("🗑️ Reset Chat")
+                    save_btn = gr.Button("💾 Salva Chat")
+                    load_btn = gr.Button("📂 Carica Chat")
 
-            chat = gr.ChatInterface(
-                fn=self.gradio_respond
-            )
-
-            with gr.Row():
-                clear_btn = gr.Button("🗑️ Reset Chat")
-                save_btn = gr.Button("💾 Salva Chat")
-                load_btn = gr.Button("📂 Carica Chat")
-
-            clear_btn.click(self.gradio_clear, inputs=None, outputs=[chat.chatbot, chat.chatbot_state])
-            save_btn.click(self.gradio_save, inputs=None, outputs=None)
-            load_btn.click(self.gradio_load, inputs=None, outputs=[chat.chatbot, chat.chatbot_state])
+                clear_btn.click(self.gradio_clear, inputs=None, outputs=[chat.chatbot, chat.chatbot_state])
+                save_btn.click(self.gradio_save, inputs=None, outputs=None)
+                load_btn.click(self.gradio_load, inputs=None, outputs=[chat.chatbot, chat.chatbot_state])
         return interface
