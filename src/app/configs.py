@@ -2,6 +2,7 @@ import os
 import threading
 import ollama
 import yaml
+import importlib
 import logging.config
 from typing import Any, ClassVar
 from pydantic import BaseModel
@@ -67,7 +68,34 @@ class APIConfig(BaseModel):
     news_providers: list[str] = []
     social_providers: list[str] = []
 
+    def validate_providers(self) -> None:
+        """
+        Validate that the configured providers are supported.
+        Raises:
+            ValueError if any provider is not supported.
+        """
+        modules = [
+            ('app.api.markets', self.market_providers),
+            ('app.api.news', self.news_providers),
+            ('app.api.social', self.social_providers),
+        ]
 
+        for (module, config_providers) in modules:
+            provider_type = module.split('.')[-1]
+            mod = importlib.import_module(module)
+
+            supported_providers = set(getattr(mod, '__all__'))
+            selected_providers = set(config_providers) & supported_providers
+
+            count = 0
+            for provider in selected_providers:
+                try:
+                    getattr(mod, provider)()
+                    count += 1
+                except Exception as e:
+                    log.warning(f"Error occurred while checking {provider_type} provider '{provider}': {e}")
+            if count == 0:
+                raise ValueError(f"No valid {provider_type} providers found or defined in configs. Available: {supported_providers}")
 
 class Strategy(BaseModel):
     name: str = "Conservative"
@@ -211,6 +239,7 @@ class AppConfig(BaseModel):
 
         super().__init__(*args, **kwargs)
         self.set_logging_level()
+        self.api.validate_providers()
         self.models.validate_models()
         self.agents.validate_defaults(self)
         self._initialized = True
