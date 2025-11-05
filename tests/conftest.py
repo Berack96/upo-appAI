@@ -22,6 +22,7 @@ def pytest_configure(config:pytest.Config):
         ("social", "marks tests that use social media"),
         ("wrapper", "marks tests for wrapper handler"),
 
+        ("configs", "marks tests for configuration classes"),
         ("tools", "marks tests for tools"),
         ("aggregator", "marks tests for market data aggregator"),
 
